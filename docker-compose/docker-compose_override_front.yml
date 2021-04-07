@@ -10,7 +10,6 @@ services:
       - "80:80"
     networks:
       - public
-      - clea-network
 
   kong:
     image: kong:2.3
@@ -37,10 +36,8 @@ services:
       KONGA_LOG_LEVEL: silly
     ports:
       - "1337:1337"
-    networks:
-      - clea-network
 
 networks:
-  public: 
+  public:
     driver: bridge
     name: public

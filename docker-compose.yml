@@ -1,53 +1,60 @@
+version: "3.8"
 services:
 
   clea-ws-rest:
-    container_name: clea-ws-rest
-    build: ./clea-ws-rest/
+    image: clea-ws-rest
+    build: clea-ws-rest
     environment:
       SPRING_PROFILES_ACTIVE: dev,docker
       CLEA_WS_REST_LOG_FILE_PATH: /logs
-      CLEA_WS_REST_LOG_FILE_NAME: -clea-ws-rest
+      CLEA_WS_REST_LOG_FILE_NAME: clea-ws-rest
     depends_on:
       - kafka
     ports:
       - "8080:8080"
-    networks:
-      - clea-network
     restart: always
 
   clea-venue-consumer:
-    container_name: clea-venue-consumer
-    build: ./clea-venue-consumer/
+    image: clea-venue-consumer
+    build: clea-venue-consumer
     environment:
       SPRING_PROFILES_ACTIVE: dev,docker
-      CLEA_VENUE_CONSUMER_LOG_FILE_PATH: -/logs
-      CLEA_VENUE_CONSUMER_LOG_FILE_NAME: -clea-venue-consumer
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      CLEA_VENUE_CONSUMER_LOG_FILE_PATH: /logs
+      CLEA_VENUE_CONSUMER_LOG_FILE_NAME: clea-venue-consumer
     depends_on:
       - postgres
       - kafka
     ports:
       - "7070:8080"
-    networks:
-      - clea-network
     restart: always
 
   clea-batch:
-    container_name: clea-batch
-    build: ./clea-batch/
+    image: clea-batch:latest
+    build: clea-batch
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      CLEA_BATCH_LOG_FILE_PATH: -/logs
-      CLEA_BATCHLOG_FILE_NAME: -clea-batch
-    ports:
-      - "15000:15000"
+      BUCKET: clea-batch
+      CLEA_BATCH_LOG_FILE_PATH: /logs
+      CLEA_BATCH_LOG_FILE_NAME: clea-batch
     depends_on:
       - postgres
-    networks:
-      - clea-network
-    restart: always
+    restart: "no"
 
+  clea-dbmigration:
+    image: flyway/flyway:7.8
+    command: migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres/cleadb
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: password
+    volumes:
+      - ./clea-dbmigration/conf:/flyway/conf
+      - ./clea-dbmigration/sql:/flyway/sql
+    depends_on:
+      - postgres
+    restart: always
   kafka:
-    container_name: kafka
     image: "wurstmeister/kafka:latest"
     environment:
       KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
@@ -62,50 +69,56 @@ services:
       - "9092:9092"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - clea-network
     restart: always
 
+  minio:
+    image: minio/minio:edge
+    environment:
+      MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
+      MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    entrypoint: sh
+    command: -c 'mkdir -p /data/clea-batch && /usr/bin/minio server /data'
+    ports:
+      - "9100:9000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
   zookeeper:
-    container_name: zookeeper
     image: wurstmeister/zookeeper:latest
     ports:
       - "2181:2181"
-    networks:
-      - clea-network
     restart: always
 
   kafdrop:
-    container_name: kafdrop
     image: "obsidiandynamics/kafdrop:latest"
     environment:
       JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
       KAFKA_BROKERCONNECT: "kafka:29092"
+      SERVER_SERVLET_CONTEXTPATH: "/kafdrop"
     depends_on:
       - kafka
     ports:
       - "9000:9000"
-    networks:
-      - clea-network
     restart: always
 
   postgres:
-    container_name: postgres
     image: "postgres:latest"
     environment:
       POSTGRES_DB: cleadb
-      POSTGRES_USER: username
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
-    networks:
-      - clea-network
+    volumes:
+      - "./docker-compose/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
     restart: always
     logging:
       driver: none
 
   pgadmin:
-    container_name: pgadmin
     image: "dpage/pgadmin4:latest"
     environment:
       PGADMIN_DEFAULT_EMAIL: user@pgadmin.com
@@ -115,13 +128,6 @@ services:
       - postgres
     ports:
       - "8081:80"
-    networks:
-      - clea-network
     restart: always
     logging:
       driver: none
-
-networks:
-  clea-network:
-    driver: bridge
-    name: clea-network
