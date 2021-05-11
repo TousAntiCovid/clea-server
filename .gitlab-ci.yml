@@ -1,0 +1,36 @@
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+default:
+  cache:
+    paths:
+      - .m2/repository/
+  tags:
+    - qlf-ci.inria.fr
+
+stages:
+  - build
+  - integration-tests
+
+build:
+  image: maven:3.6.3-adoptopenjdk-11
+  stage: build
+  script:
+    - mvn -B -ntp -fae -DdeployAtEnd deploy
+  artifacts:
+    paths:
+      - "**/target/*.jar"
+    reports:
+      junit:
+        - "**/target/surefire-reports/TEST-*.xml"
+
+integration-tests:
+  image: registry.gitlab.inria.fr/stemcovid19/tac-server/docker-image/tac-system-tests:latest
+  stage: integration-tests
+  before_script:
+    - export PATH="$PWD/docker-compose:$PATH"
+  script:
+    - clea up -d
+    - "echo 'TODO: run integration tests here' && sleep 5s && docker ps"
+  after_script:
+    - clea down
