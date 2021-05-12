@@ -16,7 +16,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-public class KafkaDeserializer implements Deserializer<DecodedVisit> {
+public class KafkaVisitDeserializer implements Deserializer<DecodedVisit> {
 
     @Override
     public DecodedVisit deserialize(String topic, byte[] data) {
@@ -24,7 +24,7 @@ public class KafkaDeserializer implements Deserializer<DecodedVisit> {
             return null;
         try {
             return new ObjectMapper()
-                    .registerModule(new SimpleModule().addDeserializer(DecodedVisit.class, new CustomJacksonDeserializer()))
+                    .registerModule(new SimpleModule().addDeserializer(DecodedVisit.class, new CustomJacksonVisitDeserializer()))
                     .readValue(data, DecodedVisit.class);
         } catch (IOException e) {
             throw new SerializationException("Error deserializing JSON message", e);
@@ -32,15 +32,15 @@ public class KafkaDeserializer implements Deserializer<DecodedVisit> {
     }
 }
 
-class CustomJacksonDeserializer extends StdDeserializer<DecodedVisit> {
+class CustomJacksonVisitDeserializer extends StdDeserializer<DecodedVisit> {
 
     private static final long serialVersionUID = 1L;
 
-    public CustomJacksonDeserializer() {
+    public CustomJacksonVisitDeserializer() {
         this(null);
     }
 
-    public CustomJacksonDeserializer(Class<DecodedVisit> t) {
+    public CustomJacksonVisitDeserializer(Class<DecodedVisit> t) {
         super(t);
     }
 

@@ -11,7 +11,7 @@ CREATE TABLE exposed_visits (
 
 	created_at        TIMESTAMP NOT NULL DEFAULT now(),
 	updated_at        TIMESTAMP NOT NULL DEFAULT now(),
-	
+
 	PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX IF NOT EXISTS exposed_visits_ltidperiodslots ON exposed_visits (ltid, period_start, timeslot);
@@ -49,3 +49,15 @@ CREATE TABLE stat_location
 );
 CREATE INDEX IF NOT EXISTS statloc_venue  ON stat_location(venue_type, venue_category1, venue_category2);
 
+-- Needs: Clea-Statistiques
+CREATE TABLE stat_reports
+(
+    id          BIGINT NOT NULL,
+    backwards   INT    NOT NULL,
+    close       INT    NOT NULL,
+    forwards    INT    NOT NULL,
+    rejected    INT    NOT NULL,
+    reported    INT    NOT NULL,
+    "timestamp" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT stat_reports_pkey PRIMARY KEY (id)
+);

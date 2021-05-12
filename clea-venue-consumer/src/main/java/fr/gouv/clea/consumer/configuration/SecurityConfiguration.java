@@ -2,25 +2,19 @@ package fr.gouv.clea.consumer.configuration;
 
 import fr.inria.clea.lsp.CleaEciesEncoder;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final String serverAuthoritySecretKey;
-
-    @Autowired
-    public SecurityConfiguration(
-            @Value("${clea.conf.security.crypto.serverAuthoritySecretKey}") String serverAuthoritySecretKey) {
-        this.serverAuthoritySecretKey = serverAuthoritySecretKey;
-    }
+    private final VenueConsumerProperties properties;
 
     @Bean
     public LocationSpecificPartDecoder getLocationSpecificPartDecoder() {
-        return new LocationSpecificPartDecoder(serverAuthoritySecretKey);
+        return new LocationSpecificPartDecoder(properties.getSecurity().getCrypto().getServerAuthoritySecretKey());
     }
 
     @Bean

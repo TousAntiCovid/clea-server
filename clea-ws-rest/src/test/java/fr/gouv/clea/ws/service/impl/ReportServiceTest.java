@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import fr.gouv.clea.ws.model.DecodedVisit;
-import fr.gouv.clea.ws.service.IDecodedVisitProducerService;
+import fr.gouv.clea.ws.service.IProducerService;
 import fr.gouv.clea.ws.service.IReportService;
 import fr.gouv.clea.ws.vo.ReportRequest;
 import fr.gouv.clea.ws.vo.Visit;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.doNothing;
 class ReportServiceTest {
 
     @MockBean
-    private IDecodedVisitProducerService processService;
+    private IProducerService producerService;
 
     @Autowired
     private IReportService reportService;
@@ -47,9 +47,9 @@ class ReportServiceTest {
     @BeforeEach
     void init() {
         now = Instant.now();
-        assertThat(processService).isNotNull();
+        assertThat(producerService).isNotNull();
         assertThat(reportService).isNotNull();
-        doNothing().when(processService).produce(anyList());
+        doNothing().when(producerService).produceVisits(anyList());
     }
 
     @Test

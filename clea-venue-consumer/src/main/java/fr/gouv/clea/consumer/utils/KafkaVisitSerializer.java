@@ -13,7 +13,7 @@ import org.apache.kafka.common.serialization.Serializer;
 
 import java.io.IOException;
 
-public class KafkaSerializer implements Serializer<DecodedVisit> {
+public class KafkaVisitSerializer implements Serializer<DecodedVisit> {
 
     @Override
     public byte[] serialize(String topic, DecodedVisit data) {
@@ -21,7 +21,7 @@ public class KafkaSerializer implements Serializer<DecodedVisit> {
             return null;
         try {
             return new ObjectMapper()
-                    .registerModule(new SimpleModule().addSerializer(DecodedVisit.class, new CustomJacksonSerializer()))
+                    .registerModule(new SimpleModule().addSerializer(DecodedVisit.class, new CustomJacksonVisitSerializer()))
                     .writeValueAsBytes(data);
         } catch (JsonProcessingException e) {
             throw new SerializationException("Error serializing JSON message", e);
@@ -29,15 +29,15 @@ public class KafkaSerializer implements Serializer<DecodedVisit> {
     }
 }
 
-class CustomJacksonSerializer extends StdSerializer<DecodedVisit> {
+class CustomJacksonVisitSerializer extends StdSerializer<DecodedVisit> {
 
     private static final long serialVersionUID = 1L;
 
-    public CustomJacksonSerializer() {
+    public CustomJacksonVisitSerializer() {
         this(null);
     }
 
-    public CustomJacksonSerializer(Class<DecodedVisit> t) {
+    public CustomJacksonVisitSerializer(Class<DecodedVisit> t) {
         super(t);
     }
 

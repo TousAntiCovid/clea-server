@@ -9,5 +9,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+clea:
   kafka:
-    bootstrap-servers: kafka:29092
+    bootstrapServers: kafka:29092
