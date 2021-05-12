@@ -2,7 +2,7 @@ package fr.gouv.clea.consumer.service.impl;
 
 import fr.gouv.clea.consumer.model.StatLocation;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.IStatLocationRepository;
+import fr.gouv.clea.consumer.repository.IStatLocationJpaRepository;
 import fr.gouv.clea.consumer.service.IStatService;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -34,7 +34,7 @@ class StatServiceTest {
     private static final long TODAY_AT_MIDNIGHT_AS_NTP = TimeUtils.ntpTimestampFromInstant(TODAY_AT_MIDNIGHT);
 
     @Autowired
-    private IStatLocationRepository repository;
+    private IStatLocationJpaRepository repository;
     @Autowired
     private IStatService service;
 
