@@ -18,7 +18,7 @@
 
     <groupId>fr.gouv.clea</groupId>
     <artifactId>clea-server</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <name>clea-server</name>
     <packaging>pom</packaging>
     <description>Tous Anti-Covid Cluster Exposure Verification (Clea) server project</description>
@@ -197,10 +197,6 @@
 
     <repositories>
         <repository>
-            <id>gitlab-maven</id>
-            <url>https://gitlab.inria.fr/api/v4/projects/25110/packages/maven</url>
-        </repository>
-        <repository>
             <id>gitlab-maven-clea-crypto</id>
             <url>https://gitlab.inria.fr/api/v4/projects/28288/packages/maven</url>
         </repository>
@@ -208,19 +204,16 @@
     <distributionManagement>
         <repository>
             <id>gitlab-maven</id>
-            <url>${env.CI_SERVER_URL}/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+            <url>https://gitlab.inria.fr/api/v4/projects/29881/packages/maven</url>
         </repository>
         <snapshotRepository>
             <id>gitlab-maven</id>
-            <url>${env.CI_SERVER_URL}/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+            <url>https://gitlab.inria.fr/api/v4/projects/29881/packages/maven</url>
         </snapshotRepository>
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:${gitRepositoryUrl}</connection>
-        <developerConnection>scm:git:${gitRepositoryUrl}</developerConnection>
-        <url>${gitRepositoryUrl}</url>
-        <tag>clea-1.1.0</tag>
+        <url>https://gitlab.inria.fr/stopcovid19/clea-server</url>
     </scm>
 
 </project>
