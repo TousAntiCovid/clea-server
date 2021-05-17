@@ -91,10 +91,6 @@ public class VisitExpositionAggregatorService implements IVisitExpositionAggrega
      * durationUnitInSeconds must be a value ensuring: 3600 % durationUnitInSeconds = 0
      */
     protected int getPeriodMaxSlot(int periodDuration) {
-        // This check should go in venue consumer consumerConfig validation
-        if (Duration.ofHours(1).toSeconds() % periodDuration == 0) {
-            log.error("durationUnitInSeconds does not have a valid value: {}. 3600(secs) / durationUnitInSeconds has a reminder!", periodDuration);
-        }
         if (periodDuration == 255) {
             return Integer.MAX_VALUE;
         }

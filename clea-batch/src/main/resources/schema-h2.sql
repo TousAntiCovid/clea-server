@@ -44,8 +44,8 @@ CREATE TABLE stat_location
     venue_category1  INT NOT NULL,
     venue_category2  INT NOT NULL,
     backward_visits  BIGINT NOT NULL,
-    forward_visits   BIGINT NOT NULL
+    forward_visits   BIGINT NOT NULL,
+    CONSTRAINT statloc_pk PRIMARY KEY (period, venue_type, venue_category1, venue_category2)
 );
-CREATE INDEX IF NOT EXISTS statloc_period ON stat_location(period);
 CREATE INDEX IF NOT EXISTS statloc_venue  ON stat_location(venue_type, venue_category1, venue_category2);
 

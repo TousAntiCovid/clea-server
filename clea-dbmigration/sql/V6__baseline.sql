@@ -1,0 +1,3 @@
+-- Rebase flyway to v6 (v1 to v4 are already applied manually in INT, PPROD and PROD)
+-- v5 (stats reports sent from kafka will probably be apply manually
+-- Next scripts to apply with flyway will be V5 and upper.
