@@ -1,6 +1,7 @@
 package fr.gouv.clea.consumer.service.impl;
 
 import fr.gouv.clea.consumer.model.StatLocation;
+import fr.gouv.clea.consumer.model.StatLocationKey;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.IStatLocationJpaRepository;
 import fr.gouv.clea.consumer.service.IStatService;
@@ -13,7 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -36,7 +40,10 @@ class StatServiceTest {
     @Autowired
     private IStatLocationJpaRepository repository;
     @Autowired
-    private IStatService service;
+    private StatService service;
+
+    @PersistenceContext
+    EntityManager entityManager;
 
     static Visit defaultVisit() {
         return Visit.builder()
@@ -134,22 +141,39 @@ class StatServiceTest {
     }
 
     @Test
+    @Transactional
     void should_get_same_stat_period_when_visits_scantimes_are_in_same_stat_slot() {
         Visit visit1 = defaultVisit().toBuilder()
                 .qrCodeScanTime(TODAY_AT_8AM)
+                .isBackward(true)
                 .build();
         Visit visit2 = defaultVisit().toBuilder()
                 .qrCodeScanTime(TODAY_AT_8AM.plus(15, ChronoUnit.MINUTES)) // same stat slot
+                .isBackward(true)
                 .build();
         Visit visit3 = defaultVisit().toBuilder()
                 .qrCodeScanTime(TODAY_AT_8AM.plus(28, ChronoUnit.MINUTES)) // same stat slot
+                .isBackward(false)
+                .build();
+
+        Visit visit4 = defaultVisit().toBuilder()
+                .qrCodeScanTime(TODAY_AT_8AM.plus(29, ChronoUnit.MINUTES)) // same stat slot
+                .isBackward(true)
                 .build();
 
         service.logStats(visit1);
         service.logStats(visit2);
         service.logStats(visit3);
+        service.logStats(visit4);
 
+        entityManager.flush();
+        entityManager.clear();
         assertThat(repository.count()).isEqualTo(1);
+        StatLocationKey key = service.buildKey(visit1);
+        StatLocation statLocation= repository.getOne(key);
+        assertThat(statLocation.getBackwardVisits()).as("back visits").isEqualTo(3l);
+        assertThat(statLocation.getForwardVisits()).as("forward visits").isEqualTo(1l);
+
     }
 
     @Test
