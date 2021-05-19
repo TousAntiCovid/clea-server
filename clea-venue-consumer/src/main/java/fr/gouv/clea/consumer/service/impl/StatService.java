@@ -28,17 +28,12 @@ public class StatService implements IStatService {
 
     @Override
     public void logStats(Visit visit) {
-        StatLocationKey statLocationKey = StatLocationKey.builder()
-                .period(this.getStatPeriod(visit))
-                .venueType(visit.getVenueType())
-                .venueCategory1(visit.getVenueCategory1())
-                .venueCategory2(visit.getVenueCategory2())
-                .build();
+        StatLocationKey statLocationKey = buildKey(visit);
 
         var statLocation = newStatLocation(statLocationKey, visit);
         Optional<StatLocation> optional=repository.findById(statLocationKey);
         if(optional.isPresent()) {
-            repository.updateByIncrement(optional.get());
+            repository.updateByIncrement(statLocation);
         }else {
             try {
                 repository.insert(statLocation);
@@ -56,6 +51,8 @@ public class StatService implements IStatService {
         );
     }
 
+
+
     protected StatLocation newStatLocation(StatLocationKey statLocationKey, Visit visit) {
         return StatLocation.builder()
                 .statLocationKey(statLocationKey)
@@ -64,6 +61,14 @@ public class StatService implements IStatService {
                 .build();
     }
 
+    public StatLocationKey buildKey(Visit visit) {
+        return StatLocationKey.builder()
+                .period(getStatPeriod(visit))
+                .venueType(visit.getVenueType())
+                .venueCategory1(visit.getVenueCategory1())
+                .venueCategory2(visit.getVenueCategory2())
+                .build();
+    }
     protected Instant getStatPeriod(Visit visit) {
         long secondsToRemove = visit.getQrCodeScanTime().getEpochSecond() % config.getStatSlotDurationInSeconds();
         return visit.getQrCodeScanTime().minus(secondsToRemove, ChronoUnit.SECONDS).truncatedTo(ChronoUnit.SECONDS);
