@@ -1,5 +1,8 @@
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  VERSIONING_PREFER_TAGS: "true"
+  VERSIONING_GIT_TAG: $CI_COMMIT_TAG
+  VERSIONING_GIT_BRANCH: $CI_COMMIT_BRANCH
 
 default:
   cache:
