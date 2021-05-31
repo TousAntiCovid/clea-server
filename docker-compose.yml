@@ -32,7 +32,7 @@ services:
     restart: always
 
   clea-batch:
-    image: clea-batch:latest
+    container_name: clea-batch
     build: ./clea-batch/
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -44,8 +44,7 @@ services:
       - postgres
     networks:
       - clea-network
-    restart: "no"
-
+    restart: always
 
   kafka:
     container_name: kafka
@@ -102,6 +101,8 @@ services:
     networks:
       - clea-network
     restart: always
+    logging:
+      driver: none
 
   pgadmin:
     container_name: pgadmin

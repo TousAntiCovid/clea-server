@@ -9,8 +9,8 @@ import fr.gouv.clea.ws.utils.BadArgumentsLoggerService;
 import fr.gouv.clea.ws.utils.UriConstants;
 import fr.gouv.clea.ws.vo.ReportRequest;
 import fr.gouv.clea.ws.vo.Visit;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "${controller.path.prefix}")
+@RequiredArgsConstructor
 @Slf4j
 public class CleaController implements CleaWsRestAPI {
 
@@ -35,19 +36,6 @@ public class CleaController implements CleaWsRestAPI {
     private final BadArgumentsLoggerService badArgumentsLoggerService;
     private final WebRequest webRequest;
     private final Validator validator;
-
-    @Autowired
-    public CleaController(
-            IReportService reportService,
-            BadArgumentsLoggerService badArgumentsLoggerService,
-            WebRequest webRequest,
-            Validator validator
-    ) {
-        this.reportService = reportService;
-        this.badArgumentsLoggerService = badArgumentsLoggerService;
-        this.webRequest = webRequest;
-        this.validator = validator;
-    }
 
     @Override
     @PostMapping(

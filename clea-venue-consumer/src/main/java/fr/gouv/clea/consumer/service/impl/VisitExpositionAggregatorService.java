@@ -1,6 +1,6 @@
 package fr.gouv.clea.consumer.service.impl;
 
-import fr.gouv.clea.consumer.configuration.VenueConsumerConfiguration;
+import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
@@ -9,8 +9,8 @@ import fr.gouv.clea.consumer.service.IVisitExpositionAggregatorService;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
 import fr.inria.clea.lsp.utils.TimeUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,31 +24,20 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class VisitExpositionAggregatorService implements IVisitExpositionAggregatorService {
 
     private final IExposedVisitRepository repository;
     private final ExposureTimeConfiguration exposureTimeConfig;
-    private final VenueConsumerConfiguration consumerConfig;
+    private final VenueConsumerProperties properties;
     private final IStatService statService;
-
-    @Autowired
-    public VisitExpositionAggregatorService(
-            IExposedVisitRepository repository,
-            VenueConsumerConfiguration configuration,
-            ExposureTimeConfiguration exposureTimeConfiguration,
-            IStatService statService) {
-        this.repository = repository;
-        this.consumerConfig = configuration;
-        this.exposureTimeConfig = exposureTimeConfiguration;
-        this.statService = statService;
-    }
 
     @Transactional
     @Override
     public void updateExposureCount(Visit visit) {
         Instant periodStartAsInstant = this.periodStartFromCompressedPeriodStartAsInstant(visit.getCompressedPeriodStartTime());
-        long scanTimeSlot = Duration.between(periodStartAsInstant, visit.getQrCodeScanTime()).toSeconds() / consumerConfig.getDurationUnitInSeconds();
+        long scanTimeSlot = Duration.between(periodStartAsInstant, visit.getQrCodeScanTime()).toSeconds() / properties.getDurationUnitInSeconds();
         if (scanTimeSlot < 0) {
             log.warn("LTId: {}, qrScanTime: {} should not before periodStartTime: {}", visit.getLocationTemporaryPublicId(), visit.getQrCodeScanTime(), periodStartAsInstant);
             return;
@@ -94,7 +83,7 @@ public class VisitExpositionAggregatorService implements IVisitExpositionAggrega
         if (periodDuration == 255) {
             return Integer.MAX_VALUE;
         }
-        int nbSlotsInPeriod = (int) Duration.of(periodDuration, ChronoUnit.HOURS).dividedBy(Duration.of(consumerConfig.getDurationUnitInSeconds(), ChronoUnit.SECONDS));
+        int nbSlotsInPeriod = (int) Duration.of(periodDuration, ChronoUnit.HOURS).dividedBy(Duration.of(properties.getDurationUnitInSeconds(), ChronoUnit.SECONDS));
         return nbSlotsInPeriod - 1; // 0 based index
     }
 

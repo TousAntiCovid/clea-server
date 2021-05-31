@@ -1,10 +1,12 @@
 package fr.gouv.clea.ws.service.impl;
 
+import fr.gouv.clea.ws.configuration.CleaKafkaProperties;
 import fr.gouv.clea.ws.model.DecodedVisit;
-import fr.gouv.clea.ws.service.IDecodedVisitProducerService;
+import fr.gouv.clea.ws.model.ReportStat;
+import fr.gouv.clea.ws.service.IProducerService;
 import fr.gouv.clea.ws.utils.MessageFormatter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -13,21 +15,20 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
-public class DecodedVisitProducerService implements IDecodedVisitProducerService {
+public class ProducerService implements IProducerService {
 
-    private final KafkaTemplate<String, DecodedVisit> kafkaTemplate;
+    private final KafkaTemplate<String, DecodedVisit> kafkaQrTemplate;
 
-    @Autowired
-    public DecodedVisitProducerService(
-            KafkaTemplate<String, DecodedVisit> kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
-    }
+    private final KafkaTemplate<String, ReportStat> kafkaStatTemplate;
+
+    private final CleaKafkaProperties cleaKafkaProperties;
 
     @Override
-    public void produce(List<DecodedVisit> serializableDecodedVisits) {
+    public void produceVisits(List<DecodedVisit> serializableDecodedVisits) {
         serializableDecodedVisits.forEach(
-                it -> kafkaTemplate.sendDefault(it).addCallback(
+                it -> kafkaQrTemplate.send(cleaKafkaProperties.getQrCodesTopic(), it).addCallback(
                         new ListenableFutureCallback<>() {
                             @Override
                             public void onFailure(Throwable ex) {
@@ -41,6 +42,24 @@ public class DecodedVisitProducerService implements IDecodedVisitProducerService
                             }
                         }
                 )
+        );
+    }
+
+
+    @Override
+    public void produceStat(ReportStat reportStat) {
+        kafkaStatTemplate.send(cleaKafkaProperties.getStatsTopic(), reportStat).addCallback(
+                new ListenableFutureCallback<>() {
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        log.error("error sending stat {} to queue. message: {}", reportStat.toString(), ex.getLocalizedMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(SendResult<String, ReportStat> result) {
+                        log.info("stat {} sent to queue", reportStat.toString());
+                    }
+                }
         );
     }
 }

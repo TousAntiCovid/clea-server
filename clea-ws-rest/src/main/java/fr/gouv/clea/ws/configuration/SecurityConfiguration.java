@@ -3,7 +3,7 @@ package fr.gouv.clea.ws.configuration;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -19,20 +19,12 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final CleaWsProperties cleaWsProperties;
+    private final CleaWsProperties properties;
 
     private final HandlerExceptionResolver handlerExceptionResolver;
-
-    @Autowired
-    public SecurityConfiguration(
-            CleaWsProperties cleaWsProperties,
-            HandlerExceptionResolver handlerExceptionResolver
-    ) {
-        this.cleaWsProperties = cleaWsProperties;
-        this.handlerExceptionResolver = handlerExceptionResolver;
-    }
 
     @Bean
     public LocationSpecificPartDecoder getLocationSpecificPartDecoder() {
@@ -40,7 +32,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     private PublicKey initPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] encoded = Decoders.BASE64.decode(this.cleaWsProperties.getRobertJwtPublicKey());
+        byte[] encoded = Decoders.BASE64.decode(this.properties.getRobertJwtPublicKey());
         KeyFactory keyFactory = KeyFactory.getInstance(SignatureAlgorithm.RS256.getFamilyName());
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
         return keyFactory.generatePublic(keySpec);
@@ -52,7 +44,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/clea/**").permitAll()
                 .and()
-                .addFilterAfter(new JwtValidationFilter(this.cleaWsProperties.isAuthorizationCheckActive(), this.initPublicKey(), handlerExceptionResolver), BasicAuthenticationFilter.class)
+                .addFilterAfter(new JwtValidationFilter(this.properties.isAuthorizationCheckActive(), this.initPublicKey(), handlerExceptionResolver), BasicAuthenticationFilter.class)
                 .httpBasic().disable()
                 .csrf().disable()
                 .cors();
