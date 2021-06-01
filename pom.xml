@@ -19,7 +19,7 @@
 
     <groupId>fr.gouv.clea</groupId>
     <artifactId>clea-server</artifactId>
-    <version>0</version>
+    <version>0-SNAPSHOT</version>
     <name>clea-server</name>
     <packaging>pom</packaging>
     <description>Tous Anti-Covid Cluster Exposure Verification (Clea) server project</description>
