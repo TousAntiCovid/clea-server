@@ -6,6 +6,7 @@ import fr.gouv.clea.ws.utils.KafkaVisitSerializer;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -20,12 +21,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class KafkaConfiguration {
 
-    private final CleaKafkaProperties cleaKafkaProperties;
+    private final KafkaProperties kafkaProperties;
 
     @Bean
     public ProducerFactory<String, DecodedVisit> cleaQrCodesTopicFactory() {
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cleaKafkaProperties.getBootstrapServers());
+        final var configProps = kafkaProperties.buildConsumerProperties();
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaVisitSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
@@ -38,8 +38,7 @@ public class KafkaConfiguration {
 
     @Bean
     public ProducerFactory<String, ReportStat> cleaStatsTopicFactory() {
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cleaKafkaProperties.getBootstrapServers());
+        final var configProps = kafkaProperties.buildConsumerProperties();
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         configProps.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);

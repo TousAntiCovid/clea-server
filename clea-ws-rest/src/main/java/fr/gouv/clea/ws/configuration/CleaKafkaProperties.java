@@ -19,9 +19,6 @@ import javax.validation.constraints.NotBlank;
 public class CleaKafkaProperties {
 
     @NotBlank
-    private String bootstrapServers;
-
-    @NotBlank
     private String qrCodesTopic;
 
     @NotBlank

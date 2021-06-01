@@ -21,11 +21,8 @@ clea:
       risk:
         enabled: "false"
   kafka:
-    bootstrapServers: localhost:9092
-    qrCodesTopic: cleaQrCodes
-    statsTopic: cleaStats
-    qrCodesConsumer: groupA
-    statsConsumer: groupB
+    qrCodesTopic: test.clea.fct.qr-code-scan
+    statsTopic: test.clea.fct.report-stat
 
 logging:
   level:
@@ -51,3 +48,7 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: create-drop
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: group1
