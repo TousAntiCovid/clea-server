@@ -2,7 +2,8 @@ package fr.gouv.clea.ws.service.impl;
 
 import fr.gouv.clea.ws.configuration.CleaWsProperties;
 import fr.gouv.clea.ws.model.DecodedVisit;
-import fr.gouv.clea.ws.service.IDecodedVisitProducerService;
+import fr.gouv.clea.ws.model.ReportStat;
+import fr.gouv.clea.ws.service.IProducerService;
 import fr.gouv.clea.ws.service.IReportService;
 import fr.gouv.clea.ws.utils.MessageFormatter;
 import fr.gouv.clea.ws.vo.ReportRequest;
@@ -11,8 +12,8 @@ import fr.inria.clea.lsp.EncryptedLocationSpecificPart;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import fr.inria.clea.lsp.exception.CleaEncodingException;
 import fr.inria.clea.lsp.utils.TimeUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -26,31 +27,20 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class ReportService implements IReportService {
 
-    private final CleaWsProperties cleaWsProperties;
+    private final CleaWsProperties properties;
 
     private final LocationSpecificPartDecoder decoder;
 
-    private final IDecodedVisitProducerService processService;
-
-
-    @Autowired
-    public ReportService(
-            CleaWsProperties cleaWsProperties,
-            LocationSpecificPartDecoder decoder,
-            IDecodedVisitProducerService processService
-    ) {
-        this.cleaWsProperties = cleaWsProperties;
-        this.decoder = decoder;
-        this.processService = processService;
-    }
+    private final IProducerService producerService;
 
     @Override
     public List<DecodedVisit> report(ReportRequest reportRequestVo) {
         final Instant now = Instant.now();
-        final VisitsInSameUnitCounter closeScanTimeVisits = new VisitsInSameUnitCounter(cleaWsProperties.getExposureTimeUnitInSeconds());
+        final VisitsInSameUnitCounter closeScanTimeVisits = new VisitsInSameUnitCounter(properties.getExposureTimeUnitInSeconds());
         long validatedPivotDate = this.validatePivotDate(reportRequestVo.getPivotDateAsNtpTimestamp(), now);
         List<Visit> reportVisits = reportRequestVo.getVisits();
         List<DecodedVisit> verified = reportVisits.stream()
@@ -60,16 +50,24 @@ public class ReportService implements IReportService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         List<DecodedVisit> pruned = this.pruneDuplicates(verified);
-        processService.produce(pruned);
+        producerService.produceVisits(pruned);
 
         // evaluate produced visits and count close scan time visits
         pruned.stream().sorted(Comparator.comparing((DecodedVisit::getQrCodeScanTime)))
                 .forEach(closeScanTimeVisits::incrementIfScannedInSameTimeUnitThanLastScanTime);
 
-        log.info("BATCH_REPORT {}#{}#{}#{}#{}", reportVisits.size(), reportVisits.size() - pruned.size(),
-                pruned.stream().filter(DecodedVisit::isBackward).count(),
-                pruned.stream().filter(DecodedVisit::isForward).count(),
-                closeScanTimeVisits.getCount());
+        ReportStat reportStat = ReportStat.builder()
+                .reported(reportVisits.size())
+                .rejected(reportVisits.size() - pruned.size())
+                .backwards((int) pruned.stream().filter(DecodedVisit::isBackward).count())
+                .forwards((int) pruned.stream().filter(DecodedVisit::isForward).count())
+                .close(closeScanTimeVisits.getCount())
+                .timestamp(TimeUtils.currentNtpTime())
+                .build();
+
+        log.info("BATCH_REPORT {}#{}#{}#{}#{}", reportStat.getReported(), reportStat.getRejected(), reportStat.getBackwards(), reportStat.getForwards(), reportStat.getClose());
+
+        producerService.produceStat(reportStat);
         return pruned;
     }
 
@@ -86,7 +84,7 @@ public class ReportService implements IReportService {
     }
 
     private boolean isOutdated(Visit visit, Instant now) {
-        boolean outdated = ChronoUnit.DAYS.between(TimeUtils.instantFromTimestamp(visit.getQrCodeScanTimeAsNtpTimestamp()), now) > cleaWsProperties.getRetentionDurationInDays();
+        boolean outdated = ChronoUnit.DAYS.between(TimeUtils.instantFromTimestamp(visit.getQrCodeScanTimeAsNtpTimestamp()), now) > properties.getRetentionDurationInDays();
         if (outdated) {
             log.warn("report: {} rejected: Outdated", MessageFormatter.truncateQrCode(visit.getQrCode()));
         }
@@ -111,7 +109,7 @@ public class ReportService implements IReportService {
         }
 
         long secondsBetweenScans = Duration.between(one.getQrCodeScanTime(), other.getQrCodeScanTime()).abs().toSeconds();
-        if (secondsBetweenScans <= cleaWsProperties.getDuplicateScanThresholdInSeconds()) {
+        if (secondsBetweenScans <= properties.getDuplicateScanThresholdInSeconds()) {
             log.warn("report: {} {} rejected: Duplicate", MessageFormatter.truncateUUID(one.getStringLocationTemporaryPublicId()), one.getQrCodeScanTime());
             return true;
         }
@@ -131,7 +129,7 @@ public class ReportService implements IReportService {
     private long validatePivotDate(long pivotDate, Instant now) {
         Instant pivotDateAsInstant = TimeUtils.instantFromTimestamp(pivotDate);
         Instant nowWithoutMilis = now.truncatedTo(ChronoUnit.SECONDS);
-        Instant retentionDateLimit = nowWithoutMilis.minus(cleaWsProperties.getRetentionDurationInDays(), ChronoUnit.DAYS);
+        Instant retentionDateLimit = nowWithoutMilis.minus(properties.getRetentionDurationInDays(), ChronoUnit.DAYS);
         if (pivotDateAsInstant.isAfter(now) || pivotDateAsInstant.isBefore(retentionDateLimit)) {
             long retentionDateLimitAsNtp = TimeUtils.ntpTimestampFromInstant(retentionDateLimit);
             log.warn("pivotDate: {} not between retentionLimitDate: {} and now: {}", pivotDateAsInstant, retentionDateLimit, now);

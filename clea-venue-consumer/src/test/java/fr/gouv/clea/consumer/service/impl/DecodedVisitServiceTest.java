@@ -1,23 +1,6 @@
 package fr.gouv.clea.consumer.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.apache.commons.lang3.RandomUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Test;
-
-import fr.gouv.clea.consumer.configuration.VenueConsumerConfiguration;
+import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.DecodedVisit;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.service.IDecodedVisitService;
@@ -27,6 +10,22 @@ import fr.inria.clea.lsp.LocationSpecificPart;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import fr.inria.clea.lsp.exception.CleaEncodingException;
 import fr.inria.clea.lsp.exception.CleaEncryptionException;
+import org.apache.commons.lang3.RandomUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
+import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class DecodedVisitServiceTest {
@@ -35,11 +34,11 @@ class DecodedVisitServiceTest {
     private final CleaEciesEncoder cleaEciesEncoder = mock(CleaEciesEncoder.class);
     private final int driftBetweenDeviceAndOfficialTimeInSecs = 300;
     private final int cleaClockDriftInSecs = 300;
-    private final VenueConsumerConfiguration config = VenueConsumerConfiguration.builder()
-                .driftBetweenDeviceAndOfficialTimeInSecs(driftBetweenDeviceAndOfficialTimeInSecs)
-                .cleaClockDriftInSecs(cleaClockDriftInSecs)
-                .build();
-    private final IDecodedVisitService decodedVisitService = new DecodedVisitService(decoder, cleaEciesEncoder, config);
+    private final VenueConsumerProperties properties = VenueConsumerProperties.builder()
+            .driftBetweenDeviceAndOfficialTimeInSecs(driftBetweenDeviceAndOfficialTimeInSecs)
+            .cleaClockDriftInSecs(cleaClockDriftInSecs)
+            .build();
+    private final IDecodedVisitService decodedVisitService = new DecodedVisitService(decoder, cleaEciesEncoder, properties);
     private Instant now;
     private UUID uuid;
     private byte[] locationTemporarySecretKey;
@@ -102,7 +101,7 @@ class DecodedVisitServiceTest {
         );
 
         assertThat(optional).isEmpty();
-   }
+    }
 
     @Test
     void should_visit_be_accepted_and_scantime_updated_when_scantime_inside_allowed_drift_and_scantime_before_qr_validity_start() throws CleaEncryptionException, CleaEncodingException {
@@ -131,7 +130,7 @@ class DecodedVisitServiceTest {
         assertThat(optional).isPresent();
         assertThat(optional.get().getQrCodeScanTime()).isEqualTo(optional.get().getQrCodeValidityStartTime());
     }
-    
+
     @Test
     @DisplayName("check with non valid temporaryLocationPublicId")
     void nonValidTemporaryLocationPublicId() throws CleaEncryptionException, CleaEncodingException {

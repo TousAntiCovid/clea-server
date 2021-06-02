@@ -20,7 +20,10 @@ clea:
         - '*,*,*,6,6,6,6'
       risk:
         enabled: "false"
-        
+  kafka:
+    qrCodesTopic: cleaQrCodes
+    statsTopic: cleaStats
+
 management:
   endpoints:
     web:
@@ -50,5 +53,3 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: group1
-    template:
-      default-topic: cleaQrCodes

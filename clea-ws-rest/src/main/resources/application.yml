@@ -3,9 +3,3 @@
 logging:
   level:
     fr.gouv.clea.consumer: INFO
-
-spring:
-  kafka:
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: fr.gouv.clea.ws.utils.KafkaSerializer

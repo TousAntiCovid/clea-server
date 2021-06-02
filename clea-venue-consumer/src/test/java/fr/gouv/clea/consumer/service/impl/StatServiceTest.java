@@ -1,16 +1,15 @@
 package fr.gouv.clea.consumer.service.impl;
 
+import fr.gouv.clea.consumer.model.ReportStat;
 import fr.gouv.clea.consumer.model.StatLocation;
 import fr.gouv.clea.consumer.model.StatLocationKey;
 import fr.gouv.clea.consumer.model.Visit;
+import fr.gouv.clea.consumer.repository.IReportStatRepository;
 import fr.gouv.clea.consumer.repository.IStatLocationJpaRepository;
 import fr.gouv.clea.consumer.service.IStatService;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -38,7 +37,9 @@ class StatServiceTest {
     private static final long TODAY_AT_MIDNIGHT_AS_NTP = TimeUtils.ntpTimestampFromInstant(TODAY_AT_MIDNIGHT);
 
     @Autowired
-    private IStatLocationJpaRepository repository;
+    private IStatLocationJpaRepository statLocationRepository;
+    @Autowired
+    private IReportStatRepository reportStatRepository;
     @Autowired
     private StatService service;
 
@@ -67,7 +68,7 @@ class StatServiceTest {
 
     @AfterEach
     void clean() {
-        repository.deleteAll();
+        statLocationRepository.deleteAll();
     }
 
     @Test
@@ -92,7 +93,7 @@ class StatServiceTest {
 
         service.logStats(visit);
 
-        List<StatLocation> stats = repository.findAll();
+        List<StatLocation> stats = statLocationRepository.findAll();
         assertThat(stats.size()).isEqualTo(1L);
         StatLocation statLocation = stats.get(0);
         assertThat(statLocation.getStatLocationKey().getPeriod()).isEqualTo(TODAY_AT_8AM);
@@ -119,17 +120,17 @@ class StatServiceTest {
                 .qrCodeScanTime(TODAY_AT_8AM.plus(15, ChronoUnit.MINUTES))
                 .build();
         service.logStats(visit1);
-        long before = repository.count();
+        long before = statLocationRepository.count();
 
         Visit visit2 = defaultVisit().toBuilder()
                 .qrCodeScanTime(TODAY_AT_8AM.plus(15, ChronoUnit.MINUTES))
                 .build();
         service.logStats(visit2);
-        long after = repository.count();
+        long after = statLocationRepository.count();
 
         assertThat(before).isEqualTo(after);
 
-        List<StatLocation> stats = repository.findAll();
+        List<StatLocation> stats = statLocationRepository.findAll();
         assertThat(stats.size()).isEqualTo(1L);
         StatLocation statLocation = stats.get(0);
         assertThat(statLocation.getStatLocationKey().getPeriod()).isEqualTo(TODAY_AT_8AM);
@@ -168,12 +169,11 @@ class StatServiceTest {
 
         entityManager.flush();
         entityManager.clear();
-        assertThat(repository.count()).isEqualTo(1);
+        assertThat(statLocationRepository.count()).isEqualTo(1);
         StatLocationKey key = service.buildKey(visit1);
-        StatLocation statLocation= repository.getOne(key);
+        StatLocation statLocation= statLocationRepository.getOne(key);
         assertThat(statLocation.getBackwardVisits()).as("back visits").isEqualTo(3l);
         assertThat(statLocation.getForwardVisits()).as("forward visits").isEqualTo(1l);
-
     }
 
     @Test
@@ -188,7 +188,7 @@ class StatServiceTest {
         service.logStats(visit1);
         service.logStats(visit2);
 
-        assertThat(repository.count()).isEqualTo(2);
+        assertThat(statLocationRepository.count()).isEqualTo(2);
     }
 
     @Test
@@ -199,7 +199,7 @@ class StatServiceTest {
         service.logStats(visit1);
         service.logStats(visit2);
 
-        assertThat(repository.count()).isEqualTo(2);
+        assertThat(statLocationRepository.count()).isEqualTo(2);
     }
 
     @Test
@@ -210,7 +210,7 @@ class StatServiceTest {
         service.logStats(visit1);
         service.logStats(visit2);
 
-        assertThat(repository.count()).isEqualTo(2);
+        assertThat(statLocationRepository.count()).isEqualTo(2);
     }
 
     @Test
@@ -221,6 +221,36 @@ class StatServiceTest {
         service.logStats(visit1);
         service.logStats(visit2);
 
-        assertThat(repository.count()).isEqualTo(2);
+        assertThat(statLocationRepository.count()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("logStats should add a new entity to DB")
+    void testLogStats() {
+        long timestamp = TimeUtils.currentNtpTime();
+        ReportStat reportStat = ReportStat.builder()
+                .reported(10)
+                .rejected(2)
+                .backwards(5)
+                .forwards(3)
+                .close(4)
+                .timestamp(timestamp)
+                .build();
+
+        service.logStats(reportStat);
+
+        assertThat(reportStatRepository.count()).isEqualTo(1);
+        var response = reportStatRepository.findAll().stream().findFirst().get();
+        assertThat(response.getId()).isInstanceOf(String.class);
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getId()).isNotBlank();
+        assertThat(response.getId()).isNotEmpty();
+        assertThat(response.getReported()).isEqualTo(10);
+        assertThat(response.getRejected()).isEqualTo(2);
+        assertThat(response.getBackwards()).isEqualTo(5);
+        assertThat(response.getForwards()).isEqualTo(3);
+        assertThat(response.getClose()).isEqualTo(4);
+        assertThat(response.getTimestamp().truncatedTo(ChronoUnit.SECONDS))
+                .isEqualTo(TimeUtils.instantFromTimestamp(timestamp).truncatedTo(ChronoUnit.SECONDS));
     }
 }

@@ -1,13 +1,6 @@
 package fr.gouv.clea.consumer.service.impl;
 
-import java.time.Duration;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import fr.gouv.clea.consumer.configuration.VenueConsumerConfiguration;
+import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.DecodedVisit;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.service.IDecodedVisitService;
@@ -16,9 +9,16 @@ import fr.inria.clea.lsp.CleaEciesEncoder;
 import fr.inria.clea.lsp.LocationSpecificPart;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import fr.inria.clea.lsp.exception.CleaEncryptionException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.time.Duration;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class DecodedVisitService implements IDecodedVisitService {
 
@@ -26,17 +26,7 @@ public class DecodedVisitService implements IDecodedVisitService {
 
     private final CleaEciesEncoder cleaEciesEncoder;
 
-    private final VenueConsumerConfiguration config;
-
-    @Autowired
-    public DecodedVisitService(
-            LocationSpecificPartDecoder decoder,
-            CleaEciesEncoder cleaEciesEncoder,
-            VenueConsumerConfiguration config) {
-        this.decoder = decoder;
-        this.cleaEciesEncoder = cleaEciesEncoder;
-        this.config = config;
-    }
+    private final VenueConsumerProperties properties;
 
     @Override
     public Optional<Visit> decryptAndValidate(DecodedVisit decodedVisit) {
@@ -77,8 +67,8 @@ public class DecodedVisitService implements IDecodedVisitService {
         if (qrCodeRenewalInterval == 0) {
             return false;
         }
-        boolean isDrifting = Duration.between(visit.getQrCodeScanTime(), visit.getQrCodeValidityStartTime()).abs().toSeconds() 
-                 > (qrCodeRenewalInterval + config.getDriftBetweenDeviceAndOfficialTimeInSecs() + config.getCleaClockDriftInSecs());
+        boolean isDrifting = Duration.between(visit.getQrCodeScanTime(), visit.getQrCodeValidityStartTime()).abs().toSeconds()
+                > (qrCodeRenewalInterval + properties.getDriftBetweenDeviceAndOfficialTimeInSecs() + properties.getCleaClockDriftInSecs());
         if (!isDrifting && visit.getQrCodeScanTime().isBefore(visit.getQrCodeValidityStartTime())) {
             visit.setQrCodeScanTime(visit.getQrCodeValidityStartTime());
         }
