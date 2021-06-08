@@ -1,0 +1,7 @@
+
+[profile s3outscale]
+region = eu-west-2
+
+[profile s3scaleway]
+region = fr-par
+
