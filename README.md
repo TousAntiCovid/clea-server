@@ -103,22 +103,4 @@ Here are the properties to inject into Kafka producers and consumers apps:
 
 ## Integration tests
 
-#### Run every tests
-```bash
-cd clea-server/
-export CLEA_ROOT_DIR=$(pwd)
-mvn clean package
-docker-compose up -d
-java -jar -Dspring.profiles.active=dev clea-integration-tests/target/*-SNAPSHOT.jar
-docker-compose down
-```
-A report file `cucumber-reports.html` will be created at CLEA_ROOT_DIR path.
-
-#### Run some tests
-It is possible to run a single test with help of IDEs, simply override the following:
-
-```
-cucumber.features=classpath:features/dynamic/clea-backward-risk.feature
-cucumber.glue=fr.gouv.clea.integrationtests
-spring.profiles.active=dev
-```
+See [.gitlab-ci.yml](.gitlab-ci.yml) file at `integration-tests` stage. A report file `cucumber-reports.html` will be created at CLEA_ROOT_DIR path.
