@@ -8,4 +8,4 @@ clea:
       - "clea-batch"
 
 minio:
-  url: http://localhost:9100
+  url: http://localhost:9000

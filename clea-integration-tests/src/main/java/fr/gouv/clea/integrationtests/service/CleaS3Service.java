@@ -43,6 +43,8 @@ public class CleaS3Service {
     }
 
     private byte[] getFile(String key) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+
+        log.info("{}, {}", minioProperties.getBucketName(), minioProperties.getDefaultBaseFolder());
         GetObjectArgs args = GetObjectArgs.builder()
                 .bucket(minioProperties.getBucketName())
                 .object(minioProperties.getDefaultBaseFolder() + "/" + key)
