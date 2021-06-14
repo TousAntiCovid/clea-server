@@ -100,3 +100,7 @@ Here are the properties to inject into Kafka producers and consumers apps:
 - `spring.kafka.properties.security.protocol` with value `ssl` to enable SSL
 - `spring.kafka.ssl.trust-store-location` with value `file:///path/to/kafka.client.truststore.jks` (do not forget the `file://` prefix for a valid URL)
 - `spring.kafka.ssl.trust-store-password` 
+
+## Integration tests
+
+See [.gitlab-ci.yml](.gitlab-ci.yml) file at `integration-tests` stage. A report file `cucumber-reports.html` will be created at CLEA_ROOT_DIR path.

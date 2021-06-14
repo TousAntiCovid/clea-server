@@ -26,6 +26,8 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 WORKDIR /home/javaapp
 
 USER javaapp
+# Integration WebHook
+RUN pip3 install --user s3cmd
 
 FROM installer
 COPY ./target/clea*-exec.jar ./clea-batch.jar
@@ -33,12 +35,12 @@ COPY ./src/main/scripts/* ./
 COPY ./src/main/docker/aws ./.aws
 
 USER root
-RUN mkdir /logs \
+RUN chmod +x *.sh \
+ && mkdir /logs \
  && touch /logs/clea-batch.log \
  && touch /logs/clea-batch.error.log \
- && chmod a+rw /logs/*.log \
- && chmod +x *.sh
+ && chmod a+rw /logs/*.log
 
 USER javaapp
 
-ENTRYPOINT [ "./clea-batch.sh" ]
+CMD [ "./clea-batch.sh" ]

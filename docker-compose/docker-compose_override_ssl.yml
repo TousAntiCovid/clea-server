@@ -14,8 +14,6 @@ services:
   #     KAFKA_SSL_TRUSTSTORE_PASSWORD: 'serversecret' 
   #   volumes:
   #     - ./kafka/certs:/etc/kafka/secrets/:ro
-  #   networks:
-  #     - clea-network
 
   kafka:
     image: "wurstmeister/kafka:latest"
@@ -32,9 +30,6 @@ services:
       KAFKA_SSL_TRUSTSTORE_PASSWORD: 'serversecret' 
     volumes:
       - ./kafka/certs:/etc/kafka/secrets/:ro
-    networks:
-      - clea-network
-
 
   # cmak allow to manage kafka but is not so easy and don't allow to see messages'
   # kafka-man:
@@ -45,8 +40,6 @@ services:
   #     KAFKA_MANAGER_PASSWORD: "admin123!"
   #   #ports:
   #   #  - '9001:8080'
-  #   networks:
-  #     - clea-network
 
   # kafdrop is a single page console already connected to kafka that allow to see messages 
   kafdrop:
