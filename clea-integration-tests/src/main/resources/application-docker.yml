@@ -1,0 +1,11 @@
+clea:
+  ws-rest:
+    base-url: http://clea-ws-rest:8080
+  batch:
+    command:
+      - "docker-compose"
+      - "up"
+      - "clea-batch"
+
+minio:
+  url: http://minio:9000

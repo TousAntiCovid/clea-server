@@ -95,6 +95,10 @@ public class VisitExpositionAggregatorService implements IVisitExpositionAggrega
         return TimeUtils.instantFromTimestamp(this.periodStartFromCompressedPeriodStart(compressedPeriodStartTime));
     }
 
+    protected long periodStartTimeNTPTimestamp(Visit visit){
+        return ((long) visit.getCompressedPeriodStartTime()) * TimeUtils.NB_SECONDS_PER_HOUR;
+    }
+
     protected ExposedVisitEntity updateExposedVisit(Visit visit, ExposedVisitEntity exposedVisit) {
         if (visit.isBackward()) {
             exposedVisit.setBackwardVisits(exposedVisit.getBackwardVisits() + 1);

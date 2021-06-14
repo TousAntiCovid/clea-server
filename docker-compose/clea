@@ -2,7 +2,7 @@
 
 SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 SCRIPTNAME=`basename $0`
-OPTIONS="-p $SCRIPTNAME -f $SCRIPTPATH/docker-compose.yml $OVERRIDES"
+OPTIONS="-p $SCRIPTNAME -f $SCRIPTPATH/../docker-compose.yml $OVERRIDES"
 
 # IP of the host (bridge)
 export EXTERNAL_IP=$(docker network inspect bridge --format='{{(index .IPAM.Config 0).Gateway}}')

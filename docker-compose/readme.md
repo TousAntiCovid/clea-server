@@ -93,7 +93,7 @@ clea -o minio up -d
 clea -o minio build clea-batch
 clea -o minio restart clea-batch
 clea -o minio exec clea-batch /home/javaapp/clea-batch.sh
-curl -v http://localhost:9100/clea-batch/v1/clusterIndex.json
+curl -v http://localhost:9000/clea-batch/v1/clusterIndex.json
 clea -o minio restart minio # reset bucket content
 clea -o minio down
 ```
@@ -105,7 +105,7 @@ clea-mc up -d
 clea-mc build clea-batch
 clea-mc restart clea-batch
 clea-mc exec clea-batch /home/javaapp/clea-batch.sh
-curl -v http://localhost:9100/clea-batch/v1/clusterIndex.json
+curl -v http://localhost:9000/clea-batch/v1/clusterIndex.json
 clea-mc restart minio # reset bucket content
 clea-mc down
 ```
