@@ -27,6 +27,7 @@ import javax.validation.constraints.Positive;
 public class VenueConsumerProperties {
 
     @Min(value = 600)
+    @HourDivisor
     private long durationUnitInSeconds;
 
     @Min(value = 1800)
