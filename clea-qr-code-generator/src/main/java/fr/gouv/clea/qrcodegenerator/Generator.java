@@ -58,7 +58,11 @@ public class Generator {
         IntStream.rangeClosed(1, PLACES_NUMBER).forEach(i -> {
             URL deepLink = generator.generateDeepLinkForRandomLocation();
             if (generateQrCodes) {
-                generateQrCodeAndCreatePdf(i, deepLink);
+                try {
+                    generateQrCodeAndCreatePdf(i, deepLink);
+                } catch (DocumentException | FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 urlsList.add(deepLink);
             }
@@ -77,7 +81,7 @@ public class Generator {
         writer.close();
     }
 
-    private static void generateQrCodeAndCreatePdf(int i, URL deepLink) {
+    private static void generateQrCodeAndCreatePdf(int i, URL deepLink) throws DocumentException, FileNotFoundException {
         final var qrCode = new BarcodeQRCode(deepLink.toString(), QR_SIZE_AS_PX, QR_SIZE_AS_PX, null);
         final var filename = format("qrcode-%d.pdf", i);
         final File targetFile = OUTPUT_DIR.resolve(filename).toFile();
