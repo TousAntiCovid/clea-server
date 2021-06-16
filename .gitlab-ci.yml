@@ -19,7 +19,7 @@ build:
   image: maven:3.6.3-adoptopenjdk-11
   stage: build
   script:
-    - mvn -B -s .mvn/settings-ci.xml -ntp -fae -DdeployAtEnd deploy
+    - mvn -B -s .mvn/settings-ci.xml -ntp -fae -DdeployAtEnd deploy -DskipTests=true
   artifacts:
     paths:
       - "**/target/*.jar"
@@ -39,6 +39,7 @@ integration-tests:
     - docker-compose up -d
     - docker network connect clea-server_default $currentContainer
     - echo "Waiting for clea-ws-rest component to be up..."
+    - curl http://clea-server_clea-ws-rest_1/actuator/health
     - until curl -s http://clea-server_clea-ws-rest_1/actuator/health | grep -q UP; do sleep 0.5; done;
     - java -jar -Dspring.profiles.active=docker clea-integration-tests/target/*-SNAPSHOT.jar
     - docker network disconnect clea-server_default $currentContainer
