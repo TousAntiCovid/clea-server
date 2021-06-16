@@ -10,10 +10,7 @@ import fr.inria.clea.lsp.LocationSpecificPart;
 import lombok.SneakyThrows;
 import org.bouncycastle.util.encoders.Hex;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,8 +38,8 @@ public class Generator {
     private static final int VENUE_TYPE = 1;
     private static final int VENUE_CAT_1 = 0;
     private static final int VENUE_CAT_2 = 0;
-    private static final int PERIOD_DURATION = 255;
-    private static final int QR_CODE_RENEWAL_INTERVAL = 0x1F;
+    private static final int UNLIMITED_PERIOD_DURATION = 255;
+    private static final int NO_RENEWAL_INTERVAL = 0x1F;
 
     // output directory path
     private static final Path OUTPUT_DIR = Path.of("/tmp/codes");
@@ -87,17 +84,13 @@ public class Generator {
         createPdf(targetFile, qrCode);
     }
 
-    private static void createPdf(File targetFile, BarcodeQRCode qrCode) {
-        try {
+    private static void createPdf(File targetFile, BarcodeQRCode qrCode) throws DocumentException, FileNotFoundException {
             Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(targetFile));
             Image image = qrCode.getImage();
             document.open();
             document.add(image);
             document.close();
-        } catch (IOException | DocumentException e) {
-            e.printStackTrace();
-        }
     }
 
     @SneakyThrows
@@ -121,8 +114,8 @@ public class Generator {
     private LocationSpecificPart createRandomLocationSpecificPart() {
         return LocationSpecificPart.builder()
                 .staff(false)
-                .periodDuration(PERIOD_DURATION /* unlimited */)
-                .qrCodeRenewalIntervalExponentCompact(QR_CODE_RENEWAL_INTERVAL /* no renewal */)
+                .periodDuration(UNLIMITED_PERIOD_DURATION /* unlimited */)
+                .qrCodeRenewalIntervalExponentCompact(NO_RENEWAL_INTERVAL /* no renewal */)
                 .venueType(VENUE_TYPE)
                 .venueCategory1(VENUE_CAT_1)
                 .venueCategory2(VENUE_CAT_2)
