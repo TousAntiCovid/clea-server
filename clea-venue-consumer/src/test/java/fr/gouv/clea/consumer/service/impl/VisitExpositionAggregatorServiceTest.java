@@ -1,16 +1,13 @@
 package fr.gouv.clea.consumer.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.UUID;
-
+import fr.gouv.clea.consumer.model.ExposedVisitEntity;
+import fr.gouv.clea.consumer.model.Visit;
+import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
+import fr.gouv.clea.consumer.service.IStatService;
+import fr.gouv.clea.consumer.service.IVisitExpositionAggregatorService;
+import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
+import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
+import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,14 +18,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
-import fr.gouv.clea.consumer.model.ExposedVisitEntity;
-import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
-import fr.gouv.clea.consumer.service.IStatService;
-import fr.gouv.clea.consumer.service.IVisitExpositionAggregatorService;
-import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
-import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
-import fr.inria.clea.lsp.utils.TimeUtils;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @DirtiesContext
@@ -47,9 +46,13 @@ class VisitExpositionAggregatorServiceTest {
     private IStatService statService;
 
     private Instant todayAtMidnight;
+
     private Instant todayAt8am;
+
     private UUID uuid;
+
     private byte[] locationTemporarySecretKey;
+
     private byte[] encryptedLocationContactMessage;
 
     @BeforeEach
@@ -84,14 +87,14 @@ class VisitExpositionAggregatorServiceTest {
                 .locationTemporaryPublicId(uuid)
                 .isBackward(true)
                 .build();
-        
+
         service.updateExposureCount(visit);
 
         List<ExposedVisitEntity> entities = repository.findAll();
         entities.forEach(it -> {
-                    assertThat(it.getLocationTemporaryPublicId()).isEqualTo(uuid);
-                    assertThat(it.getBackwardVisits()).isEqualTo(1);
-                }
+            assertThat(it.getLocationTemporaryPublicId()).isEqualTo(uuid);
+            assertThat(it.getBackwardVisits()).isEqualTo(1);
+        }
         );
     }
 
@@ -106,14 +109,14 @@ class VisitExpositionAggregatorServiceTest {
         long before = repository.count();
 
         service.updateExposureCount(visit);
-        
+
         long after = repository.count();
         assertThat(before).isEqualTo(after);
         List<ExposedVisitEntity> entities = repository.findAll();
         entities.forEach(it -> {
-                    assertThat(it.getLocationTemporaryPublicId()).isEqualTo(uuid);
-                    assertThat(it.getBackwardVisits()).isEqualTo(2);
-                }
+            assertThat(it.getLocationTemporaryPublicId()).isEqualTo(uuid);
+            assertThat(it.getBackwardVisits()).isEqualTo(2);
+        }
         );
     }
 
@@ -131,7 +134,7 @@ class VisitExpositionAggregatorServiceTest {
                 .locationTemporaryPublicId(newUUID)
                 .isBackward(true)
                 .build();
-        
+
         service.updateExposureCount(visit);
         service.updateExposureCount(visit2);
 
@@ -139,18 +142,18 @@ class VisitExpositionAggregatorServiceTest {
         entities.stream()
                 .filter(it -> it.getLocationTemporaryPublicId().equals(uuid))
                 .forEach(it -> {
-                            assertThat(it.getLocationTemporaryPublicId()).isEqualTo(uuid);
-                            assertThat(it.getBackwardVisits()).isEqualTo(1);
-                            assertThat(it.getForwardVisits()).isEqualTo(1);
-                        }
+                    assertThat(it.getLocationTemporaryPublicId()).isEqualTo(uuid);
+                    assertThat(it.getBackwardVisits()).isEqualTo(1);
+                    assertThat(it.getForwardVisits()).isEqualTo(1);
+                }
                 );
         entities.stream()
                 .filter(it -> it.getLocationTemporaryPublicId().equals(newUUID))
                 .forEach(it -> {
-                            assertThat(it.getLocationTemporaryPublicId()).isEqualTo(newUUID);
-                            assertThat(it.getBackwardVisits()).isEqualTo(1);
-                            assertThat(it.getForwardVisits()).isZero();
-                        }
+                    assertThat(it.getLocationTemporaryPublicId()).isEqualTo(newUUID);
+                    assertThat(it.getBackwardVisits()).isEqualTo(1);
+                    assertThat(it.getForwardVisits()).isZero();
+                }
                 );
     }
 

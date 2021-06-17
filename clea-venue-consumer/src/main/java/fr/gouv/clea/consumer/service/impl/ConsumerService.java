@@ -23,20 +23,27 @@ import java.util.Optional;
 public class ConsumerService implements IConsumerService {
 
     private final IDecodedVisitService decodedVisitService;
+
     private final IVisitExpositionAggregatorService visitExpositionAggregatorService;
+
     private final IStatService statService;
 
     @Override
     @KafkaListener(topics = "${clea.kafka.qrCodesTopic}", containerFactory = "visitContainerFactory")
     public void consumeVisit(DecodedVisit decodedVisit) {
-        log.info("[locationTemporaryPublicId: {}, qrCodeScanTime: {}] retrieved from queue", MessageFormatter.truncateUUID(decodedVisit.getStringLocationTemporaryPublicId()), decodedVisit.getQrCodeScanTime());
+        log.info(
+                "[locationTemporaryPublicId: {}, qrCodeScanTime: {}] retrieved from queue",
+                MessageFormatter.truncateUUID(decodedVisit.getStringLocationTemporaryPublicId()),
+                decodedVisit.getQrCodeScanTime()
+        );
         Optional<Visit> optionalVisit = decodedVisitService.decryptAndValidate(decodedVisit);
         optionalVisit.ifPresentOrElse(
                 visit -> {
                     log.debug("Consumer: visit after decrypt + validation: {}, ", visit);
                     visitExpositionAggregatorService.updateExposureCount(visit);
                 },
-                () -> log.info("empty visit after decrypt + validation"));
+                () -> log.info("empty visit after decrypt + validation")
+        );
     }
 
     @Override

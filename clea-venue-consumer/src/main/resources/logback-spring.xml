@@ -1,20 +1,28 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
  
- <property  name="LOG_DIR" value="${CLEA_VENUE_CONSUMER_LOG_FILE_PATH:-/logs}" />
- <property  name="LOG_FILENAME" value="${CLEA_VENUE_CONSUMER_LOG_FILE_NAME:-clea-venue-consumer}" />
- <property  name="ERROR_LOG_FILENAME" value="${CLEA_VENUE_CONSUMER_ERROR_LOG_FILE_NAME:-clea-venue-consumer}.error" />
+ <property name="LOG_DIR" value="${CLEA_VENUE_CONSUMER_LOG_FILE_PATH:-/logs}" />
+ <property
+    name="LOG_FILENAME"
+    value="${CLEA_VENUE_CONSUMER_LOG_FILE_NAME:-clea-venue-consumer}"
+  />
+ <property
+    name="ERROR_LOG_FILENAME"
+    value="${CLEA_VENUE_CONSUMER_ERROR_LOG_FILE_NAME:-clea-venue-consumer}.error"
+  />
  
-    <appender name="RollingFile"
-        class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender
+    name="RollingFile"
+    class="ch.qos.logback.core.rolling.RollingFileAppender"
+  >
         <file>${LOG_DIR}/${LOG_FILENAME}.log</file>
-        <encoder
-            class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>%d %p %C{1.} [%t][%file:%line] %m%n</Pattern>
         </encoder>
  
         <rollingPolicy
-            class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy"
+    >
             <!-- rollover daily and when the file reaches 10 MegaBytes -->
             <fileNamePattern>${LOG_DIR}/${LOG_FILENAME}.%d{yyyy-MM-dd}.%i.log.gz
             </fileNamePattern>
@@ -22,18 +30,21 @@
         </rollingPolicy>
     </appender>
 
-	<appender name="RollingErrorFile"
-        class="ch.qos.logback.core.rolling.RollingFileAppender">
+	<appender
+    name="RollingErrorFile"
+    class="ch.qos.logback.core.rolling.RollingFileAppender"
+  >
         <file>${LOG_DIR}/${ERROR_LOG_FILENAME}.log</file>
-        <encoder
-            class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>%d %p %C{1.} [%t][%file:%line] %m%n</Pattern>
         </encoder>
  
         <rollingPolicy
-            class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy"
+    >
             <!-- rollover daily and when the file reaches 10 MegaBytes -->
-            <fileNamePattern>${LOG_DIR}/${ERROR_LOG_FILENAME}.%d{yyyy-MM-dd}.%i.log.gz
+            <fileNamePattern
+      >${LOG_DIR}/${ERROR_LOG_FILENAME}.%d{yyyy-MM-dd}.%i.log.gz
             </fileNamePattern>
                 <maxFileSize>10MB</maxFileSize>
         </rollingPolicy>
@@ -41,7 +52,7 @@
 
     <springProfile name="dev">
         <include resource="org/springframework/boot/logging/logback/base.xml" />
-        <logger name="org.springframework" level="OFF"/>
+        <logger name="org.springframework" level="OFF" />
     </springProfile>
 
     <springProfile name="!dev">

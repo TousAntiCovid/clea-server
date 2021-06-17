@@ -41,12 +41,16 @@ class CleaControllerTest {
 
     @Captor
     private ArgumentCaptor<ReportRequest> reportRequestArgumentCaptor;
+
     @Value("${controller.path.prefix}" + UriConstants.API_V1)
     private String pathPrefix;
+
     @Autowired
     private TestRestTemplate restTemplate;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     @MockBean
     private ReportService reportService;
 
@@ -65,14 +69,16 @@ class CleaControllerTest {
     void testInfectedUserCanReportHimselfAsInfected() {
         List<Visit> visits = List.of(new Visit("qrCode", 0L));
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(visits, 0L), newJsonHeader());
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     void testWhenReportRequestWithInvalidMediaTypeThenGetUnsupportedMediaType() {
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, "foo", String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, "foo", String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         verifyNoMoreInteractions(reportService);
@@ -81,7 +87,8 @@ class CleaControllerTest {
     @Test
     void testWhenReportRequestWithNullVisitListThenGetBadRequest() {
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(null, 0L), newJsonHeader());
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
@@ -106,7 +113,8 @@ class CleaControllerTest {
     void nullPivotDate() throws JsonProcessingException {
         List<Visit> visits = List.of(new Visit(RandomStringUtils.randomAlphanumeric(20), RandomUtils.nextLong()));
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(visits, null), newJsonHeader());
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -116,7 +124,8 @@ class CleaControllerTest {
         assertThat(apiError.getValidationErrors().size()).isEqualTo(1);
         assertThat(apiError.getValidationErrors().stream().findFirst()).isPresent();
         assertThat(apiError.getValidationErrors().stream().findFirst().get().getObject()).isEqualTo("ReportRequest");
-        assertThat(apiError.getValidationErrors().stream().findFirst().get().getField()).isEqualTo("pivotDateAsNtpTimestamp");
+        assertThat(apiError.getValidationErrors().stream().findFirst().get().getField())
+                .isEqualTo("pivotDateAsNtpTimestamp");
         assertThat(apiError.getValidationErrors().stream().findFirst().get().getRejectedValue()).isNull();
         assertThat(apiError.getValidationErrors().stream().findFirst().get().getMessage()).contains("nul");
     }
@@ -124,11 +133,14 @@ class CleaControllerTest {
     @Test
     @DisplayName("when pivotDate is not numeric, reject everything")
     void notNumericPivotDate() throws JsonProcessingException {
-        ReportRequest reportRequest = new ReportRequest(List.of(new Visit(RandomStringUtils.randomAlphanumeric(20), 1L)), 0L);
+        ReportRequest reportRequest = new ReportRequest(
+                List.of(new Visit(RandomStringUtils.randomAlphanumeric(20), 1L)), 0L
+        );
         String json = objectMapper.writeValueAsString(reportRequest);
         String badJson = json.replace("0", "a");
         HttpEntity<String> request = new HttpEntity<>(badJson, newJsonHeader());
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -142,7 +154,8 @@ class CleaControllerTest {
     @DisplayName("when visit list is null, reject everything")
     void nullVisitList() throws JsonProcessingException {
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(null, 0L), newJsonHeader());
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -156,7 +169,8 @@ class CleaControllerTest {
     @DisplayName("when visit list is empty, reject everything")
     void emptyVisitList() throws JsonProcessingException {
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(List.of(), 0L), newJsonHeader());
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -173,13 +187,18 @@ class CleaControllerTest {
                 new ReportRequest(List.of(new Visit("qr1", 1L), new Visit(null, 2L)), 3L),
                 newJsonHeader()
         );
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
         assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().stream().filter(it -> it.getQrCode() == null).findAny()).isEmpty();
+        assertThat(
+                reportRequestArgumentCaptor.getValue().getVisits().stream().filter(it -> it.getQrCode() == null)
+                        .findAny()
+        ).isEmpty();
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCode()).isEqualTo("qr1");
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp()).isEqualTo(1L);
+        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp())
+                .isEqualTo(1L);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
@@ -190,13 +209,18 @@ class CleaControllerTest {
                 new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("", 2L)), 3L),
                 newJsonHeader()
         );
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
         assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().stream().filter(it -> it.getQrCode().isEmpty()).findAny()).isEmpty();
+        assertThat(
+                reportRequestArgumentCaptor.getValue().getVisits().stream().filter(it -> it.getQrCode().isEmpty())
+                        .findAny()
+        ).isEmpty();
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCode()).isEqualTo("qr1");
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp()).isEqualTo(1L);
+        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp())
+                .isEqualTo(1L);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
@@ -207,13 +231,18 @@ class CleaControllerTest {
                 new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("     ", 2L)), 3L),
                 newJsonHeader()
         );
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
         assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().stream().filter(it -> it.getQrCode().isBlank()).findAny()).isEmpty();
+        assertThat(
+                reportRequestArgumentCaptor.getValue().getVisits().stream().filter(it -> it.getQrCode().isBlank())
+                        .findAny()
+        ).isEmpty();
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCode()).isEqualTo("qr1");
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp()).isEqualTo(1L);
+        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp())
+                .isEqualTo(1L);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
@@ -224,13 +253,18 @@ class CleaControllerTest {
                 new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("qr2", null)), 3L),
                 newJsonHeader()
         );
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
         assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().stream().filter(it -> it.getQrCodeScanTimeAsNtpTimestamp() == null).findAny()).isEmpty();
+        assertThat(
+                reportRequestArgumentCaptor.getValue().getVisits().stream()
+                        .filter(it -> it.getQrCodeScanTimeAsNtpTimestamp() == null).findAny()
+        ).isEmpty();
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCode()).isEqualTo("qr1");
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp()).isEqualTo(1L);
+        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp())
+                .isEqualTo(1L);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
@@ -241,7 +275,8 @@ class CleaControllerTest {
         String json = objectMapper.writeValueAsString(reportRequest);
         String badJson = json.replace("2", "a");
         HttpEntity<String> request = new HttpEntity<>(badJson, newJsonHeader());
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -257,7 +292,8 @@ class CleaControllerTest {
         ReportRequest reportRequest = new ReportRequest(List.of(new Visit(" ", 1L)), 2L);
         String json = objectMapper.writeValueAsString(reportRequest);
         HttpEntity<String> request = new HttpEntity<>(json, newJsonHeader());
-        ResponseEntity<String> response = restTemplate.postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+        ResponseEntity<String> response = restTemplate
+                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -270,6 +306,7 @@ class CleaControllerTest {
         assertThat(apiError.getValidationErrors().stream().findFirst().get().getField()).isEqualTo("qrCode");
         assertThat(apiError.getValidationErrors().stream().findFirst().get().getRejectedValue()).asString().isBlank();
         // TODO find a way to test this localized message: vide / empty
-        // assertThat(apiError.getValidationErrors().stream().findFirst().get().getMessage()).isEqualTo("ne doit pas être vide");
+        // assertThat(apiError.getValidationErrors().stream().findFirst().get().getMessage()).isEqualTo("ne
+        // doit pas être vide");
     }
 }

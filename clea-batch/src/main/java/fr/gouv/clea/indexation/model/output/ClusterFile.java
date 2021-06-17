@@ -15,7 +15,7 @@ public class ClusterFile {
     private String name;
 
     private List<ClusterFileItem> items;
-    
+
     public ClusterFile() {
         items = new ArrayList<>();
     }

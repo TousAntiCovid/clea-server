@@ -1,6 +1,5 @@
 version: "3.8"
 services:
-
   clea-ws-rest:
     image: clea-ws-rest
     build: clea-ws-rest

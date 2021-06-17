@@ -29,12 +29,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class JwtValidationFilterTest {
 
-    private final MockHttpServletRequest request = new MockHttpServletRequest("POST", UriConstants.API_V1 + UriConstants.REPORT);
+    private final MockHttpServletRequest request = new MockHttpServletRequest(
+            "POST", UriConstants.API_V1 + UriConstants.REPORT
+    );
+
     private final MockHttpServletResponse response = new MockHttpServletResponse();
+
     private final MockFilterChain chain = new MockFilterChain();
+
     private KeyPair keyPair;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private HandlerExceptionResolver handlerExceptionResolver;
 
@@ -49,7 +56,9 @@ class JwtValidationFilterTest {
         long jwtLifeTime = 5;
         Instant now = Instant.now();
         Instant expiration = now.plus(jwtLifeTime, ChronoUnit.MINUTES);
-        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(true, keyPair.getPublic(), handlerExceptionResolver);
+        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(
+                true, keyPair.getPublic(), handlerExceptionResolver
+        );
         request.addHeader(HttpHeaders.AUTHORIZATION, this.newJwtToken(now, expiration));
         jwtValidationFilter.doFilter(request, response, chain);
         assertThat(response.getStatus()).isEqualTo(200);
@@ -59,7 +68,9 @@ class JwtValidationFilterTest {
     @DisplayName("if authorization check is active, a token with an expired date should cause filter to return 403")
     void testEnabledAuthWithExpiredToken() {
         Instant now = Instant.now();
-        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(true, keyPair.getPublic(), handlerExceptionResolver);
+        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(
+                true, keyPair.getPublic(), handlerExceptionResolver
+        );
         request.addHeader(HttpHeaders.AUTHORIZATION, this.newJwtToken(now, now));
         jwtValidationFilter.doFilter(request, response, chain);
         assertThat(response.getStatus()).isEqualTo(403);
@@ -68,7 +79,9 @@ class JwtValidationFilterTest {
     @Test
     @DisplayName("if authorization check is active, a null token should cause filter to return 401")
     void testEnabledAuthWithNullToken() throws IOException {
-        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(true, keyPair.getPublic(), handlerExceptionResolver);
+        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(
+                true, keyPair.getPublic(), handlerExceptionResolver
+        );
         jwtValidationFilter.doFilter(request, response, chain);
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
         assertThat(response.getStatus()).isEqualTo(401);
@@ -78,7 +91,9 @@ class JwtValidationFilterTest {
     @Test
     @DisplayName("if authorization check is inactive, a null token should have no impact")
     void testDisabledAuthWithNullToken() {
-        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(false, keyPair.getPublic(), handlerExceptionResolver);
+        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(
+                false, keyPair.getPublic(), handlerExceptionResolver
+        );
         jwtValidationFilter.doFilter(request, response, chain);
         assertThat(response.getStatus()).isEqualTo(200);
     }
@@ -86,7 +101,9 @@ class JwtValidationFilterTest {
     @Test
     @DisplayName("if authorization check is active, an invalid token should cause filter to return 403")
     void testEnabledAuthWithInvalidToken() throws IOException {
-        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(true, keyPair.getPublic(), handlerExceptionResolver);
+        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(
+                true, keyPair.getPublic(), handlerExceptionResolver
+        );
         request.addHeader(HttpHeaders.AUTHORIZATION, RandomStringUtils.randomAlphanumeric(9));
         jwtValidationFilter.doFilter(request, response, chain);
         ApiError apiError = objectMapper.readValue(response.getContentAsString(), ApiError.class);
@@ -97,7 +114,9 @@ class JwtValidationFilterTest {
     @Test
     @DisplayName("if authorization check is inactive, an invalid token should have no impact")
     void testDisabledAuthWithInvalidToken() {
-        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(false, keyPair.getPublic(), handlerExceptionResolver);
+        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(
+                false, keyPair.getPublic(), handlerExceptionResolver
+        );
         request.addHeader(HttpHeaders.AUTHORIZATION, RandomStringUtils.randomAlphanumeric(9));
         jwtValidationFilter.doFilter(request, response, chain);
         assertThat(response.getStatus()).isEqualTo(200);

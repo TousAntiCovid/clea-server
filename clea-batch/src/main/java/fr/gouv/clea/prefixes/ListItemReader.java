@@ -1,15 +1,14 @@
 package fr.gouv.clea.prefixes;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStream;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class ListItemReader implements ItemReader<List<String>>, ItemStream {
@@ -21,18 +20,20 @@ public class ListItemReader implements ItemReader<List<String>>, ItemStream {
 
         final List<String> ltidList = new ArrayList<>();
 
-        for (String clusterLtid; (clusterLtid = this.delegate.read()) != null; ) {
+        for (String clusterLtid; (clusterLtid = this.delegate.read()) != null;) {
             ltidList.add(clusterLtid);
         }
-        //null return means all input data has been read, and forwards execution to processor
+        // null return means all input data has been read, and forwards execution to
+        // processor
         return ltidList.isEmpty() ? null : ltidList;
     }
 
     /**
      * Open the stream for the provided {@link ExecutionContext}.
      *
-     * @param executionContext current step's {@link ExecutionContext}.  Will be the
-     *                         executionContext from the last run of the step on a restart.
+     * @param executionContext current step's {@link ExecutionContext}. Will be the
+     *                         executionContext from the last run of the step on a
+     *                         restart.
      * @throws IllegalArgumentException if context is null
      */
     @Override
@@ -41,8 +42,9 @@ public class ListItemReader implements ItemReader<List<String>>, ItemStream {
     }
 
     /**
-     * Indicates that the execution context provided during open is about to be saved. If any state is remaining, but
-     * has not been put in the context, it should be added here.
+     * Indicates that the execution context provided during open is about to be
+     * saved. If any state is remaining, but has not been put in the context, it
+     * should be added here.
      *
      * @param executionContext to be updated
      * @throws IllegalArgumentException if executionContext is null.
@@ -53,8 +55,9 @@ public class ListItemReader implements ItemReader<List<String>>, ItemStream {
     }
 
     /**
-     * If any resources are needed for the stream to operate they need to be destroyed here. Once this method has been
-     * called all other methods (except open) may throw an exception.
+     * If any resources are needed for the stream to operate they need to be
+     * destroyed here. Once this method has been called all other methods (except
+     * open) may throw an exception.
      */
     @Override
     public void close() throws ItemStreamException {

@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -45,7 +46,8 @@ public class StatService implements IStatService {
                 repository.updateByIncrement(statLocation);
             }
         }
-        log.info("saved stat period: {}, venueType: {} venueCategory1: {}, venueCategory2: {}, backwardVisits: {}, forwardVisits: {}",
+        log.info(
+                "saved stat period: {}, venueType: {} venueCategory1: {}, venueCategory2: {}, backwardVisits: {}, forwardVisits: {}",
                 statLocation.getStatLocationKey().getPeriod(),
                 statLocation.getStatLocationKey().getVenueType(),
                 statLocation.getStatLocationKey().getVenueCategory1(),
@@ -77,6 +79,7 @@ public class StatService implements IStatService {
                 .venueCategory2(visit.getVenueCategory2())
                 .build();
     }
+
     protected Instant getStatPeriod(Visit visit) {
         long secondsToRemove = visit.getQrCodeScanTime().getEpochSecond() % properties.getStatSlotDurationInSeconds();
         return visit.getQrCodeScanTime().minus(secondsToRemove, ChronoUnit.SECONDS).truncatedTo(ChronoUnit.SECONDS);

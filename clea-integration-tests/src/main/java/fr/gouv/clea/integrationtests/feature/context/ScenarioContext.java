@@ -23,21 +23,27 @@ import java.util.UUID;
 @Component
 @ScenarioScope
 public class ScenarioContext {
+
     private final Map<String, Visitor> visitors = new HashMap<>(10);
 
     private final Map<String, Map<String, ConfPair>> venueTypeCategories1 = new HashMap<>();
 
     private final Map<String, LocationQrCodeGenerator> locations = new HashMap<>(10);
+
     private final Map<String, LocationQrCodeGenerator> staffLocations = new HashMap<>(10);
 
     private String serverAuthorityPublicKey;
+
     private String manualContactTracingAuthorityPublicKey;
 
     private final CleaApi cleaApi;
+
     private final ApplicationProperties appConfig;
+
     private final CleaS3Service s3service;
 
-    public ScenarioContext(final ApplicationProperties appConfig, final CleaApi cleaApi, CleaS3Service s3service) throws Exception {
+    public ScenarioContext(final ApplicationProperties appConfig, final CleaApi cleaApi, CleaS3Service s3service)
+            throws Exception {
         this.cleaApi = cleaApi;
         this.appConfig = appConfig;
         this.s3service = s3service;
@@ -85,29 +91,40 @@ public class ScenarioContext {
         return visitors.get(visitorName);
     }
 
-    public void updateOrCreateRiskConfig(String vtype, String vcategory1, Integer vcategory2, Integer backwardThreshold, Integer backwardExposureTime, Float backwardRisk, Integer forwardThreshold, Integer forwardExposureTime, Float forwardRisk) {
-        //TODO: Create new ConfPair or just check if it exists?
+    public void updateOrCreateRiskConfig(String vtype, String vcategory1, Integer vcategory2, Integer backwardThreshold,
+            Integer backwardExposureTime, Float backwardRisk, Integer forwardThreshold, Integer forwardExposureTime,
+            Float forwardRisk) {
+        // TODO: Create new ConfPair or just check if it exists?
     }
 
-    private LocationQrCodeGenerator createDynamicLocation(String locationName, Instant periodStartTime, String venueType,
-                                                          String venueCategory1, Integer venueCategory2, Duration qrCodeRenewalInterval, Integer periodDuration) throws CleaCryptoException {
+    private LocationQrCodeGenerator createDynamicLocation(String locationName, Instant periodStartTime,
+            String venueType,
+            String venueCategory1, Integer venueCategory2, Duration qrCodeRenewalInterval, Integer periodDuration)
+            throws CleaCryptoException {
         long qrCodeRenewalIntervalLong = qrCodeRenewalInterval.getSeconds();
         int qrCodeRenewalIntervalExponentCompact = (int) (Math.log(qrCodeRenewalIntervalLong) / Math.log(2));
-        return this.createLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2, qrCodeRenewalIntervalExponentCompact, periodDuration);
+        return this.createLocation(
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
+                qrCodeRenewalIntervalExponentCompact, periodDuration
+        );
     }
 
     private LocationQrCodeGenerator createStaticLocation(String locationName, Instant periodStartTime, String venueType,
-                                                         String venueCategory1, Integer venueCategory2, Integer periodDuration) throws CleaCryptoException {
+            String venueCategory1, Integer venueCategory2, Integer periodDuration) throws CleaCryptoException {
         int qrCodeRenewalIntervalExponentCompact = 0x1F;
-        return this.createLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2, qrCodeRenewalIntervalExponentCompact, periodDuration);
+        return this.createLocation(
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
+                qrCodeRenewalIntervalExponentCompact, periodDuration
+        );
     }
 
-
     private LocationQrCodeGenerator createLocation(String locationName, Instant periodStartTime, String venueType,
-                                                   String venueCategory1, Integer venueCategory2, Integer qrCodeRenewalIntervalExponentCompact, Integer periodDuration) throws CleaCryptoException {
+            String venueCategory1, Integer venueCategory2, Integer qrCodeRenewalIntervalExponentCompact,
+            Integer periodDuration) throws CleaCryptoException {
         final String permanentLocationSecretKey = Hex.toHexString(UUID.randomUUID().toString().getBytes());
         ConfPair conf;
-        if (venueTypeCategories1.containsKey(venueType) && venueTypeCategories1.get(venueType).containsKey(venueCategory1)) {
+        if (venueTypeCategories1.containsKey(venueType)
+                && venueTypeCategories1.get(venueType).containsKey(venueCategory1)) {
             conf = venueTypeCategories1.get(venueType).get(venueCategory1);
         } else {
             conf = new ConfPair(9, 9);
@@ -143,29 +160,40 @@ public class ScenarioContext {
         return location;
     }
 
-    public LocationQrCodeGenerator getOrCreateDynamicLocation(String locationName, Instant periodStartTime, String venueType,
-                                                              String venueCategory1, Integer venueCategory2, Duration qrCodeRenewalInterval) throws CleaCryptoException {
-        return this.getOrCreateDynamicLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
-                qrCodeRenewalInterval, 24);
+    public LocationQrCodeGenerator getOrCreateDynamicLocation(String locationName, Instant periodStartTime,
+            String venueType,
+            String venueCategory1, Integer venueCategory2, Duration qrCodeRenewalInterval) throws CleaCryptoException {
+        return this.getOrCreateDynamicLocation(
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
+                qrCodeRenewalInterval, 24
+        );
     }
 
     public LocationQrCodeGenerator getOrCreateDynamicLocation(String locationName, Instant periodStartTime,
-                                                              String venueType, String venueCategory1, Integer venueCategory2, Duration qrCodeRenewalInterval,
-                                                              Integer periodDuration) throws CleaCryptoException {
+            String venueType, String venueCategory1, Integer venueCategory2, Duration qrCodeRenewalInterval,
+            Integer periodDuration) throws CleaCryptoException {
         return locations.containsKey(locationName) ? locations.get(locationName)
-                : this.createDynamicLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
-                qrCodeRenewalInterval, periodDuration);
+                : this.createDynamicLocation(
+                        locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
+                        qrCodeRenewalInterval, periodDuration
+                );
     }
 
-    public LocationQrCodeGenerator getOrCreateStaticLocation(String locationName, Instant periodStartTime, String venueType,
-                                                             String venueCategory1, Integer venueCategory2, Integer periodDuration) throws CleaCryptoException {
+    public LocationQrCodeGenerator getOrCreateStaticLocation(String locationName, Instant periodStartTime,
+            String venueType,
+            String venueCategory1, Integer venueCategory2, Integer periodDuration) throws CleaCryptoException {
         return locations.containsKey(locationName) ? locations.get(locationName)
-                : this.createStaticLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2, periodDuration);
+                : this.createStaticLocation(
+                        locationName, periodStartTime, venueType, venueCategory1, venueCategory2, periodDuration
+                );
     }
 
-    public LocationQrCodeGenerator getOrCreateStaticLocation(String locationName, Instant periodStartTime, String venueType,
-                                                             String venueCategory1, Integer venueCategory2) throws CleaCryptoException {
-        return this.getOrCreateStaticLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2, 24);
+    public LocationQrCodeGenerator getOrCreateStaticLocation(String locationName, Instant periodStartTime,
+            String venueType,
+            String venueCategory1, Integer venueCategory2) throws CleaCryptoException {
+        return this.getOrCreateStaticLocation(
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2, 24
+        );
     }
 
     public LocationQrCodeGenerator getLocation(String locationName) {
@@ -178,7 +206,9 @@ public class ScenarioContext {
 
     @Getter
     private static class ConfPair {
+
         private final int type;
+
         private final int category;
 
         public ConfPair(int type, int category) {

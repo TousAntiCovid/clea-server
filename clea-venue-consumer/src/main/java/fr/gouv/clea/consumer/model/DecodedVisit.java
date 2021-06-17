@@ -13,8 +13,11 @@ import java.time.Instant;
 @Getter
 @ToString
 public class DecodedVisit {
+
     private final Instant qrCodeScanTime; // t_qrScan
+
     private final EncryptedLocationSpecificPart encryptedLocationSpecificPart;
+
     private final boolean isBackward;
 
     public String getStringLocationTemporaryPublicId() {

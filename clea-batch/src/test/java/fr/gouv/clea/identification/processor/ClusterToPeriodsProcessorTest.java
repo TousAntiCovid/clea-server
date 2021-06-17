@@ -1,21 +1,20 @@
 package fr.gouv.clea.identification.processor;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-import java.util.UUID;
-
+import fr.gouv.clea.dto.ClusterPeriod;
+import fr.gouv.clea.dto.SinglePlaceCluster;
+import fr.gouv.clea.dto.SinglePlaceClusterPeriod;
+import fr.gouv.clea.mapper.ClusterPeriodModelsMapper;
+import fr.gouv.clea.mapper.ClusterPeriodModelsMapperImpl;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import fr.gouv.clea.dto.ClusterPeriod;
-import fr.gouv.clea.dto.SinglePlaceCluster;
-import fr.gouv.clea.dto.SinglePlaceClusterPeriod;
-import fr.gouv.clea.mapper.ClusterPeriodModelsMapper;
-import fr.gouv.clea.mapper.ClusterPeriodModelsMapperImpl;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @ExtendWith(MockitoExtension.class)
@@ -37,8 +36,12 @@ class ClusterToPeriodsProcessorTest {
         final int lastTimeSlot = 1001;
         final int riskLevel = 4;
         final long periodStart = 1L;
-        final ClusterPeriod clusterPeriod = new ClusterPeriod(periodStart, firstTimeSlot, lastTimeSlot, clusterStart, clusterDurationInSeconds, riskLevel);
-        final SinglePlaceCluster cluster = new SinglePlaceCluster(ltid, venueType, venueCat1, venueCat2, List.of(clusterPeriod));
+        final ClusterPeriod clusterPeriod = new ClusterPeriod(
+                periodStart, firstTimeSlot, lastTimeSlot, clusterStart, clusterDurationInSeconds, riskLevel
+        );
+        final SinglePlaceCluster cluster = new SinglePlaceCluster(
+                ltid, venueType, venueCat1, venueCat2, List.of(clusterPeriod)
+        );
 
         final List<SinglePlaceClusterPeriod> singlePlaceClusterPeriods = processor.process(cluster);
 

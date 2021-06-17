@@ -1,9 +1,9 @@
 package fr.gouv.clea.scoring.configuration.validators;
 
+import fr.gouv.clea.scoring.configuration.ScoringRule;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
-import fr.gouv.clea.scoring.configuration.ScoringRule;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -19,7 +19,7 @@ build:
   image: maven:3.6.3-adoptopenjdk-11
   stage: build
   script:
-    - mvn -B -s .mvn/settings-ci.xml -ntp -fae -DdeployAtEnd deploy
+    - mvn -B -s .mvn/settings-ci.xml -ntp -fae -DdeployAtEnd spotless:check deploy
   artifacts:
     paths:
       - "**/target/*.jar"
@@ -44,6 +44,6 @@ integration-tests:
     - docker network disconnect clea-server_default $currentContainer
     - docker-compose down
   artifacts:
-      paths:
-        - "$CI_PROJECT_DIR/cucumber-reports.html"
-      expire_in: 2 weeks
+    paths:
+      - "$CI_PROJECT_DIR/cucumber-reports.html"
+    expire_in: 2 weeks

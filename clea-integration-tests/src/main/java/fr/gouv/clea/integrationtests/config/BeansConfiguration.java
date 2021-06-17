@@ -44,7 +44,7 @@ public class BeansConfiguration {
     }
 
     @Bean
-    //TODO: Next step, test on actual platform. No guarantees that it works yet.
+    // TODO: Next step, test on actual platform. No guarantees that it works yet.
     @Profile("!(docker | dev)")
     public MinioClient minioClient() {
         return MinioClient.builder()

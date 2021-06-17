@@ -1,5 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
     <parent>
         <artifactId>clea-server</artifactId>
         <groupId>fr.gouv.clea</groupId>
@@ -142,8 +146,10 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <!-- this is used for inheritance merges -->
+                        <id>make-assembly</id>
+                        <!-- bind to the packaging phase -->
+                        <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
@@ -200,9 +206,13 @@
                                 </goals>
                                 <phase>test</phase>
                                 <configuration>
-                                    <checkoutDirectory>${project.basedir}/target/bats/core</checkoutDirectory>
+                                    <checkoutDirectory>
+                                        ${project.basedir}/target/bats/core
+                                    </checkoutDirectory>
                                     <connectionType>connection</connectionType>
-                                    <connectionUrl>scm:git:https://github.com/bats-core/bats-core.git</connectionUrl>
+                                    <connectionUrl>
+                                        scm:git:https://github.com/bats-core/bats-core.git
+                                    </connectionUrl>
                                 </configuration>
                             </execution>
                             <execution>
@@ -212,9 +222,13 @@
                                 </goals>
                                 <phase>test</phase>
                                 <configuration>
-                                    <checkoutDirectory>${project.basedir}/target/bats/support</checkoutDirectory>
+                                    <checkoutDirectory>
+                                        ${project.basedir}/target/bats/support
+                                    </checkoutDirectory>
                                     <connectionType>connection</connectionType>
-                                    <connectionUrl>scm:git:https://github.com/ztombol/bats-support.git</connectionUrl>
+                                    <connectionUrl>
+                                        scm:git:https://github.com/ztombol/bats-support.git
+                                    </connectionUrl>
                                 </configuration>
                             </execution>
                             <execution>
@@ -224,9 +238,13 @@
                                 </goals>
                                 <phase>test</phase>
                                 <configuration>
-                                    <checkoutDirectory>${project.basedir}/target/bats/assert</checkoutDirectory>
+                                    <checkoutDirectory>
+                                        ${project.basedir}/target/bats/assert
+                                    </checkoutDirectory>
                                     <connectionType>connection</connectionType>
-                                    <connectionUrl>scm:git:https://github.com/ztombol/bats-assert.git</connectionUrl>
+                                    <connectionUrl>
+                                        scm:git:https://github.com/ztombol/bats-assert.git
+                                    </connectionUrl>
                                 </configuration>
                             </execution>
                         </executions>
@@ -258,7 +276,9 @@
                                     <executable>chmod</executable>
                                     <arguments>
                                         <argument>+x</argument>
-                                        <argument>target/bats/core/bin/bats</argument>
+                                        <argument>
+                                            target/bats/core/bin/bats
+                                        </argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -272,11 +292,21 @@
                                     <executable>chmod</executable>
                                     <arguments>
                                         <argument>+x</argument>
-                                        <argument>target/bats/core/libexec/bats-core/bats-exec-suite</argument>
-                                        <argument>target/bats/core/libexec/bats-core/bats-exec-file</argument>
-                                        <argument>target/bats/core/libexec/bats-core/bats-exec-test</argument>
-                                        <argument>target/bats/core/libexec/bats-core/bats-preprocess</argument>
-                                        <argument>target/bats/core/libexec/bats-core/bats-format-pretty</argument>
+                                        <argument>
+                                            target/bats/core/libexec/bats-core/bats-exec-suite
+                                        </argument>
+                                        <argument>
+                                            target/bats/core/libexec/bats-core/bats-exec-file
+                                        </argument>
+                                        <argument>
+                                            target/bats/core/libexec/bats-core/bats-exec-test
+                                        </argument>
+                                        <argument>
+                                            target/bats/core/libexec/bats-core/bats-preprocess
+                                        </argument>
+                                        <argument>
+                                            target/bats/core/libexec/bats-core/bats-format-pretty
+                                        </argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -287,7 +317,9 @@
                                 </goals>
                                 <phase>test</phase>
                                 <configuration>
-                                    <executable>target/bats/core/bin/bats</executable>
+                                    <executable>
+                                        target/bats/core/bin/bats
+                                    </executable>
                                     <arguments>
                                         <argument>src/test/bats</argument>
                                     </arguments>

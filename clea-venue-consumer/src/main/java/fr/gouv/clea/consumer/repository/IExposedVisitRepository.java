@@ -11,11 +11,9 @@ import java.util.UUID;
 public interface IExposedVisitRepository extends JpaRepository<ExposedVisitEntity, String> {
 
     @Modifying
-    @Query(
-            value = "DELETE FROM EXPOSED_VISITS e WHERE ((?1 - (e.PERIOD_START + (e.TIMESLOT * ?2))) / ?3) > ?4",
-            nativeQuery = true
-    )
+    @Query(value = "DELETE FROM EXPOSED_VISITS e WHERE ((?1 - (e.PERIOD_START + (e.TIMESLOT * ?2))) / ?3) > ?4", nativeQuery = true)
     int purge(long currentNtp, int durationUnitInSeconds, int secondsInDays, int retentionDurationInDays);
 
-    List<ExposedVisitEntity> findAllByLocationTemporaryPublicIdAndPeriodStart(UUID locationTemporaryPublicId, long periodStart);
+    List<ExposedVisitEntity> findAllByLocationTemporaryPublicIdAndPeriodStart(UUID locationTemporaryPublicId,
+            long periodStart);
 }

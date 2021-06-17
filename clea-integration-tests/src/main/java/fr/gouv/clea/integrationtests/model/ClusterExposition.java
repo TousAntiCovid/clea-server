@@ -14,6 +14,7 @@ import static fr.inria.clea.lsp.utils.TimeUtils.SECONDS_FROM_01_01_1900_TO_01_01
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClusterExposition {
+
     @JsonProperty("s")
     private long startTimeAsNtpTimestamp;
 

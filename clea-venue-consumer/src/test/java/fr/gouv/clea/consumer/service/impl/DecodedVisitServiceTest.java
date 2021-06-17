@@ -31,16 +31,26 @@ import static org.mockito.Mockito.when;
 class DecodedVisitServiceTest {
 
     private final LocationSpecificPartDecoder decoder = mock(LocationSpecificPartDecoder.class);
+
     private final CleaEciesEncoder cleaEciesEncoder = mock(CleaEciesEncoder.class);
+
     private final int driftBetweenDeviceAndOfficialTimeInSecs = 300;
+
     private final int cleaClockDriftInSecs = 300;
+
     private final VenueConsumerProperties properties = VenueConsumerProperties.builder()
             .driftBetweenDeviceAndOfficialTimeInSecs(driftBetweenDeviceAndOfficialTimeInSecs)
             .cleaClockDriftInSecs(cleaClockDriftInSecs)
             .build();
-    private final IDecodedVisitService decodedVisitService = new DecodedVisitService(decoder, cleaEciesEncoder, properties);
+
+    private final IDecodedVisitService decodedVisitService = new DecodedVisitService(
+            decoder, cleaEciesEncoder, properties
+    );
+
     private Instant now;
+
     private UUID uuid;
+
     private byte[] locationTemporarySecretKey;
 
     @BeforeEach
@@ -77,7 +87,8 @@ class DecodedVisitServiceTest {
     }
 
     @Test
-    void should_visit_be_rejected_when_scantime_over_allowed_drift() throws CleaEncryptionException, CleaEncodingException {
+    void should_visit_be_rejected_when_scantime_over_allowed_drift()
+            throws CleaEncryptionException, CleaEncodingException {
         int CRIexp = 10; // qrCodeRenewalInterval=2^10(=1024). 1024+300+300=1624
         Instant qrCodeValidityStartTime = now.truncatedTo(ChronoUnit.SECONDS).plus(2000, ChronoUnit.SECONDS);
         when(decoder.decrypt(any(EncryptedLocationSpecificPart.class)))
@@ -104,7 +115,8 @@ class DecodedVisitServiceTest {
     }
 
     @Test
-    void should_visit_be_accepted_and_scantime_updated_when_scantime_inside_allowed_drift_and_scantime_before_qr_validity_start() throws CleaEncryptionException, CleaEncodingException {
+    void should_visit_be_accepted_and_scantime_updated_when_scantime_inside_allowed_drift_and_scantime_before_qr_validity_start()
+            throws CleaEncryptionException, CleaEncodingException {
         int CRIexp = 10; // qrCodeRenewalInterval=2^10(=1024). 1024+300+300=1624
         Instant qrCodeValidityStartTime = now.truncatedTo(ChronoUnit.SECONDS).plus(1600, ChronoUnit.SECONDS);
         when(decoder.decrypt(any(EncryptedLocationSpecificPart.class)))

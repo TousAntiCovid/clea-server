@@ -28,7 +28,10 @@ public class ExposedVisitEntityService implements IExposedVisitEntityService {
     public void deleteOutdatedExposedVisits() {
         try {
             long start = System.currentTimeMillis();
-            int count = this.repository.purge(TimeUtils.currentNtpTime(), (int) properties.getDurationUnitInSeconds(), TimeUtils.NB_SECONDS_PER_HOUR * 24, properties.getRetentionDurationInDays());
+            int count = this.repository.purge(
+                    TimeUtils.currentNtpTime(), (int) properties.getDurationUnitInSeconds(),
+                    TimeUtils.NB_SECONDS_PER_HOUR * 24, properties.getRetentionDurationInDays()
+            );
             long end = System.currentTimeMillis();
             log.info("successfully purged {} entries from DB in {} seconds", count, (end - start) / 1000);
         } catch (Exception e) {

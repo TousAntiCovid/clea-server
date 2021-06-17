@@ -10,10 +10,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ReportStat {
+
     private int reported;
+
     private int rejected;
+
     private int backwards;
+
     private int forwards;
+
     private int close;
+
     private long timestamp;
 }

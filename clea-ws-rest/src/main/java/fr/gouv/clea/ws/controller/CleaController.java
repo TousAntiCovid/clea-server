@@ -20,6 +20,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,24 +33,28 @@ import java.util.stream.Collectors;
 public class CleaController implements CleaWsRestAPI {
 
     public static final String MALFORMED_VISIT_LOG_MESSAGE = "Filtered out %d malformed visits of %d while Exposure Status Request";
+
     private final IReportService reportService;
+
     private final BadArgumentsLoggerService badArgumentsLoggerService;
+
     private final WebRequest webRequest;
+
     private final Validator validator;
 
     @Override
-    @PostMapping(
-            path = UriConstants.API_V1 + UriConstants.REPORT,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PostMapping(path = UriConstants.API_V1
+            + UriConstants.REPORT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ReportResponse report(@RequestBody ReportRequest reportRequestVo) {
         ReportRequest filtered = this.filterReports(reportRequestVo, webRequest);
         List<DecodedVisit> reported = List.of();
         if (!filtered.getVisits().isEmpty()) {
             reported = reportService.report(filtered);
         }
-        String message = String.format("%s reports processed, %s rejected", reported.size(), reportRequestVo.getVisits().size() - reported.size());
+        String message = String.format(
+                "%s reports processed, %s rejected", reported.size(),
+                reportRequestVo.getVisits().size() - reported.size()
+        );
         log.info(message);
         return new ReportResponse(true, message);
     }
@@ -65,7 +70,8 @@ public class CleaController implements CleaWsRestAPI {
                             visit -> {
                                 visitViolations.addAll(validator.validate(visit));
                                 if (!visitViolations.isEmpty()) {
-                                    this.badArgumentsLoggerService.logValidationErrorMessage(visitViolations, webRequest);
+                                    this.badArgumentsLoggerService
+                                            .logValidationErrorMessage(visitViolations, webRequest);
                                     return false;
                                 } else {
                                     return true;

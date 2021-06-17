@@ -34,15 +34,21 @@ import java.util.stream.Collectors;
 public class Visitor {
 
     private final String name;
+
     private final CleaApi cleaApi;
+
     private final CleaS3Service s3Service;
+
     private final ApplicationProperties applicationProperties;
+
     private List<Visit> localList = new ArrayList<>();
 
     @Getter(AccessLevel.NONE)
     private ReportResponse lastReportResponse = null;
 
-    public float getStatus() throws IOException, CleaEncodingException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public float getStatus() throws IOException, CleaEncodingException, ServerException, InsufficientDataException,
+            ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
+            XmlParserException, InternalException {
         ClusterIndex clusterIndex = s3Service.getClusterIndex().orElseThrow();
         Set<String> matchingPrefixes = this.getClusterFilesMatchingPrefix(localList, clusterIndex);
         int iteration = clusterIndex.getIteration();
@@ -93,13 +99,14 @@ public class Visitor {
     }
 
     public void sendReportAndSaveResponse() throws ApiException {
-        //Backend should accept report without pivot date, not the case right now, using 14 day ago pivot date instead
+        // Backend should accept report without pivot date, not the case right now,
+        // using 14 day ago pivot date instead
         this.sendReportAndSaveResponse(Instant.now().minus(Duration.ofDays(14)));
     }
 
     public void scanQrCode(String qrCode, Instant scanTime) {
 
-        //check if prefix is present then removes it
+        // check if prefix is present then removes it
         if (!qrCode.startsWith(applicationProperties.getQrCodePrefix())) {
             return;
         }
@@ -112,18 +119,17 @@ public class Visitor {
     }
 
     protected Set<String> getClusterFilesMatchingPrefix(final List<Visit> localList, final ClusterIndex clusterIndex) {
-        return clusterIndex.getPrefixes().stream().filter(prefix ->
-                localList.stream().map(visit -> {
-                    try {
-                        return QrCodeDecoder.getLocationTemporaryId(visit);
-                    } catch (CleaEncodingException e) {
-                        log.error("an error occured during qr code decoding.Visit: {} ; error : {}", visit, e.getMessage());
-                    }
-                    return null;
-                })
-                        .filter(Objects::nonNull)
-                        .map(UUID::toString)
-                        .anyMatch(qrId -> qrId.startsWith(prefix))
+        return clusterIndex.getPrefixes().stream().filter(prefix -> localList.stream().map(visit -> {
+            try {
+                return QrCodeDecoder.getLocationTemporaryId(visit);
+            } catch (CleaEncodingException e) {
+                log.error("an error occured during qr code decoding.Visit: {} ; error : {}", visit, e.getMessage());
+            }
+            return null;
+        })
+                .filter(Objects::nonNull)
+                .map(UUID::toString)
+                .anyMatch(qrId -> qrId.startsWith(prefix))
         ).collect(Collectors.toSet());
     }
 
@@ -141,7 +147,8 @@ public class Visitor {
         return result;
     }
 
-    private void sendReportAndSaveResponse(final Instant pivotDate, final List<Visit> alteredVisitsList) throws ApiException {
+    private void sendReportAndSaveResponse(final Instant pivotDate, final List<Visit> alteredVisitsList)
+            throws ApiException {
         final ReportRequest reportRequest = buildReportRequest(pivotDate, alteredVisitsList);
         final ReportResponse response = cleaApi.reportUsingPOST(reportRequest);
         lastReportResponse = Optional.ofNullable(response).orElse(null);

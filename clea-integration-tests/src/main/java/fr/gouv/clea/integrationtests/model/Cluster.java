@@ -11,8 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Cluster {
+
     @JsonProperty("ltid")
-    private String locationTemporaryPublicID; //LTid
+    private String locationTemporaryPublicID; // LTid
 
     @JsonProperty("exp")
     private List<ClusterExposition> expositions;
