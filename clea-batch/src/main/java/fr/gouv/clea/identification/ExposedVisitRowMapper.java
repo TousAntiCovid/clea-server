@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class ExposedVisitRowMapper implements RowMapper<ExposedVisit> {
+
     @Override
     public ExposedVisit mapRow(ResultSet rs, int i) throws SQLException {
         return ExposedVisit.builder()

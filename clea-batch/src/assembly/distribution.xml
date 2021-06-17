@@ -1,7 +1,8 @@
-
-<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+<assembly
+  xmlns="http://maven.apache.org/ASSEMBLY/2.1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd"
+>
     <id>distribution</id>
     <formats>
         <format>zip</format>
@@ -16,20 +17,12 @@
             <outputDirectory>/</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
-
-<!-- 
-        <fileSet>
-            <directory>${project.build.directory}</directory>
-            <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>*-exec.jar</include>
-            </includes>
-        </fileSet>
-     -->
     </fileSets>
     <files>
         <file>
-            <source>${project.build.directory}/${artifactId}-${version}-exec.${packaging}</source>
+            <source>
+                ${project.build.directory}/${artifactId}-${version}-exec.${packaging}
+            </source>
             <outputDirectory>/</outputDirectory>
             <destName>${artifactId}.${packaging}</destName>
         </file>

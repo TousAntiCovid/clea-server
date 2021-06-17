@@ -1,8 +1,13 @@
 package fr.gouv.clea.config;
 
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.gouv.clea.indexation.IndexationPartitioner;
+import fr.gouv.clea.indexation.model.output.ClusterFile;
+import fr.gouv.clea.indexation.processor.SinglePlaceClusterBuilder;
+import fr.gouv.clea.indexation.reader.StepExecutionContextReader;
+import fr.gouv.clea.indexation.writer.IndexationWriter;
+import fr.gouv.clea.mapper.ClusterPeriodModelsMapper;
+import fr.gouv.clea.service.PrefixesStorageService;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -17,19 +22,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import fr.gouv.clea.indexation.IndexationPartitioner;
-import fr.gouv.clea.indexation.model.output.ClusterFile;
-import fr.gouv.clea.indexation.processor.SinglePlaceClusterBuilder;
-import fr.gouv.clea.indexation.reader.StepExecutionContextReader;
-import fr.gouv.clea.indexation.writer.IndexationWriter;
-import fr.gouv.clea.mapper.ClusterPeriodModelsMapper;
-import fr.gouv.clea.service.PrefixesStorageService;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class IndexationStepBatchConfig {
-
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
@@ -57,7 +54,6 @@ public class IndexationStepBatchConfig {
                 .build();
     }
 
-
     @Bean
     public Partitioner prefixPartitioner() {
         return new IndexationPartitioner(prefixesStorageService);
@@ -74,8 +70,10 @@ public class IndexationStepBatchConfig {
 
     @Bean
     public Step partitionedClustersIndexation() {
-        return stepBuilderFactory.get("partitionedClustersIndexation")
-                .<Map.Entry<String, List<String>>, ClusterFile>chunk(properties.getIndexationStepChunkSize())
+        return stepBuilderFactory
+                .get("partitionedClustersIndexation").<Map.Entry<String, List<String>>, ClusterFile>chunk(
+                        properties.getIndexationStepChunkSize()
+                )
                 .reader(memoryMapItemReader(null, null))
                 .processor(singlePlaceClusterBuilder()) // build a Map of ClusterFile at once
                 .writer(indexationWriter(objectMapper)) // build Files and index
@@ -85,7 +83,7 @@ public class IndexationStepBatchConfig {
     @Bean
     @StepScope
     public ItemReader<Map.Entry<String, List<String>>> memoryMapItemReader(
-            //values provided through step execution context by prefixPartitioner
+            // values provided through step execution context by prefixPartitioner
             @Value("#{stepExecutionContext['prefixes']}") List<String> prefixes,
             @Value("#{stepExecutionContext['ltids']}") List<List<String>> ltids) {
         return new StepExecutionContextReader(prefixes, ltids);

@@ -1,11 +1,15 @@
 package fr.gouv.clea.config;
 
-import static fr.gouv.clea.config.BatchConstants.SQL_SELECT_DISTINCT_LTID_FROM_EXPOSEDVISITS;
-
-import java.util.List;
-
-import javax.sql.DataSource;
-
+import fr.gouv.clea.dto.SinglePlaceCluster;
+import fr.gouv.clea.dto.SinglePlaceClusterPeriod;
+import fr.gouv.clea.dto.SinglePlaceExposedVisits;
+import fr.gouv.clea.identification.ExposedVisitRowMapper;
+import fr.gouv.clea.identification.processor.ClusterToPeriodsProcessor;
+import fr.gouv.clea.identification.processor.SinglePlaceExposedVisitsBuilder;
+import fr.gouv.clea.identification.processor.SinglePlaceExposedVisitsProcessor;
+import fr.gouv.clea.identification.writer.SinglePlaceClusterPeriodListWriter;
+import fr.gouv.clea.mapper.ClusterPeriodModelsMapper;
+import fr.gouv.clea.scoring.configuration.risk.RiskConfiguration;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -20,16 +24,11 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import fr.gouv.clea.dto.SinglePlaceCluster;
-import fr.gouv.clea.dto.SinglePlaceClusterPeriod;
-import fr.gouv.clea.dto.SinglePlaceExposedVisits;
-import fr.gouv.clea.identification.ExposedVisitRowMapper;
-import fr.gouv.clea.identification.processor.ClusterToPeriodsProcessor;
-import fr.gouv.clea.identification.processor.SinglePlaceExposedVisitsBuilder;
-import fr.gouv.clea.identification.processor.SinglePlaceExposedVisitsProcessor;
-import fr.gouv.clea.identification.writer.SinglePlaceClusterPeriodListWriter;
-import fr.gouv.clea.mapper.ClusterPeriodModelsMapper;
-import fr.gouv.clea.scoring.configuration.risk.RiskConfiguration;
+import javax.sql.DataSource;
+
+import java.util.List;
+
+import static fr.gouv.clea.config.BatchConstants.SQL_SELECT_DISTINCT_LTID_FROM_EXPOSEDVISITS;
 
 @Configuration
 public class IdentificationStepBatchConfig {
@@ -52,10 +51,12 @@ public class IdentificationStepBatchConfig {
     @Bean
     public Step clusterIdentification() {
         final CompositeItemProcessor<String, List<SinglePlaceClusterPeriod>> compositeProcessor = new CompositeItemProcessor<>();
-        compositeProcessor.setDelegates(List.of(
-                exposedVisitBuilder(),                  // from String to ExposedVisit
-                singleClusterPlaceBuilder(),            // from ExposedVisit to SingleClusterPlace
-                singlePlaceClusterPeriodListBuilder())  // from SingleClusterPlace to List<SinglePlaceClusterPeriods>
+        compositeProcessor.setDelegates(
+                List.of(
+                        exposedVisitBuilder(), // from String to ExposedVisit
+                        singleClusterPlaceBuilder(), // from ExposedVisit to SingleClusterPlace
+                        singlePlaceClusterPeriodListBuilder()
+                ) // from SingleClusterPlace to List<SinglePlaceClusterPeriods>
         );
 
         final SynchronizedItemStreamReader<String> reader = new SynchronizedItemStreamReader<>();

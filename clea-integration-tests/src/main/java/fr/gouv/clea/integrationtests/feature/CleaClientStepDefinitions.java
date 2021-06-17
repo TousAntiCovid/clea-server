@@ -47,74 +47,101 @@ public class CleaClientStepDefinitions implements En {
 
     private final ApplicationProperties applicationProperties;
 
-    public CleaClientStepDefinitions(final ScenarioContext scenarioContext, final CleaBatchService cleaBatchService, final ApplicationProperties applicationProperties) {
+    public CleaClientStepDefinitions(final ScenarioContext scenarioContext, final CleaBatchService cleaBatchService,
+            final ApplicationProperties applicationProperties) {
         this.scenarioContext = Objects.requireNonNull(scenarioContext, "scenarioAppContext must not be null");
         this.cleaBatchService = cleaBatchService;
         this.applicationProperties = applicationProperties;
     }
 
-    // TODO Robert registration of the user -> integration tests perimeters to be specified, do we need to test interactions between all apps?
+    // TODO Robert registration of the user -> integration tests perimeters to be
+    // specified, do we need to test interactions between all apps?
     @Given("{string} registered on TAC")
     public void registered_on_tac(final String username) {
         this.scenarioContext.getOrCreateUser(username);
     }
 
     @Given("VType of {string}, VCategory1 of {string} and VCategory2 of {int} has risk configuration of \\(Threshold , ExposureTime, Risklevel) for backward \\({int},{int},{float}) and for forward \\({int},{int},{float})")
-    public void create_or_update_venue_with_specific_configuration(String venueType, String venueCategory1, Integer venueCategory2, int backwardThreshold, int backwardExposureTime, float backwardRiskLevel, int forwardThreshold, int forwardExposureTime, float forwardRiskLevel) {
-        this.scenarioContext.updateOrCreateRiskConfig(venueType, venueCategory1, venueCategory2, backwardThreshold, backwardExposureTime, backwardRiskLevel, forwardThreshold, forwardExposureTime, forwardRiskLevel);
+    public void create_or_update_venue_with_specific_configuration(String venueType, String venueCategory1,
+            Integer venueCategory2, int backwardThreshold, int backwardExposureTime, float backwardRiskLevel,
+            int forwardThreshold, int forwardExposureTime, float forwardRiskLevel) {
+        this.scenarioContext.updateOrCreateRiskConfig(
+                venueType, venueCategory1, venueCategory2, backwardThreshold, backwardExposureTime, backwardRiskLevel,
+                forwardThreshold, forwardExposureTime, forwardRiskLevel
+        );
     }
 
-    //Dynamic Location
+    // Dynamic Location
     @Given("{string} created a dynamic QRCode at {instant} with VType as {string} and with VCategory1 as {string} and with VCategory2 as {int} and with a renewal time of \"{int} {word}\" and with a periodDuration of \"{int} hours\"")
-    public void dynamic_location_with_a_periodDuration_and_renewalTime(String locationName, Instant periodStartTime, String venueType, String venueCategory1, Integer venueCategory2, Integer qrCodeRenewalInterval, String qrCodeRenewalIntervalUnit, Integer periodDuration) throws CleaCryptoException {
-        Duration qrCodeRenewalIntervalDuration = Duration.of(qrCodeRenewalInterval, ChronoUnit.valueOf(qrCodeRenewalIntervalUnit.toUpperCase()));
-        LocationQrCodeGenerator location = this.scenarioContext.getOrCreateDynamicLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2, qrCodeRenewalIntervalDuration, periodDuration);
+    public void dynamic_location_with_a_periodDuration_and_renewalTime(String locationName, Instant periodStartTime,
+            String venueType, String venueCategory1, Integer venueCategory2, Integer qrCodeRenewalInterval,
+            String qrCodeRenewalIntervalUnit, Integer periodDuration) throws CleaCryptoException {
+        Duration qrCodeRenewalIntervalDuration = Duration
+                .of(qrCodeRenewalInterval, ChronoUnit.valueOf(qrCodeRenewalIntervalUnit.toUpperCase()));
+        LocationQrCodeGenerator location = this.scenarioContext.getOrCreateDynamicLocation(
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2, qrCodeRenewalIntervalDuration,
+                periodDuration
+        );
         // TODO: add QR id
     }
 
     @Given("{string} created a dynamic QRCode at {instant} with VType as {string} and with VCategory1 as {string} and with VCategory2 as {int} and with and with a renewal time of \"{int} {word}\"")
-    public void dynamic_location_without_periodDuration_with_renewalTime(String locationName, Instant periodStartTime, String venueType, String venueCategory1, Integer venueCategory2, Integer qrCodeRenewalInterval, String qrCodeRenewalIntervalUnit) throws CleaCryptoException {
-        Duration qrCodeRenewalIntervalDuration = Duration.of(qrCodeRenewalInterval, ChronoUnit.valueOf(qrCodeRenewalIntervalUnit.toUpperCase()));
-        LocationQrCodeGenerator location = this.scenarioContext.getOrCreateDynamicLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2, qrCodeRenewalIntervalDuration);
+    public void dynamic_location_without_periodDuration_with_renewalTime(String locationName, Instant periodStartTime,
+            String venueType, String venueCategory1, Integer venueCategory2, Integer qrCodeRenewalInterval,
+            String qrCodeRenewalIntervalUnit) throws CleaCryptoException {
+        Duration qrCodeRenewalIntervalDuration = Duration
+                .of(qrCodeRenewalInterval, ChronoUnit.valueOf(qrCodeRenewalIntervalUnit.toUpperCase()));
+        LocationQrCodeGenerator location = this.scenarioContext.getOrCreateDynamicLocation(
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2, qrCodeRenewalIntervalDuration
+        );
         // TODO: add QR id
     }
 
     @Given("{string} created a static QRCode at {instant} with VType as {string} and with VCategory1 as {string} and with VCategory2 as {int} and with a periodDuration of \"{int} hours\"")
-    public void static_location_without_renewalTime_with_periodDuration(String locationName, Instant periodStartTime, String venueType, String venueCategory1, Integer venueCategory2, Integer periodDuration) throws CleaCryptoException {
-        LocationQrCodeGenerator location = this.scenarioContext.getOrCreateStaticLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2, periodDuration);
+    public void static_location_without_renewalTime_with_periodDuration(String locationName, Instant periodStartTime,
+            String venueType, String venueCategory1, Integer venueCategory2, Integer periodDuration)
+            throws CleaCryptoException {
+        LocationQrCodeGenerator location = this.scenarioContext.getOrCreateStaticLocation(
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2, periodDuration
+        );
         // TODO: add QR id
     }
 
     @Given("{string} created a static QRCode at {instant} with VType as {string} and VCategory1 as {string} and with VCategory2 as {int}")
-    public void static_location_with_default_periodDuration(String locationName, Instant periodStartTime, String venueType, String venueCategory1, Integer venueCategory2) throws CleaCryptoException {
-        LocationQrCodeGenerator location = this.scenarioContext.getOrCreateStaticLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2);
+    public void static_location_with_default_periodDuration(String locationName, Instant periodStartTime,
+            String venueType, String venueCategory1, Integer venueCategory2) throws CleaCryptoException {
+        LocationQrCodeGenerator location = this.scenarioContext
+                .getOrCreateStaticLocation(locationName, periodStartTime, venueType, venueCategory1, venueCategory2);
         // TODO: add QR id
     }
 
-    //Visitor scan a QR code at given instant
+    // Visitor scan a QR code at given instant
     @Given("{string} recorded a visit to {string} at {instant}")
-    public void visitor_scans_qrcode_at_given_instant(String visitorName, String locationName, Instant qrCodeScanTime) throws CleaCryptoException {
+    public void visitor_scans_qrcode_at_given_instant(String visitorName, String locationName, Instant qrCodeScanTime)
+            throws CleaCryptoException {
         LocationQrCodeGenerator location = this.scenarioContext.getLocation(locationName);
         QRCode qr = location.getQrCodeAt(qrCodeScanTime);
         this.scenarioContext.getOrCreateUser(visitorName).scanQrCode(qr.getQrCode(), qrCodeScanTime);
     }
 
-    //Visitor scan a staff QR code at given instant
+    // Visitor scan a staff QR code at given instant
     @Given("{string} recorded a visit as a STAFF to {string} at {instant}")
-    public void visitor_scans_staff_qrcode_at_given_instant(String visitorName, String locationName, Instant qrCodeScanTime) throws CleaCryptoException {
+    public void visitor_scans_staff_qrcode_at_given_instant(String visitorName, String locationName,
+            Instant qrCodeScanTime) throws CleaCryptoException {
         LocationQrCodeGenerator location = this.scenarioContext.getStaffLocation(locationName);
         QRCode qr = location.getQrCodeAt(qrCodeScanTime);
         this.scenarioContext.getOrCreateUser(visitorName).scanQrCode(qr.getQrCode(), qrCodeScanTime);
     }
 
-    //Visitor scan a QR code at a given Instant, but the scanned QR code is valid for another Instant
+    // Visitor scan a QR code at a given Instant, but the scanned QR code is valid
+    // for another Instant
     @Given("{string} recorded a visit to {string} at {instant} with a QR code valid for {string}")
-    public void visitor_scans_qrcode_at_given_instant_but_qr_code_valid_for_another_instant(String visitorName, String locationName, Instant qrCodeScanTime, Instant qrCodeValidTime) throws CleaCryptoException {
+    public void visitor_scans_qrcode_at_given_instant_but_qr_code_valid_for_another_instant(String visitorName,
+            String locationName, Instant qrCodeScanTime, Instant qrCodeValidTime) throws CleaCryptoException {
         LocationQrCodeGenerator location = this.scenarioContext.getLocation(locationName);
         QRCode qr = location.getQrCodeAt(qrCodeValidTime);
         this.scenarioContext.getOrCreateUser(visitorName).scanQrCode(qr.getQrCode(), qrCodeScanTime);
     }
-
 
     @When("Cluster detection triggered")
     public void trigger_cluster_identification() throws IOException, InterruptedException {
@@ -136,7 +163,9 @@ public class CleaClientStepDefinitions implements En {
     @When("{string} declares himself/herself sick with a {instant} pivot date with no QRCode")
     public void visitor_declares_sick_with_pivot_date_and_no_qrCode(String visitorName, Instant pivotDate) {
         final Visitor visitor = this.scenarioContext.getVisitor(visitorName);
-        Assertions.assertThatThrownBy(() -> visitor.sendReportAndSaveResponse(pivotDate), String.valueOf(ApiException.class));
+        Assertions.assertThatThrownBy(
+                () -> visitor.sendReportAndSaveResponse(pivotDate), String.valueOf(ApiException.class)
+        );
     }
 
     @When("{string} declares himself/herself sick with malformed QrCode")
@@ -176,19 +205,24 @@ public class CleaClientStepDefinitions implements En {
     }
 
     @Then("Exposure status should reports {string} as not being at risk")
-    public void visitor_should_not_be_at_risk(String visitorName) throws CleaEncodingException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public void visitor_should_not_be_at_risk(String visitorName) throws CleaEncodingException, IOException,
+            ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException,
+            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         float riskLevel = this.scenarioContext.getOrCreateUser(visitorName).getStatus();
         assertThat(riskLevel).isEqualTo(0);
     }
 
     @Then("Exposure status should reports {string} as being at risk of {float}")
-    public void visitor_should_be_at_specified_risk(String visitorName, Float risk) throws CleaEncodingException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public void visitor_should_be_at_specified_risk(String visitorName, Float risk) throws CleaEncodingException,
+            IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException,
+            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         float riskLevel = this.scenarioContext.getVisitor(visitorName).getStatus();
         assertThat(riskLevel).isEqualTo(risk);
     }
 
     @Then("Exposure status request for {string} should include only {int} visit\\(s) to {string} at {string}")
-    public void visitor_should_include_only_(String visitorName, Integer nbVisits, String locationName, String qrScanTime) {
+    public void visitor_should_include_only_(String visitorName, Integer nbVisits, String locationName,
+            String qrScanTime) {
         final Visitor visitor = this.scenarioContext.getVisitor(visitorName);
         assertThat(visitor.getLocalList().size()).isEqualTo(nbVisits);
     }
@@ -198,7 +232,8 @@ public class CleaClientStepDefinitions implements En {
         final Visitor visitor = this.scenarioContext.getVisitor(visitorName);
         final Optional<ReportResponse> lastReportResponseOptional = visitor.getLastReportResponse();
         if (lastReportResponseOptional.isPresent() && null != lastReportResponseOptional.get().getMessage()) {
-            assertThat(CleaApiResponseParser.getRejectedVisits(lastReportResponseOptional.get().getMessage())).isEqualTo(rejectedVisits);
+            assertThat(CleaApiResponseParser.getRejectedVisits(lastReportResponseOptional.get().getMessage()))
+                    .isEqualTo(rejectedVisits);
         } else {
             throw new CucumberException("last report response does not contain any message");
         }
@@ -208,8 +243,10 @@ public class CleaClientStepDefinitions implements En {
     public void visitor_cannot_send_visits(String visitorName) {
         final Visitor visitor = this.scenarioContext.getVisitor(visitorName);
         final Optional<ReportResponse> lastReportResponse = visitor.getLastReportResponse();
-        lastReportResponse.ifPresentOrElse(response -> assertThat(response.getSuccess()).isFalse(),
-                () -> assertThat(lastReportResponse).isEmpty());
+        lastReportResponse.ifPresentOrElse(
+                response -> assertThat(response.getSuccess()).isFalse(),
+                () -> assertThat(lastReportResponse).isEmpty()
+        );
     }
 
     @Then("{string} sends his/her visits")
@@ -221,24 +258,25 @@ public class CleaClientStepDefinitions implements En {
     @When("{string} declares himself/herself sick with malformed pivot date")
     public void visitor_declares_sick_with_malformed_pivotDate(String visitorName) {
         final Visitor visitor = this.scenarioContext.getVisitor(visitorName);
-        final String reportUrl = applicationProperties.getWsRest().getBaseUrl().toString().concat("/api/clea/v1/wreport");
-        final ErrorResponse apiReportErrorResponse =
-                given()
-                        .contentType(ContentType.JSON)
-                        .body(new PivotDateTypeReportRequest("malformed", visitor.getLocalList()))
-                        .when()
-                        .post(reportUrl)
-                        .then()
-                        .statusCode(400)
-                        .contentType(ContentType.JSON)
-                        .extract()
-                        .as(ErrorResponse.class);
-        assertThat(apiReportErrorResponse.getHttpStatus()).isNotNull().isEqualTo(String.valueOf(HttpStatus.SC_BAD_REQUEST));
+        final String reportUrl = applicationProperties.getWsRest().getBaseUrl().toString()
+                .concat("/api/clea/v1/wreport");
+        final ErrorResponse apiReportErrorResponse = given()
+                .contentType(ContentType.JSON)
+                .body(new PivotDateTypeReportRequest("malformed", visitor.getLocalList()))
+                .when()
+                .post(reportUrl)
+                .then()
+                .statusCode(400)
+                .contentType(ContentType.JSON)
+                .extract()
+                .as(ErrorResponse.class);
+        assertThat(apiReportErrorResponse.getHttpStatus()).isNotNull()
+                .isEqualTo(String.valueOf(HttpStatus.SC_BAD_REQUEST));
         assertThat(apiReportErrorResponse.getMessage()).isEqualTo("JSON parse error");
     }
 
     private static void noOp() {
-        //no operations cucumber method for "context" phrases in gherkin files
+        // no operations cucumber method for "context" phrases in gherkin files
     }
 
     @ParameterType(".*")

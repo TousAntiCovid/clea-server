@@ -17,16 +17,19 @@ import java.util.UUID;
 public class SinglePlaceExposedVisits {
 
     private UUID locationTemporaryPublicId;
+
     private int venueType;
+
     private int venueCategory1;
+
     private int venueCategory2;
 
     @Builder.Default
-    private final List<ExposedVisit> visits= new ArrayList<>();
+    private final List<ExposedVisit> visits = new ArrayList<>();
 
-	public void addVisit(ExposedVisit v) {
-		if(null!=v) {
-			visits.add(v);
-		}		
-	}
+    public void addVisit(ExposedVisit v) {
+        if (null != v) {
+            visits.add(v);
+        }
+    }
 }

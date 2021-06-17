@@ -40,7 +40,8 @@ class SinglePlaceExposedVisitsBuilderTest {
         final int venueType = 2;
         final int venueCat1 = 1;
         final int venueCat2 = 2;
-        // only visit1 is detailed because only this one's information are queried to build SinglePlaceExposedVisits
+        // only visit1 is detailed because only this one's information are queried to
+        // build SinglePlaceExposedVisits
         final ExposedVisit visit1 = ExposedVisit.builder()
                 .locationTemporaryPublicId(ltidUUID)
                 .venueType(venueType)

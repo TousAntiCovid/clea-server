@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @DirtiesContext
-@EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
+@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
 class ConsumerServiceTest {
 
     @Autowired
@@ -46,8 +46,8 @@ class ConsumerServiceTest {
     private CleaKafkaProperties cleaKafkaProperties;
 
     /*
-     * @RefreshScope beans cannot be spied with @SpyBean
-     * see https://github.com/spring-cloud/spring-cloud-consumerConfig/issues/944
+     * @RefreshScope beans cannot be spied with @SpyBean see
+     * https://github.com/spring-cloud/spring-cloud-consumerConfig/issues/944
      */
     @SpyBean
     private IDecodedVisitService decodedVisitService;

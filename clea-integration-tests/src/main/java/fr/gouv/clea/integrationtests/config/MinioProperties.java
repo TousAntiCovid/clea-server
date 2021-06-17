@@ -28,4 +28,3 @@ public class MinioProperties {
         String secret;
     }
 }
-

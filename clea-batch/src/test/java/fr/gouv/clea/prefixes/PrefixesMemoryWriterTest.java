@@ -39,7 +39,7 @@ class PrefixesMemoryWriterTest {
         final PrefixesMemoryWriter writer = new PrefixesMemoryWriter(prefixesStorageService, prefixesLength);
 
         writer.write(ltidsList);
-        
+
         Mockito.verify(prefixesStorageService, times(list.size())).addPrefixIfAbsent(ArgumentMatchers.matches(prefix));
         Mockito.verify(prefixesStorageService, times(list.size())).addLtidToPrefix(eq(prefix), anyString());
         Mockito.verify(prefixesStorageService, times(1)).addLtidToPrefix(prefix, uuid1);

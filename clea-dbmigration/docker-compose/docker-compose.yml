@@ -1,10 +1,10 @@
-version: '3'
+version: "3"
 services:
   flyway:
     image: flyway/flyway:7.8
     #command: migrate
     #command: migrate -baselineOnMigrate=true -baselineVersion=4
-    entrypoint: [ "tail","-f","/dev/null"]
+    entrypoint: ["tail", "-f", "/dev/null"]
     environment:
       FLYWAY_URL: jdbc:postgresql://postgres/cleadb
       FLYWAY_USER: postgres
@@ -26,4 +26,3 @@ services:
       - ../sql/:/manual:ro
     ports:
       - "5432:5432"
-    

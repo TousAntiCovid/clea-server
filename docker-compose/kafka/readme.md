@@ -1,13 +1,13 @@
-# GOAL 
+# GOAL
 
 Generate a "root" certificate then a certificate for Kafka.
-
 
 # Instructions
 
 ## Root CA
 
 Generate a private key, then a certificate
+
 ```sh
 openssl genrsa -out ca.pem 2048
 
@@ -29,6 +29,7 @@ Email Address []:
 ## Kafka Int certificats
 
 Generate a private key, then a certificate request
+
 ```sh
 openssl genrsa -out kafka-int.pem 2048
 
@@ -65,8 +66,7 @@ The keystore will be used by Kafka to initialize TLS
 
 The trustore contains ca.crt provide to Application to validate Kafka certificat.
 
-
-TO create the keystore : 
+TO create the keystore :
 1°) transform crt+key to p12 format, including the chain (root certificat)
 
 ```sh
@@ -76,14 +76,12 @@ Verifying - Enter Export Password: changeit
 
 keytool -importkeystore -deststorepass keystore-pass -destkeystore kafka-int.jks -srckeystore kafka-int.p12 -srcstoretype PKCS12
 Import du fichier de clés kafka-int.p12 vers kafka-int.jks...
-Entrez le mot de passe du fichier de clés source :  
+Entrez le mot de passe du fichier de clés source :
 L''entrée de l''alias kafka a été importée.
 Commande d''import exécutée : 1 entrées importées, échec ou annulation de 0 entrées
 ```
 
-
 To create a trustore :
-
 
 ```sh
 $ keytool -keystore truststore.jks -alias root-ca -import -file ca.crt
@@ -100,7 +98,7 @@ Nom de l''algorithme de signature : SHA256withRSA
 Algorithme de clé publique du sujet : Clé RSA 2048 bits
 Version : 3
 
-Extensions : 
+Extensions :
 
 #1: ObjectId: 2.5.29.35 Criticality=false
 AuthorityKeyIdentifier [

@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verify;
 class SlotGenerationTest {
 
     private static final Instant TODAY_AT_MIDNIGHT = Instant.now().truncatedTo(DAYS);
+
     private static final Instant TODAY_AT_8AM = TODAY_AT_MIDNIGHT.plus(8, HOURS);
 
     private final VenueConsumerProperties properties = VenueConsumerProperties.builder().build();
@@ -52,17 +53,19 @@ class SlotGenerationTest {
 
     @BeforeEach
     void init() {
-        exposureTimeConfig.setRules(List.of(
-                ExposureTimeRule.builder()
-                        .venueType(ScoringRule.WILDCARD_VALUE)
-                        .venueCategory1(ScoringRule.WILDCARD_VALUE)
-                        .venueCategory2(ScoringRule.WILDCARD_VALUE)
-                        .exposureTimeBackward(3)
-                        .exposureTimeForward(3)
-                        .exposureTimeStaffBackward(3)
-                        .exposureTimeStaffForward(3)
-                        .build()
-        ));
+        exposureTimeConfig.setRules(
+                List.of(
+                        ExposureTimeRule.builder()
+                                .venueType(ScoringRule.WILDCARD_VALUE)
+                                .venueCategory1(ScoringRule.WILDCARD_VALUE)
+                                .venueCategory2(ScoringRule.WILDCARD_VALUE)
+                                .exposureTimeBackward(3)
+                                .exposureTimeForward(3)
+                                .exposureTimeStaffBackward(3)
+                                .exposureTimeStaffForward(3)
+                                .build()
+                )
+        );
         properties.setDurationUnitInSeconds(Duration.ofMinutes(30).toSeconds());
         service = new VisitExpositionAggregatorService(repository, exposureTimeConfig, properties, statService);
     }
@@ -78,10 +81,9 @@ class SlotGenerationTest {
 
         service.updateExposureCount(visit);
 
-        /*  => scanTimeSlot = 8*2 = 16
-         *  => slots to generate = 3 before + scanTimeSlot + 3 after = 7
-         *  => firstExposedSlot = 16-3 = 13
-         *  => lastExposedSlot = 16+3 = 19
+        /*
+         * => scanTimeSlot = 8*2 = 16 => slots to generate = 3 before + scanTimeSlot + 3
+         * after = 7 => firstExposedSlot = 16-3 = 13 => lastExposedSlot = 16+3 = 19
          */
         verify(repository).saveAll(exposedVisitEntitiesCaptor.capture());
         assertThat(exposedVisitEntitiesCaptor.getValue())
@@ -100,10 +102,9 @@ class SlotGenerationTest {
 
         service.updateExposureCount(visit);
 
-        /*  => scanTimeSlot = 0
-         *  => slots to generate = scanTimeSlot + 1 after = 2
-         *  => firstExposedSlot = 0
-         *  => lastExposedSlot = 0+1 = 1
+        /*
+         * => scanTimeSlot = 0 => slots to generate = scanTimeSlot + 1 after = 2 =>
+         * firstExposedSlot = 0 => lastExposedSlot = 0+1 = 1
          */
         verify(repository).saveAll(exposedVisitEntitiesCaptor.capture());
         assertThat(exposedVisitEntitiesCaptor.getValue())
@@ -123,10 +124,8 @@ class SlotGenerationTest {
         service.updateExposureCount(visit);
 
         /*
-         *  => scanTimeSlot = 0
-         *  => slots to generate = scanTimeSlot + 3 after = 4
-         *  => firstExposedSlot = 0
-         *  => lastExposedSlot = 0+4-1 = 3
+         * => scanTimeSlot = 0 => slots to generate = scanTimeSlot + 3 after = 4 =>
+         * firstExposedSlot = 0 => lastExposedSlot = 0+4-1 = 3
          */
         verify(repository).saveAll(exposedVisitEntitiesCaptor.capture());
         assertThat(exposedVisitEntitiesCaptor.getValue())
@@ -156,17 +155,15 @@ class SlotGenerationTest {
                 .compressedPeriodStartTime(getCompressedPeriodStartTime(TODAY_AT_MIDNIGHT))
                 .periodDuration(24)
                 .qrCodeValidityStartTime(TODAY_AT_MIDNIGHT)
-                .qrCodeRenewalIntervalExponentCompact(14) // 2^14 seconds = 4.55 hours 
+                .qrCodeRenewalIntervalExponentCompact(14) // 2^14 seconds = 4.55 hours
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
         service.updateExposureCount(visit);
 
         /*
-         *  => scanTimeSlot = 8
-         *  => slots to generate = scanTimeSlot + 3 after + 3 before
-         *  => firstExposedSlot = 11
-         *  => lastExposedSlot = 5
+         * => scanTimeSlot = 8 => slots to generate = scanTimeSlot + 3 after + 3 before
+         * => firstExposedSlot = 11 => lastExposedSlot = 5
          */
         verify(repository).saveAll(exposedVisitEntitiesCaptor.capture());
         assertThat(exposedVisitEntitiesCaptor.getValue())

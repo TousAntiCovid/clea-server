@@ -28,7 +28,8 @@ import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
 @DirtiesContext
-@TestPropertySource(properties = {"clea.conf.scheduling.purge.cron=*/10 * * * * *", "clea.conf.scheduling.purge.enabled=true"})
+@TestPropertySource(properties = { "clea.conf.scheduling.purge.cron=*/10 * * * * *",
+        "clea.conf.scheduling.purge.enabled=true" })
 class ExposedVisitEntityServiceSchedulingTest {
 
     @Value("${clea.conf.scheduling.purge.cron}")
@@ -69,8 +70,12 @@ class ExposedVisitEntityServiceSchedulingTest {
         long count = scheduledTasks.stream()
                 .filter(scheduledTask -> scheduledTask.getTask() instanceof CronTask)
                 .map(scheduledTask -> (CronTask) scheduledTask.getTask())
-                .filter(cronTask -> cronTask.getExpression().equals(cronValue)
-                        && cronTask.toString().equals("fr.gouv.clea.consumer.service.impl.ExposedVisitEntityService.deleteOutdatedExposedVisits"))
+                .filter(
+                        cronTask -> cronTask.getExpression().equals(cronValue)
+                                && cronTask.toString().equals(
+                                        "fr.gouv.clea.consumer.service.impl.ExposedVisitEntityService.deleteOutdatedExposedVisits"
+                                )
+                )
                 .count();
 
         assertThat(count).isEqualTo(1L);

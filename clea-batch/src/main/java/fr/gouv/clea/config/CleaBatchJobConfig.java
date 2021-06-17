@@ -15,7 +15,8 @@ public class CleaBatchJobConfig {
     private JobBuilderFactory jobBuilderFactory;
 
     @Bean
-    public Job cleaBatchJob(Step clusterIdentification, Step clustersIndexation, Step prefixesComputing, Step purgeIntermediateTable, Step clusterIndexGeneration) {
+    public Job cleaBatchJob(Step clusterIdentification, Step clustersIndexation, Step prefixesComputing,
+            Step purgeIntermediateTable, Step clusterIndexGeneration) {
         return this.jobBuilderFactory.get("clea-batch-job")
                 .incrementer(new RunIdIncrementer())
                 .start(purgeIntermediateTable)

@@ -20,10 +20,10 @@ public class IndexationPartitioner implements Partitioner {
     }
 
     /**
-     * Create a set of distinct {@link ExecutionContext} instances together with
-     * a unique identifier for each one. The identifiers should be short,
-     * mnemonic values, and only have to be unique within the return value (e.g.
-     * use an incrementer).
+     * Create a set of distinct {@link ExecutionContext} instances together with a
+     * unique identifier for each one. The identifiers should be short, mnemonic
+     * values, and only have to be unique within the return value (e.g. use an
+     * incrementer).
      *
      * @param gridSize the size of the map to return
      * @return a map from identifier to input parameters
@@ -38,24 +38,28 @@ public class IndexationPartitioner implements Partitioner {
         final Map<String, ExecutionContext> result = new HashMap<>();
 
         // At least 1 prefix per partition
-        final int partitionSize = Math.max(prefixLtidsMap.size()/gridSize, 1) ;
+        final int partitionSize = Math.max(prefixLtidsMap.size() / gridSize, 1);
 
-        // prefixLtidsMap.size() if less prefixes than parameterized gridSize, otherwise gridSize
+        // prefixLtidsMap.size() if less prefixes than parameterized gridSize, otherwise
+        // gridSize
         final int partitionsTotalNumber = Math.min(prefixLtidsMap.size(), gridSize);
 
-        // Build partitions execution contexts by splitting map into X equal parts, X being partitionsTotalNumber
-        for (int partitionsIndex = 0; partitionsIndex< partitionsTotalNumber; partitionsIndex++) {
+        // Build partitions execution contexts by splitting map into X equal parts, X
+        // being partitionsTotalNumber
+        for (int partitionsIndex = 0; partitionsIndex < partitionsTotalNumber; partitionsIndex++) {
             final ExecutionContext value = createPartitionExecutionContext(prefixLtidsMapIterator, partitionSize);
-            result.put("partition-"+partitionsIndex, value);
+            result.put("partition-" + partitionsIndex, value);
         }
 
-        // handle possible remaining entries due to non-null euclidian partitionSize division quotient
+        // handle possible remaining entries due to non-null euclidian partitionSize
+        // division quotient
         dispatchRemainingEntries(prefixLtidsMapIterator, result);
         log.debug("{} partitions created", result.size());
         return result;
     }
 
-    private ExecutionContext createPartitionExecutionContext(Iterator<Map.Entry<String, List<String>>> prefixesLtidsMapIterator, int partitionSize) {
+    private ExecutionContext createPartitionExecutionContext(
+            Iterator<Map.Entry<String, List<String>>> prefixesLtidsMapIterator, int partitionSize) {
         final ExecutionContext value = new ExecutionContext();
         final List<String> prefixes = new ArrayList<>();
         final List<List<String>> ltids = new ArrayList<>();
@@ -73,7 +77,8 @@ public class IndexationPartitioner implements Partitioner {
         return value;
     }
 
-    private void dispatchRemainingEntries(final Iterator<Map.Entry<String, List<String>>> prefixLtidsMapIterator, final Map<String, ExecutionContext> result) {
+    private void dispatchRemainingEntries(final Iterator<Map.Entry<String, List<String>>> prefixLtidsMapIterator,
+            final Map<String, ExecutionContext> result) {
         int partitionIndex = 0;
         while (prefixLtidsMapIterator.hasNext()) {
             final Map.Entry<String, List<String>> currentValue = prefixLtidsMapIterator.next();

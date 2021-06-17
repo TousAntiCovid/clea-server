@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class VenueConsumerPropertiesValidationTest {
 
     private static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
+
     private Validator validator;
 
     @BeforeEach

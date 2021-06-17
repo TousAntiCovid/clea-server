@@ -44,7 +44,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/clea/**").permitAll()
                 .and()
-                .addFilterAfter(new JwtValidationFilter(this.properties.isAuthorizationCheckActive(), this.initPublicKey(), handlerExceptionResolver), BasicAuthenticationFilter.class)
+                .addFilterAfter(
+                        new JwtValidationFilter(
+                                this.properties.isAuthorizationCheckActive(), this.initPublicKey(),
+                                handlerExceptionResolver
+                        ), BasicAuthenticationFilter.class
+                )
                 .httpBasic().disable()
                 .csrf().disable()
                 .cors();

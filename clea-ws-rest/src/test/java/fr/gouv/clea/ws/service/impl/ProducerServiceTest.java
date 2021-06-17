@@ -33,7 +33,7 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
+@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
 class ProducerServiceTest {
 
     @Autowired
@@ -45,7 +45,8 @@ class ProducerServiceTest {
     @Autowired
     private CleaKafkaProperties cleaKafkaProperties;
 
-    private static DecodedVisit createSerializableDecodedVisit(Instant qrCodeScanTime, boolean isBackward, UUID locationTemporaryPublicId, byte[] encryptedLocationMessage) {
+    private static DecodedVisit createSerializableDecodedVisit(Instant qrCodeScanTime, boolean isBackward,
+            UUID locationTemporaryPublicId, byte[] encryptedLocationMessage) {
         return new DecodedVisit(
                 qrCodeScanTime,
                 EncryptedLocationSpecificPart.builder()
@@ -102,24 +103,30 @@ class ProducerServiceTest {
                 .collect(Collectors.toList());
         assertThat(extracted.size()).isEqualTo(3);
 
-        DecodedVisit visit1 = extracted.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1)).findFirst().orElse(null);
+        DecodedVisit visit1 = extracted.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1))
+                .findFirst().orElse(null);
         assertThat(visit1).isNotNull();
         assertThat(visit1.getLocationTemporaryPublicId()).isEqualTo(uuid1);
-        assertThat(visit1.getEncryptedLocationSpecificPart().getEncryptedLocationMessage()).isEqualTo(encryptedLocationMessage1);
+        assertThat(visit1.getEncryptedLocationSpecificPart().getEncryptedLocationMessage())
+                .isEqualTo(encryptedLocationMessage1);
         assertThat(visit1.getQrCodeScanTime()).isEqualTo(qrCodeScanTime1);
         assertThat(visit1.isBackward()).isEqualTo(isBackward1);
 
-        DecodedVisit visit2 = extracted.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2)).findFirst().orElse(null);
+        DecodedVisit visit2 = extracted.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2))
+                .findFirst().orElse(null);
         assertThat(visit2).isNotNull();
         assertThat(visit2.getLocationTemporaryPublicId()).isEqualTo(uuid2);
-        assertThat(visit2.getEncryptedLocationSpecificPart().getEncryptedLocationMessage()).isEqualTo(encryptedLocationMessage2);
+        assertThat(visit2.getEncryptedLocationSpecificPart().getEncryptedLocationMessage())
+                .isEqualTo(encryptedLocationMessage2);
         assertThat(visit2.getQrCodeScanTime()).isEqualTo(qrCodeScanTime2);
         assertThat(visit2.isBackward()).isEqualTo(isBackward2);
 
-        DecodedVisit visit3 = extracted.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid3)).findFirst().orElse(null);
+        DecodedVisit visit3 = extracted.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid3))
+                .findFirst().orElse(null);
         assertThat(visit3).isNotNull();
         assertThat(visit3.getLocationTemporaryPublicId()).isEqualTo(uuid3);
-        assertThat(visit3.getEncryptedLocationSpecificPart().getEncryptedLocationMessage()).isEqualTo(encryptedLocationMessage3);
+        assertThat(visit3.getEncryptedLocationSpecificPart().getEncryptedLocationMessage())
+                .isEqualTo(encryptedLocationMessage3);
         assertThat(visit3.getQrCodeScanTime()).isEqualTo(qrCodeScanTime3);
         assertThat(visit3.isBackward()).isEqualTo(isBackward3);
     }

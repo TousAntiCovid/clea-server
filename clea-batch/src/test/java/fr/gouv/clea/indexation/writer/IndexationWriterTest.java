@@ -47,7 +47,8 @@ public class IndexationWriterTest {
 
         writer.generateClusterFile(clusterFile, Path.of(directoryOutputPath));
 
-        final File expectedFilePath = Path.of(directoryOutputPath, clusterFile.getName() + JSON_FILE_EXTENSION).toFile();
+        final File expectedFilePath = Path.of(directoryOutputPath, clusterFile.getName() + JSON_FILE_EXTENSION)
+                .toFile();
         Mockito.verify(objectMapper, Mockito.times(1)).writeValue(expectedFilePath, clusterFile.getItems());
     }
 }

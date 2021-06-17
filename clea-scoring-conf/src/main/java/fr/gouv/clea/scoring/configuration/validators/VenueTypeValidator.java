@@ -26,5 +26,4 @@ public class VenueTypeValidator implements ConstraintValidator<ValidateWildcards
         return scoringRule.isDefaultRule();
     }
 
-
 }

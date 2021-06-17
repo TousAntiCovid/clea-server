@@ -50,7 +50,6 @@ class SinglePlaceClusterBuilderTest {
     @InjectMocks
     private SinglePlaceClusterBuilder processor;
 
-
     @Test
     void getSinglePLaceClusterPeriods_queries_jdbcTemplate_with_provided_ltid() {
 
@@ -58,7 +57,10 @@ class SinglePlaceClusterBuilderTest {
 
         processor.getSinglePlaceClusterPeriods(ltid);
 
-        verify(jdbcTemplate).query(sqlStringArgumentCaptor.capture(), any(SinglePlaceClusterPeriodRowMapper.class), uuidArgumentCaptor.capture());
+        verify(jdbcTemplate).query(
+                sqlStringArgumentCaptor.capture(), any(SinglePlaceClusterPeriodRowMapper.class),
+                uuidArgumentCaptor.capture()
+        );
 
         assertThat(uuidArgumentCaptor.getValue()).isEqualTo(UUID.fromString(ltid));
         assertThat(sqlStringArgumentCaptor.getValue()).isEqualTo(SQL_SELECT_BY_LTID_IN_SINGLEPLACECLUSTERPERIOD);
@@ -81,8 +83,18 @@ class SinglePlaceClusterBuilderTest {
         final ClusterPeriod clusterPeriod2 = ClusterPeriod.builder().build();
         final SinglePlaceClusterPeriod period2 = buildSinglePlaceClusterPeriod(ltid2, venueCat1, venueCat2, venueType);
 
-        when(jdbcTemplate.query(eq(SQL_SELECT_BY_LTID_IN_SINGLEPLACECLUSTERPERIOD), any(SinglePlaceClusterPeriodRowMapper.class), eq(ltid1))).thenReturn(List.of(period1));
-        when(jdbcTemplate.query(eq(SQL_SELECT_BY_LTID_IN_SINGLEPLACECLUSTERPERIOD), any(SinglePlaceClusterPeriodRowMapper.class), eq(ltid2))).thenReturn(List.of(period2));
+        when(
+                jdbcTemplate.query(
+                        eq(SQL_SELECT_BY_LTID_IN_SINGLEPLACECLUSTERPERIOD),
+                        any(SinglePlaceClusterPeriodRowMapper.class), eq(ltid1)
+                )
+        ).thenReturn(List.of(period1));
+        when(
+                jdbcTemplate.query(
+                        eq(SQL_SELECT_BY_LTID_IN_SINGLEPLACECLUSTERPERIOD),
+                        any(SinglePlaceClusterPeriodRowMapper.class), eq(ltid2)
+                )
+        ).thenReturn(List.of(period2));
         when(mapper.map(period1)).thenReturn(clusterPeriod1);
         when(mapper.map(period2)).thenReturn(clusterPeriod2);
 
@@ -90,8 +102,12 @@ class SinglePlaceClusterBuilderTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo(prefix);
-        final ClusterFileItem expectedItem1 = buildClusterFileItem(ltid1, venueCat1, venueCat2, venueType, List.of(clusterPeriod1));
-        final ClusterFileItem expectedItem2 = buildClusterFileItem(ltid2, venueCat1, venueCat2, venueType, List.of(clusterPeriod2));
+        final ClusterFileItem expectedItem1 = buildClusterFileItem(
+                ltid1, venueCat1, venueCat2, venueType, List.of(clusterPeriod1)
+        );
+        final ClusterFileItem expectedItem2 = buildClusterFileItem(
+                ltid2, venueCat1, venueCat2, venueType, List.of(clusterPeriod2)
+        );
         assertThat(result.getItems()).containsExactly(expectedItem1, expectedItem2);
     }
 
@@ -120,7 +136,8 @@ class SinglePlaceClusterBuilderTest {
 
         final SinglePlaceClusterPeriod period1 = buildSinglePlaceClusterPeriod(ltid1, venueCat1, venueCat2, venueType);
 
-        final ClusterFileItem result = processor.createClusterFileItem(period1, List.of(clusterPeriod1, clusterPeriod2));
+        final ClusterFileItem result = processor
+                .createClusterFileItem(period1, List.of(clusterPeriod1, clusterPeriod2));
 
         assertThat(result.getTemporaryLocationId()).isEqualTo(ltid1.toString());
         final var expectedExposureRow1 = buildExposureRow(startTimestamp1, duration1, riskLevel1);
@@ -136,7 +153,8 @@ class SinglePlaceClusterBuilderTest {
                 .build();
     }
 
-    private SinglePlaceClusterPeriod buildSinglePlaceClusterPeriod(UUID ltid2, int venueCat1, int venueCat2, int venueType) {
+    private SinglePlaceClusterPeriod buildSinglePlaceClusterPeriod(UUID ltid2, int venueCat1, int venueCat2,
+            int venueType) {
         return SinglePlaceClusterPeriod.builder()
                 .locationTemporaryPublicId(ltid2)
                 .venueCategory1(venueCat1)
@@ -145,13 +163,16 @@ class SinglePlaceClusterBuilderTest {
                 .build();
     }
 
-    private ClusterFileItem buildClusterFileItem(UUID ltid1, int venueCat1, int venueCat2, int venueType, List<ClusterPeriod> clusterPeriods) {
-        return ClusterFileItem.ofCluster(SinglePlaceCluster.builder()
-                .locationTemporaryPublicId(ltid1)
-                .venueCategory1(venueCat1)
-                .venueCategory2(venueCat2)
-                .venueType(venueType)
-                .periods(clusterPeriods)
-                .build());
+    private ClusterFileItem buildClusterFileItem(UUID ltid1, int venueCat1, int venueCat2, int venueType,
+            List<ClusterPeriod> clusterPeriods) {
+        return ClusterFileItem.ofCluster(
+                SinglePlaceCluster.builder()
+                        .locationTemporaryPublicId(ltid1)
+                        .venueCategory1(venueCat1)
+                        .venueCategory2(venueCat2)
+                        .venueType(venueType)
+                        .periods(clusterPeriods)
+                        .build()
+        );
     }
 }

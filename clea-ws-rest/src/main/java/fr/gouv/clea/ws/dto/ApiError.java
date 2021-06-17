@@ -11,8 +11,12 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApiError {
+
     private int httpStatus;
+
     private Instant timestamp;
+
     private String message;
+
     private Set<ValidationError> validationErrors;
 }

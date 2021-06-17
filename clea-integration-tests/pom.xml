@@ -1,6 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>fr.gouv.clea</groupId>
@@ -183,7 +186,8 @@
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <version>5.1.0</version>
                 <configuration>
-                    <inputSpec>${project.basedir}/../clea-ws-rest/src/main/resources/api-report-v1.yml</inputSpec>
+                    <inputSpec
+          >${project.basedir}/../clea-ws-rest/src/main/resources/api-report-v1.yml</inputSpec>
                     <generatorName>java</generatorName>
                     <apiPackage>fr.gouv.clea.api</apiPackage>
                     <modelPackage>fr.gouv.clea.model</modelPackage>

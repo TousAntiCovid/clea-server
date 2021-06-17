@@ -44,6 +44,6 @@ integration-tests:
     - docker network disconnect clea-server_default $currentContainer
     - docker-compose down
   artifacts:
-      paths:
-        - "$CI_PROJECT_DIR/cucumber-reports.html"
-      expire_in: 2 weeks
+    paths:
+      - "$CI_PROJECT_DIR/cucumber-reports.html"
+    expire_in: 2 weeks

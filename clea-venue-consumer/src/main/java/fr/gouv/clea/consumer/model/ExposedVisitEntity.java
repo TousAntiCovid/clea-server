@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -35,12 +36,18 @@ public class ExposedVisitEntity {
     private UUID locationTemporaryPublicId;
 
     private int venueType;
+
     private int venueCategory1;
+
     private int venueCategory2;
+
     private long periodStart;
+
     @Column(name = "timeslot")
     private int timeSlot;
+
     private long backwardVisits;
+
     private long forwardVisits;
 
     @CreationTimestamp

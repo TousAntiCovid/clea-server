@@ -21,7 +21,9 @@ public class KafkaVisitSerializer implements Serializer<DecodedVisit> {
             return null;
         try {
             return new ObjectMapper()
-                    .registerModule(new SimpleModule().addSerializer(DecodedVisit.class, new CustomJacksonVisitSerializer()))
+                    .registerModule(
+                            new SimpleModule().addSerializer(DecodedVisit.class, new CustomJacksonVisitSerializer())
+                    )
                     .writeValueAsBytes(data);
         } catch (JsonProcessingException e) {
             throw new SerializationException("Error serializing JSON message", e);

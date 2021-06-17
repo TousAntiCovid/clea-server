@@ -1,13 +1,12 @@
 package fr.gouv.clea.clea.scoring.configuration;
 
+import fr.gouv.clea.scoring.configuration.risk.RiskConfiguration;
+import fr.gouv.clea.scoring.configuration.risk.RiskConfigurationConverter;
+import fr.gouv.clea.scoring.configuration.risk.RiskRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
-
-import fr.gouv.clea.scoring.configuration.risk.RiskConfiguration;
-import fr.gouv.clea.scoring.configuration.risk.RiskConfigurationConverter;
-import fr.gouv.clea.scoring.configuration.risk.RiskRule;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ScoringRuleSelectionTest {
 
     private RiskConfiguration riskConfiguration;
-    
-    final static List<String> rawRules = List.of( 
+
+    final static List<String> rawRules = List.of(
             "*,*,*,3,1,3.0,2.0", // 0
             "1,1,1,3,1,3.0,2.0", // 1
             "1,2,3,3,1,3.0,2.0", // 2
@@ -27,11 +26,13 @@ class ScoringRuleSelectionTest {
             "3,1,*,3,1,3.0,2.0", // 4
             "3,*,2,3,1,3.0,2.0", // 5
             "3,*,3,3,1,3.0,2.0", // 6
-            "3,1,2,3,1,3.0,2.0"  // 7
-        );
+            "3,1,2,3,1,3.0,2.0" // 7
+    );
+
     final static RiskConfigurationConverter converter = new RiskConfigurationConverter();
+
     final static List<RiskRule> rules = rawRules.stream().map(converter::convert).collect(Collectors.toList());
-    
+
     @BeforeEach
     void setUp() {
         riskConfiguration = new RiskConfiguration();

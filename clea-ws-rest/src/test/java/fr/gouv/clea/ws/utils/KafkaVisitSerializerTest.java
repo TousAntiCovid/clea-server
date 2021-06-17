@@ -31,9 +31,11 @@ class KafkaVisitSerializerTest {
         byte[] serializedVisit = serializer.serialize("", decoded);
         DecodedVisit deserializedVisit = deserializer.deserialize("", serializedVisit);
 
-        assertThat(decoded.getQrCodeScanTime().truncatedTo(ChronoUnit.SECONDS)).isEqualTo(deserializedVisit.getQrCodeScanTime().truncatedTo(ChronoUnit.SECONDS));
+        assertThat(decoded.getQrCodeScanTime().truncatedTo(ChronoUnit.SECONDS))
+                .isEqualTo(deserializedVisit.getQrCodeScanTime().truncatedTo(ChronoUnit.SECONDS));
         assertThat(decoded.isBackward()).isEqualTo(deserializedVisit.isBackward());
-        assertThat(decoded.getEncryptedLocationSpecificPart()).isEqualTo(deserializedVisit.getEncryptedLocationSpecificPart());
+        assertThat(decoded.getEncryptedLocationSpecificPart())
+                .isEqualTo(deserializedVisit.getEncryptedLocationSpecificPart());
         serializer.close();
         deserializer.close();
     }

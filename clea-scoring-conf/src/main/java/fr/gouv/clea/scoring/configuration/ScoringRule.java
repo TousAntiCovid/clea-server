@@ -1,8 +1,5 @@
 package fr.gouv.clea.scoring.configuration;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-
 import fr.gouv.clea.scoring.configuration.validators.NoDuplicates;
 import fr.gouv.clea.scoring.configuration.validators.ValidateWildcards;
 import lombok.AllArgsConstructor;
@@ -10,6 +7,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 @SuperBuilder
 @AllArgsConstructor
@@ -67,11 +67,11 @@ public class ScoringRule {
     public boolean isFullMatch() {
         return this.getWildCardCount() == 0;
     }
-    
+
     public boolean isDefaultRule() {
         return this.getWildCardCount() == 3;
     }
-    
+
     public boolean isCategory1Wildcarded() {
         return this.getVenueCategory1() == ScoringRule.WILDCARD_VALUE;
     }

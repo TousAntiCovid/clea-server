@@ -37,8 +37,10 @@ public class SinglePlaceExposedVisitsBuilder implements ItemProcessor<String, Si
 
     @Override
     public SinglePlaceExposedVisits process(final String ltid) {
-        final List<ExposedVisit> list = jdbcTemplate.query(SQL_SELECT_FROM_EXPOSEDVISITS_WHERE_LTID_ORDERBY_PERIOD_AND_TIMESLOT,
-                rowMapper, UUID.fromString(ltid));
+        final List<ExposedVisit> list = jdbcTemplate.query(
+                SQL_SELECT_FROM_EXPOSEDVISITS_WHERE_LTID_ORDERBY_PERIOD_AND_TIMESLOT,
+                rowMapper, UUID.fromString(ltid)
+        );
         ExposedVisit firstExposedVisit = list.stream().findFirst().orElse(null);
         if (null != firstExposedVisit) {
             long loadedVisitsCount = counter.incrementAndGet();

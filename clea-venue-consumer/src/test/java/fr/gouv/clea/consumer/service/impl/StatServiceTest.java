@@ -6,7 +6,6 @@ import fr.gouv.clea.consumer.model.StatLocationKey;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.IReportStatRepository;
 import fr.gouv.clea.consumer.repository.IStatLocationJpaRepository;
-import fr.gouv.clea.consumer.service.IStatService;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.*;
@@ -17,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -30,16 +30,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 class StatServiceTest {
 
     private static final UUID _UUID = UUID.randomUUID();
+
     private static final byte[] LOCATION_TEMPORARY_SECRET_KEY = RandomUtils.nextBytes(20);
+
     private static final byte[] ENCRYPTED_LOCATION_CONTACT_MESSAGE = RandomUtils.nextBytes(20);
+
     private static final Instant TODAY_AT_MIDNIGHT = Instant.now().truncatedTo(ChronoUnit.DAYS);
+
     private static final Instant TODAY_AT_8AM = TODAY_AT_MIDNIGHT.plus(8, ChronoUnit.HOURS);
+
     private static final long TODAY_AT_MIDNIGHT_AS_NTP = TimeUtils.ntpTimestampFromInstant(TODAY_AT_MIDNIGHT);
 
     @Autowired
     private IStatLocationJpaRepository statLocationRepository;
+
     @Autowired
     private IReportStatRepository reportStatRepository;
+
     @Autowired
     private StatService service;
 
@@ -74,14 +81,9 @@ class StatServiceTest {
     @Test
     void should_create_a_new_stat_in_DB_when_visit_has_no_existing_context() {
         /*
-         * if:
-         * periodStartTime = today at 00:00:00
-         * qrCodeScanTime = today at 08:15:00
-         * durationUnit = 1800 seconds
-         *
-         * then:
-         *  => scanTimeSlot = 8*2 = 16
-         *  => stat duration = periodStartTime + (slot * durationUnit) = today at 08:00:00
+         * if: periodStartTime = today at 00:00:00 qrCodeScanTime = today at 08:15:00
+         * durationUnit = 1800 seconds then: => scanTimeSlot = 8*2 = 16 => stat duration
+         * = periodStartTime + (slot * durationUnit) = today at 08:00:00
          */
 
         Visit visit = defaultVisit().toBuilder()
@@ -107,14 +109,9 @@ class StatServiceTest {
     @Test
     void should_update_an_existing_stat_in_DB_when_visit_has_existing_context() {
         /*
-         * if:
-         * periodStartTime = today at 00:00:00
-         * qrCodeScanTime = today at 08:15:00
-         * durationUnit = 1800 seconds
-         *
-         * then:
-         *  => scanTimeSlot = 8*2 = 16
-         *  => stat duration = periodStartTime + (slot * durationUnit) = today at 08:00:00
+         * if: periodStartTime = today at 00:00:00 qrCodeScanTime = today at 08:15:00
+         * durationUnit = 1800 seconds then: => scanTimeSlot = 8*2 = 16 => stat duration
+         * = periodStartTime + (slot * durationUnit) = today at 08:00:00
          */
         Visit visit1 = defaultVisit().toBuilder()
                 .qrCodeScanTime(TODAY_AT_8AM.plus(15, ChronoUnit.MINUTES))
@@ -171,7 +168,7 @@ class StatServiceTest {
         entityManager.clear();
         assertThat(statLocationRepository.count()).isEqualTo(1);
         StatLocationKey key = service.buildKey(visit1);
-        StatLocation statLocation= statLocationRepository.getOne(key);
+        StatLocation statLocation = statLocationRepository.getOne(key);
         assertThat(statLocation.getBackwardVisits()).as("back visits").isEqualTo(3l);
         assertThat(statLocation.getForwardVisits()).as("forward visits").isEqualTo(1l);
     }

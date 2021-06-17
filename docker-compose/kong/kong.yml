@@ -51,13 +51,13 @@ _transform: true
 #   # Custom entities from plugin can also be specified
 
 services:
- - name: report-service
-   url: http://clea-ws-rest:8080
-   path: /api
-   tags:
-   - clea
-   routes:
-   - name: api-route
-     paths:
-     - /api
-     strip_path: false  
+  - name: report-service
+    url: http://clea-ws-rest:8080
+    path: /api
+    tags:
+      - clea
+    routes:
+      - name: api-route
+        paths:
+          - /api
+        strip_path: false

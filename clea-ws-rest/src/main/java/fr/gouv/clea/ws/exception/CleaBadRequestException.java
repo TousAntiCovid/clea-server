@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.ConstraintViolation;
+
 import java.util.Set;
 
 @Data
@@ -16,15 +17,16 @@ import java.util.Set;
 public class CleaBadRequestException extends AbstractCleaException {
 
     private static final String EX_CODE = "clea-003";
+
     private static final String MESSAGE = "Invalid request";
 
     private Set<ConstraintViolation<ReportRequest>> reportRequestViolations;
+
     private Set<ConstraintViolation<Visit>> visitViolations;
 
     public CleaBadRequestException(
             Set<ConstraintViolation<ReportRequest>> reportRequestViolations,
-            Set<ConstraintViolation<Visit>> visitViolations
-    ) {
+            Set<ConstraintViolation<Visit>> visitViolations) {
         super(MESSAGE, EX_CODE);
         this.reportRequestViolations = reportRequestViolations;
         this.visitViolations = visitViolations;

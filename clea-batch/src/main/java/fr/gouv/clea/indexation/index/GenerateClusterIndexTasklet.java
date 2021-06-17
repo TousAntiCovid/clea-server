@@ -28,7 +28,8 @@ public class GenerateClusterIndexTasklet implements Tasklet {
 
     private final ObjectMapper objectMapper;
 
-    public GenerateClusterIndexTasklet(final BatchProperties batchProperties, PrefixesStorageService prefixesStorageService, ObjectMapper objectMapper) {
+    public GenerateClusterIndexTasklet(final BatchProperties batchProperties,
+            PrefixesStorageService prefixesStorageService, ObjectMapper objectMapper) {
         this.outputPath = batchProperties.getFilesOutputPath();
         this.prefixesStorageService = prefixesStorageService;
         this.objectMapper = objectMapper;

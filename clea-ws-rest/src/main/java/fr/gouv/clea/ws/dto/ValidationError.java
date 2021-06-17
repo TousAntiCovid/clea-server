@@ -10,8 +10,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class ValidationError {
+
     private String object;
+
     private String field;
+
     private Object rejectedValue;
+
     private String message;
 }

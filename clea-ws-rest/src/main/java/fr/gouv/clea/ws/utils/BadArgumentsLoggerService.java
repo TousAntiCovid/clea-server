@@ -6,11 +6,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.validation.ConstraintViolation;
+
 import java.util.Set;
 
 @Slf4j
 @Service
 public class BadArgumentsLoggerService {
+
     public static final String INVALID_INPUT_TEMPLATE = "Invalid input data: %s, requested uri: %s";
 
     public <T> void logValidationErrorMessage(Set<ConstraintViolation<T>> violations, WebRequest webRequest) {

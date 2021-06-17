@@ -67,9 +67,12 @@ class ReportServiceTest {
         List<DecodedVisit> processed = reportService.report(new ReportRequest(visits, 0L));
 
         assertThat(processed.size()).isEqualTo(3);
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1)).findAny()).isPresent();
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2)).findAny()).isPresent();
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid3)).findAny()).isPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1)).findAny())
+                .isPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2)).findAny())
+                .isPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid3)).findAny())
+                .isPresent();
     }
 
     @Test
@@ -84,13 +87,15 @@ class ReportServiceTest {
                 newVisit(uuid3, TimeUtils.ntpTimestampFromInstant(now.plus(1, ChronoUnit.DAYS))) /* don't pass */
         );
 
-
         List<DecodedVisit> processed = reportService.report(new ReportRequest(visits, 0L));
 
         assertThat(processed.size()).isEqualTo(2);
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1)).findAny()).isPresent();
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2)).findAny()).isPresent();
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid3)).findAny()).isNotPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1)).findAny())
+                .isPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2)).findAny())
+                .isPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid3)).findAny())
+                .isNotPresent();
     }
 
     @Test
@@ -107,14 +112,17 @@ class ReportServiceTest {
                 newVisit(uuid4, TimeUtils.ntpTimestampFromInstant(now)) /* pass */
         );
 
-
         List<DecodedVisit> processed = reportService.report(new ReportRequest(visits, 0L));
 
         assertThat(processed.size()).isEqualTo(3);
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1)).findAny()).isNotPresent();
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2)).findAny()).isPresent();
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid3)).findAny()).isPresent();
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid4)).findAny()).isPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1)).findAny())
+                .isNotPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2)).findAny())
+                .isPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid3)).findAny())
+                .isPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid4)).findAny())
+                .isPresent();
     }
 
     @Test
@@ -130,8 +138,10 @@ class ReportServiceTest {
         List<DecodedVisit> processed = reportService.report(new ReportRequest(visits, 0L));
 
         assertThat(processed.size()).isEqualTo(1);
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1)).findAny()).isPresent();
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2)).findAny()).isNotPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1)).findAny())
+                .isPresent();
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2)).findAny())
+                .isNotPresent();
     }
 
     @Test
@@ -159,9 +169,12 @@ class ReportServiceTest {
         List<DecodedVisit> processed = reportService.report(new ReportRequest(visits, 0L));
 
         assertThat(processed.size()).isEqualTo(4);
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuidA)).count()).isEqualTo(2);
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuidB)).count()).isEqualTo(1);
-        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuidC)).count()).isEqualTo(1);
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuidA)).count())
+                .isEqualTo(2);
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuidB)).count())
+                .isEqualTo(1);
+        assertThat(processed.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuidC)).count())
+                .isEqualTo(1);
     }
 
     @Test
@@ -282,7 +295,8 @@ class ReportServiceTest {
 
             List<ILoggingEvent> logsList = loggingEventListAppender.list;
 
-            assertThat(logsList).extracting("formattedMessage").contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 2, 0, 4, 0));
+            assertThat(logsList).extracting("formattedMessage")
+                    .contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 2, 0, 4, 0));
         }
 
         @Test
@@ -295,7 +309,8 @@ class ReportServiceTest {
             reportService.report(new ReportRequest(visits, pivotDate));
 
             List<ILoggingEvent> logsList = loggingEventListAppender.list;
-            assertThat(logsList).extracting("formattedMessage").contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 0, 1, 0, 0));
+            assertThat(logsList).extracting("formattedMessage")
+                    .contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 0, 1, 0, 0));
         }
 
         @Test
@@ -312,7 +327,8 @@ class ReportServiceTest {
             reportService.report(new ReportRequest(visits, pivotDate));
 
             List<ILoggingEvent> logsList = loggingEventListAppender.list;
-            assertThat(logsList).extracting("formattedMessage").contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 0, 0, 2, 0));
+            assertThat(logsList).extracting("formattedMessage")
+                    .contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 0, 0, 2, 0));
         }
 
         @Test
@@ -332,7 +348,8 @@ class ReportServiceTest {
             reportService.report(reportRequestVo);
 
             List<ILoggingEvent> logsList = loggingEventListAppender.list;
-            assertThat(logsList).extracting("formattedMessage").contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 1, 0, 3, 0));
+            assertThat(logsList).extracting("formattedMessage")
+                    .contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 1, 0, 3, 0));
         }
 
         @Test
@@ -347,7 +364,8 @@ class ReportServiceTest {
             reportService.report(new ReportRequest(visits, 0L));
 
             List<ILoggingEvent> logsList = loggingEventListAppender.list;
-            assertThat(logsList).extracting("formattedMessage").contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 1, 0, 1, 0));
+            assertThat(logsList).extracting("formattedMessage")
+                    .contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 1, 0, 1, 0));
         }
     }
 }

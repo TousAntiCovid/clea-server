@@ -24,7 +24,9 @@ public class KafkaVisitDeserializer implements Deserializer<DecodedVisit> {
             return null;
         try {
             return new ObjectMapper()
-                    .registerModule(new SimpleModule().addDeserializer(DecodedVisit.class, new CustomJacksonVisitDeserializer()))
+                    .registerModule(
+                            new SimpleModule().addDeserializer(DecodedVisit.class, new CustomJacksonVisitDeserializer())
+                    )
                     .readValue(data, DecodedVisit.class);
         } catch (IOException e) {
             throw new SerializationException("Error deserializing JSON message", e);

@@ -10,7 +10,6 @@ import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,18 +30,24 @@ public class CleaS3Service {
 
     private final MinioProperties minioProperties;
 
-    public Optional<ClusterIndex> getClusterIndex() throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public Optional<ClusterIndex> getClusterIndex() throws IOException, ServerException, InsufficientDataException,
+            ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
+            XmlParserException, InternalException {
         byte[] file = this.getFile("clusterIndex" + ".json");
         ClusterIndex clusterIndex = objectMapper.readValue(file, ClusterIndex.class);
         return Optional.ofNullable(clusterIndex);
     }
 
-    public List<Cluster> getClusterFile(int iteration, String prefix) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public List<Cluster> getClusterFile(int iteration, String prefix) throws IOException, ServerException,
+            InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException,
+            InvalidResponseException, XmlParserException, InternalException {
         byte[] file = this.getFile(iteration + "/" + prefix + ".json");
         return List.of(objectMapper.readValue(file, Cluster[].class));
     }
 
-    private byte[] getFile(String key) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    private byte[] getFile(String key) throws IOException, ServerException, InsufficientDataException,
+            ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
+            XmlParserException, InternalException {
 
         log.info("{}, {}", minioProperties.getBucketName(), minioProperties.getDefaultBaseFolder());
         GetObjectArgs args = GetObjectArgs.builder()
