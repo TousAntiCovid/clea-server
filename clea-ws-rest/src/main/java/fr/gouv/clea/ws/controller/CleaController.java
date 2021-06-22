@@ -6,6 +6,7 @@ import fr.gouv.clea.ws.exception.CleaBadRequestException;
 import fr.gouv.clea.ws.model.DecodedVisit;
 import fr.gouv.clea.ws.service.IReportService;
 import fr.gouv.clea.ws.utils.BadArgumentsLoggerService;
+import fr.gouv.clea.ws.utils.MetricsService;
 import fr.gouv.clea.ws.utils.UriConstants;
 import fr.gouv.clea.ws.vo.ReportRequest;
 import fr.gouv.clea.ws.vo.Visit;
@@ -42,6 +43,8 @@ public class CleaController implements CleaWsRestAPI {
 
     private final Validator validator;
 
+    private final MetricsService metricsService;
+
     @Override
     @PostMapping(path = UriConstants.API_V1
             + UriConstants.REPORT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -51,10 +54,11 @@ public class CleaController implements CleaWsRestAPI {
         if (!filtered.getVisits().isEmpty()) {
             reported = reportService.report(filtered);
         }
-        String message = String.format(
-                "%s reports processed, %s rejected", reported.size(),
-                reportRequestVo.getVisits().size() - reported.size()
-        );
+        var processedReports = reported.size();
+        var rejectedReports = reportRequestVo.getVisits().size() - reported.size();
+        var message = String.format("%s reports processed, %s rejected", processedReports, rejectedReports);
+        metricsService.getProcessedCounter().increment(processedReports);
+        metricsService.getRejectedCounter().increment(rejectedReports);
         log.info(message);
         return new ReportResponse(true, message);
     }

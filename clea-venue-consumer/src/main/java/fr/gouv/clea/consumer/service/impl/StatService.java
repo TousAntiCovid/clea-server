@@ -8,6 +8,7 @@ import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.IReportStatRepository;
 import fr.gouv.clea.consumer.repository.IStatLocationJpaRepository;
 import fr.gouv.clea.consumer.service.IStatService;
+import fr.gouv.clea.consumer.utils.MetricsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,6 +31,8 @@ public class StatService implements IStatService {
     private final IReportStatRepository reportStatRepository;
 
     private final VenueConsumerProperties properties;
+
+    private final MetricsService metricsService;
 
     @Override
     public void logStats(Visit visit) {

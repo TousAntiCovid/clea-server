@@ -6,6 +6,7 @@ import fr.gouv.clea.ws.model.ReportStat;
 import fr.gouv.clea.ws.service.IProducerService;
 import fr.gouv.clea.ws.service.IReportService;
 import fr.gouv.clea.ws.utils.MessageFormatter;
+import fr.gouv.clea.ws.utils.MetricsService;
 import fr.gouv.clea.ws.vo.ReportRequest;
 import fr.gouv.clea.ws.vo.Visit;
 import fr.inria.clea.lsp.EncryptedLocationSpecificPart;
@@ -36,6 +37,8 @@ public class ReportService implements IReportService {
     private final LocationSpecificPartDecoder decoder;
 
     private final IProducerService producerService;
+
+    private final MetricsService metricsService;
 
     @Override
     public List<DecodedVisit> report(ReportRequest reportRequestVo) {
@@ -97,6 +100,7 @@ public class ReportService implements IReportService {
         ) > properties.getRetentionDurationInDays();
         if (outdated) {
             log.warn("report: {} rejected: Outdated", MessageFormatter.truncateQrCode(visit.getQrCode()));
+            metricsService.getOutdatedCounter().increment();
         }
         return outdated;
     }
@@ -105,6 +109,7 @@ public class ReportService implements IReportService {
         boolean future = TimeUtils.instantFromTimestamp(visit.getQrCodeScanTimeAsNtpTimestamp()).isAfter(now);
         if (future) {
             log.warn("report: {} rejected: In future", MessageFormatter.truncateQrCode(visit.getQrCode()));
+            metricsService.getFutureCounter().increment();
         }
         return future;
     }
@@ -125,6 +130,7 @@ public class ReportService implements IReportService {
                     "report: {} {} rejected: Duplicate",
                     MessageFormatter.truncateUUID(one.getStringLocationTemporaryPublicId()), one.getQrCodeScanTime()
             );
+            metricsService.getDuplicateCounter().increment();
             return true;
         }
         return false;
@@ -142,14 +148,15 @@ public class ReportService implements IReportService {
 
     private long validatePivotDate(long pivotDate, Instant now) {
         Instant pivotDateAsInstant = TimeUtils.instantFromTimestamp(pivotDate);
-        Instant nowWithoutMilis = now.truncatedTo(ChronoUnit.SECONDS);
-        Instant retentionDateLimit = nowWithoutMilis.minus(properties.getRetentionDurationInDays(), ChronoUnit.DAYS);
+        Instant nowWithoutMillis = now.truncatedTo(ChronoUnit.SECONDS);
+        Instant retentionDateLimit = nowWithoutMillis.minus(properties.getRetentionDurationInDays(), ChronoUnit.DAYS);
         if (pivotDateAsInstant.isAfter(now) || pivotDateAsInstant.isBefore(retentionDateLimit)) {
             long retentionDateLimitAsNtp = TimeUtils.ntpTimestampFromInstant(retentionDateLimit);
             log.warn(
                     "pivotDate: {} not between retentionLimitDate: {} and now: {}", pivotDateAsInstant,
                     retentionDateLimit, now
             );
+            metricsService.getNotCurrentCounter().increment();
             return retentionDateLimitAsNtp;
         } else {
             return pivotDate;

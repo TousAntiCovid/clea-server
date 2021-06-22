@@ -3,6 +3,7 @@ package fr.gouv.clea.consumer.service.impl;
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
 import fr.gouv.clea.consumer.service.IExposedVisitEntityService;
+import fr.gouv.clea.consumer.utils.MetricsService;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,8 @@ public class ExposedVisitEntityService implements IExposedVisitEntityService {
 
     private final VenueConsumerProperties properties;
 
+    private final MetricsService metricsService;
+
     @Override
     @Transactional
     @Scheduled(cron = "${clea.conf.scheduling.purge.cron}")
@@ -34,8 +37,10 @@ public class ExposedVisitEntityService implements IExposedVisitEntityService {
             );
             long end = System.currentTimeMillis();
             log.info("successfully purged {} entries from DB in {} seconds", count, (end - start) / 1000);
+            metricsService.getPurgedCounter().increment(count);
         } catch (Exception e) {
             log.error("error during purge");
+            metricsService.getFailedPurgeCounter().increment();
             throw e;
         }
     }
