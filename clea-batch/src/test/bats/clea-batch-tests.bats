@@ -19,17 +19,17 @@ setup() {
 
 @test "Should fail if no BUCKET env" {
     unset BUCKET
-    run src/main/scripts/clea-batch.sh
+    run src/main/scripts/clea-batch-console.sh
 
     assert_failure
-    assert_output --partial "BUCKET required"
+    assert_output --partial "BUCKET_OUTSCALE required"
 }
 
 @test "Should fail on Java failure" {
     java() { echo "CALLING_JAVA ${*}" ; return 1; }
     export -f java
 
-    run src/main/scripts/clea-batch.sh
+    run src/main/scripts/clea-batch-console.sh
 
     assert_failure
     assert_output --partial "Java batch fails"
@@ -39,7 +39,7 @@ setup() {
     java() { echo "CALLING_JAVA ${*}" ; return 0; }
     export -f java
 
-    run src/main/scripts/clea-batch.sh
+    run src/main/scripts/clea-batch-console.sh
 
     assert_failure
     assert_output --regexp "Working directory .+ not exists"
@@ -52,7 +52,7 @@ setup() {
     mkdir -p /tmp/v1/123
     rm -rf /tmp/v1/123/*
 
-    run src/main/scripts/clea-batch.sh
+    run src/main/scripts/clea-batch-console.sh
 
     assert_failure
     assert_output --partial "not enough clusterfiles to continue"
@@ -68,19 +68,19 @@ setup() {
     touch    /tmp/v1/123/ac.json
     touch    /tmp/v1/123/ad.json
     
-    run src/main/scripts/clea-batch.sh
+    run src/main/scripts/clea-batch-console.sh
 
     assert_failure
     assert_output --partial "No clusterIndex.json generated"
 }
 
-@test "Should fail if S3cmd copy of cluster files returns error" {
+@test "Should fail if S3 copy of cluster files returns error" {
     java() { echo "CALLING_JAVA ${*}" ; return 0; }
     export -f java
 
     # fails for s3cmd sync but not for s3cmd put
-    s3cmd() { echo "CALLING_S3CMD ${*}" ; [ $1 == "sync" ] && return 1 || return 0; }
-    export -f s3cmd
+    aws() { echo "CALLING_AWS_S3 ${*}" ; [ $4 == "sync" ] && return 1 || return 0; }
+    export -f aws
 
     mkdir -p /tmp/v1/123
     rm -rf /tmp/v1/123/*
@@ -89,20 +89,20 @@ setup() {
     touch    /tmp/v1/123/ad.json
     touch    /tmp/v1/clusterIndex.json
     
-    run src/main/scripts/clea-batch.sh
+    run src/main/scripts/clea-batch-console.sh
     assert_failure
     assert_output --partial "fails to copy cluster files"
 
 }
 
 
-@test "Should fail if S3cmd copy of cluster index returns error" {
+@test "Should fail if S3 copy of cluster index returns error" {
     java() { echo "CALLING_JAVA ${*}" ; return 0; }
     export -f java
 
     # fails for s3cmd put but not for s3cmd sync
-    s3cmd() { echo "CALLING_S3CMD ${*}" ; [ $1 == "put" ] && return 1 || return 0; }
-    export -f s3cmd
+    aws() { echo "CALLING_AWS_S3 ${*}" ; [ $4 == "cp" ] && return 1 || return 0; }
+    export -f aws
 
     mkdir -p /tmp/v1/123
     rm -rf /tmp/v1/123/*
@@ -111,7 +111,7 @@ setup() {
     touch    /tmp/v1/123/ad.json
     touch    /tmp/v1/clusterIndex.json
     
-    run src/main/scripts/clea-batch.sh
+    run src/main/scripts/clea-batch-console.sh
     assert_failure
     assert_output --partial "fails to copy clusterIndex"
 
@@ -121,8 +121,8 @@ setup() {
     java() { echo "CALLING_JAVA ${*}" ; return 0; }
     export -f java
 
-    s3cmd() { echo "CALLING_S3CMD ${*}" ; return 0; }
-    export -f s3cmd
+    aws() { echo "CALLING_AWS_S3 ${*}" ; return 0; }
+    export -f aws
 
     mkdir -p /tmp/v1/123
     rm -rf /tmp/v1/123/*
@@ -131,20 +131,20 @@ setup() {
     touch    /tmp/v1/123/ad.json
     touch    /tmp/v1/clusterIndex.json
     
-    run src/main/scripts/clea-batch.sh
+    run src/main/scripts/clea-batch-console.sh
 
     assert_success
     assert_output --partial "CALLING_JAVA"
-    assert_output --partial "CALLING_S3CMD sync"
-    assert_output --partial "CALLING_S3CMD put"
+    assert_output --partial "s3 sync"
+    assert_output --partial "s3 cp"
 }
 
 @test "Succeeds to purge temporary files at end of batch" {
     java() { echo "CALLING_JAVA ${*}" ; return 0; }
     export -f java
 
-    s3cmd() { echo "CALLING_S3CMD ${*}" ; return 0; }
-    export -f s3cmd
+    aws() { echo "CALLING_AWS_S3 ${*}" ; return 0; }
+    export -f aws
 
     mkdir -p /tmp/v1/123
     rm -rf /tmp/v1/123/*
@@ -153,7 +153,7 @@ setup() {
     touch    /tmp/v1/123/ad.json
     touch    /tmp/v1/clusterIndex.json
     
-    run src/main/scripts/clea-batch.sh
+    run src/main/scripts/clea-batch-console.sh
 
     assert_success
 
