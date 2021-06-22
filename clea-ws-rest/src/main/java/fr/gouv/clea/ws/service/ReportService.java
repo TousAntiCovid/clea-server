@@ -5,6 +5,7 @@ import fr.gouv.clea.ws.model.DecodedVisit;
 import fr.gouv.clea.ws.model.ReportStat;
 import fr.gouv.clea.ws.service.model.Visit;
 import fr.gouv.clea.ws.utils.MessageFormatter;
+import fr.gouv.clea.ws.utils.MetricsService;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import fr.inria.clea.lsp.exception.CleaEncodingException;
 import fr.inria.clea.lsp.utils.TimeUtils;
@@ -31,6 +32,8 @@ public class ReportService {
     private final LocationSpecificPartDecoder decoder;
 
     private final ProducerService producerService;
+
+    private final MetricsService metricsService;
 
     public int report(Instant pivotDate, List<Visit> visits) {
         final var now = Instant.now();
@@ -97,6 +100,7 @@ public class ReportService {
         final var daysBetweenScanTimeAndNow = DAYS.between(visit.getQrCodeScanTime(), now);
         if (daysBetweenScanTimeAndNow > properties.getRetentionDurationInDays()) {
             log.warn("report: {} rejected: Outdated", MessageFormatter.truncateQrCode(visit.getLocationSpecificPart()));
+            metricsService.getOutdatedVisitCounter().increment();
             return true;
         }
         return false;
@@ -108,6 +112,7 @@ public class ReportService {
             log.warn(
                     "report: {} rejected: In future", MessageFormatter.truncateQrCode(visit.getLocationSpecificPart())
             );
+            metricsService.getFutureVisitCounter().increment();
         }
         return future;
     }
@@ -129,6 +134,7 @@ public class ReportService {
                     "report: {} {} rejected: Duplicate",
                     MessageFormatter.truncateUUID(one.getStringLocationTemporaryPublicId()), one.getQrCodeScanTime()
             );
+            metricsService.getDuplicateVisitCounter().increment();
             return true;
         }
         return false;
@@ -152,6 +158,7 @@ public class ReportService {
                     "pivotDate: {} not between retentionLimitDate: {} and now: {}", pivotDate,
                     retentionDateLimit, now
             );
+            metricsService.getNotCurrentPivotDatesCounter().increment();
             return retentionDateLimit;
         } else {
             return pivotDate;
