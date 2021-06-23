@@ -33,12 +33,12 @@ COPY ./src/main/scripts/* ./
 COPY ./src/main/docker/aws ./.aws
 
 USER root
-RUN mkdir /logs \
+RUN chmod +x *.sh \
+ && mkdir /logs \
  && touch /logs/clea-batch.log \
  && touch /logs/clea-batch.error.log \
- && chmod a+rw /logs/*.log \
- && chmod +x *.sh
+ && chmod a+rw /logs/*.log
 
 USER javaapp
 
-ENTRYPOINT [ "./clea-batch.sh" ]
+CMD [ "./clea-batch-console.sh" ]
