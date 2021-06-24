@@ -152,10 +152,8 @@ class CleaControllerAuthEnabledTest {
                 .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
         Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
         assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(2L);
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCode()).isEqualTo("qr1");
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp())
-                .isEqualTo(1L);
+        assertThat(reportRequestArgumentCaptor.getValue().getVisits())
+                .containsExactly(new Visit("qr1", 1L));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
