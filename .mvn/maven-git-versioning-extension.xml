@@ -11,6 +11,6 @@
      </branch>
     <tag>
         <pattern>(.+)</pattern>
-        <versionFormat>${tag.slug}</versionFormat>
+        <versionFormat>${tag}</versionFormat>
     </tag>
 </configuration>
