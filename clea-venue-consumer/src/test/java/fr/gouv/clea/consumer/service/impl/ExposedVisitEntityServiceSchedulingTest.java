@@ -19,11 +19,11 @@ import org.springframework.test.context.TestPropertySource;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
@@ -65,20 +65,17 @@ class ExposedVisitEntityServiceSchedulingTest {
     @Test
     @DisplayName("check that croned job is active")
     void testCronIsActive() {
-        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
-        scheduledTasks.forEach(scheduledTask -> scheduledTask.getTask().getRunnable().getClass().getDeclaredMethods());
-        long count = scheduledTasks.stream()
-                .filter(scheduledTask -> scheduledTask.getTask() instanceof CronTask)
-                .map(scheduledTask -> (CronTask) scheduledTask.getTask())
-                .filter(
-                        cronTask -> cronTask.getExpression().equals(cronValue)
-                                && cronTask.toString().equals(
-                                        "fr.gouv.clea.consumer.service.impl.ExposedVisitEntityService.deleteOutdatedExposedVisits"
-                                )
-                )
-                .count();
-
-        assertThat(count).isEqualTo(1L);
+        assertThat(scheduledTaskHolder.getScheduledTasks())
+                .extracting(ScheduledTask::getTask)
+                .filteredOn(task -> task instanceof CronTask)
+                .extracting(task -> (CronTask) task)
+                .extracting(task -> tuple(task.getExpression(), task.toString()))
+                .containsExactly(
+                        tuple(
+                                cronValue,
+                                "fr.gouv.clea.consumer.service.impl.ExposedVisitEntityService.deleteOutdatedExposedVisits"
+                        )
+                );
     }
 
     @Test
@@ -109,18 +106,22 @@ class ExposedVisitEntityServiceSchedulingTest {
                 )
         );
 
-        assertThat(repository.count()).isEqualTo(9);
-
         await().atMost(30, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(repository.count()).isEqualTo(7));
 
-        assertThat(repository.findAll().stream().anyMatch(it -> it.getPeriodStart() == _15DaysLater)).isTrue();
-        assertThat(repository.findAll().stream().anyMatch(it -> it.getPeriodStart() == _14DaysLater)).isTrue();
-        assertThat(repository.findAll().stream().anyMatch(it -> it.getPeriodStart() == _2DaysLater)).isTrue();
-        assertThat(repository.findAll().stream().anyMatch(it -> it.getPeriodStart() == yesterday)).isTrue();
-        assertThat(repository.findAll().stream().anyMatch(it -> it.getPeriodStart() == _2DaysAgo)).isTrue();
-        assertThat(repository.findAll().stream().anyMatch(it -> it.getPeriodStart() == _14DaysAgo)).isTrue();
-        assertThat(repository.findAll().stream().anyMatch(it -> it.getPeriodStart() == _15DaysAgo)).isFalse();
-        assertThat(repository.findAll().stream().anyMatch(it -> it.getPeriodStart() == _16DaysAgo)).isFalse();
+        assertThat(repository.findAll())
+                .extracting(ExposedVisitEntity::getPeriodStart)
+                .contains(
+                        _15DaysLater,
+                        _14DaysLater,
+                        _2DaysLater,
+                        yesterday,
+                        _2DaysAgo,
+                        _14DaysAgo
+                )
+                .doesNotContain(
+                        _15DaysAgo,
+                        _16DaysAgo
+                );
     }
 }

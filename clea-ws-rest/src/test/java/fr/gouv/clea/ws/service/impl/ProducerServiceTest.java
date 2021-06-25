@@ -12,6 +12,7 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 @SpringBootTest
 @EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
@@ -94,41 +96,21 @@ class ProducerServiceTest {
 
         producerService.produceVisits(decoded);
 
-        ConsumerRecords<String, DecodedVisit> records = KafkaTestUtils.getRecords(visitConsumer);
-        assertThat(records.count()).isEqualTo(3);
-
-        List<DecodedVisit> extracted = StreamSupport
-                .stream(records.spliterator(), true)
-                .map(ConsumerRecord::value)
-                .collect(Collectors.toList());
-        assertThat(extracted.size()).isEqualTo(3);
-
-        DecodedVisit visit1 = extracted.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid1))
-                .findFirst().orElse(null);
-        assertThat(visit1).isNotNull();
-        assertThat(visit1.getLocationTemporaryPublicId()).isEqualTo(uuid1);
-        assertThat(visit1.getEncryptedLocationSpecificPart().getEncryptedLocationMessage())
-                .isEqualTo(encryptedLocationMessage1);
-        assertThat(visit1.getQrCodeScanTime()).isEqualTo(qrCodeScanTime1);
-        assertThat(visit1.isBackward()).isEqualTo(isBackward1);
-
-        DecodedVisit visit2 = extracted.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid2))
-                .findFirst().orElse(null);
-        assertThat(visit2).isNotNull();
-        assertThat(visit2.getLocationTemporaryPublicId()).isEqualTo(uuid2);
-        assertThat(visit2.getEncryptedLocationSpecificPart().getEncryptedLocationMessage())
-                .isEqualTo(encryptedLocationMessage2);
-        assertThat(visit2.getQrCodeScanTime()).isEqualTo(qrCodeScanTime2);
-        assertThat(visit2.isBackward()).isEqualTo(isBackward2);
-
-        DecodedVisit visit3 = extracted.stream().filter(it -> it.getLocationTemporaryPublicId().equals(uuid3))
-                .findFirst().orElse(null);
-        assertThat(visit3).isNotNull();
-        assertThat(visit3.getLocationTemporaryPublicId()).isEqualTo(uuid3);
-        assertThat(visit3.getEncryptedLocationSpecificPart().getEncryptedLocationMessage())
-                .isEqualTo(encryptedLocationMessage3);
-        assertThat(visit3.getQrCodeScanTime()).isEqualTo(qrCodeScanTime3);
-        assertThat(visit3.isBackward()).isEqualTo(isBackward3);
+        assertThat(KafkaTestUtils.getRecords(visitConsumer))
+                .extracting(ConsumerRecord::value)
+                .extracting(
+                        value -> tuple(
+                                value.getLocationTemporaryPublicId(),
+                                value.getEncryptedLocationSpecificPart().getEncryptedLocationMessage(),
+                                value.getQrCodeScanTime(),
+                                value.isBackward()
+                        )
+                )
+                .containsExactly(
+                        Tuple.tuple(uuid1, encryptedLocationMessage1, qrCodeScanTime1, isBackward1),
+                        Tuple.tuple(uuid2, encryptedLocationMessage2, qrCodeScanTime2, isBackward2),
+                        Tuple.tuple(uuid3, encryptedLocationMessage3, qrCodeScanTime3, isBackward3)
+                );
     }
 
     @Test

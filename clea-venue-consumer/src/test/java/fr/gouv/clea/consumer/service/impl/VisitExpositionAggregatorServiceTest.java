@@ -1,6 +1,5 @@
 package fr.gouv.clea.consumer.service.impl;
 
-import fr.gouv.clea.consumer.model.ExposedVisitEntity;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
 import fr.gouv.clea.consumer.service.IStatService;
@@ -20,14 +19,10 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @DirtiesContext
@@ -90,12 +85,9 @@ class VisitExpositionAggregatorServiceTest {
 
         service.updateExposureCount(visit);
 
-        List<ExposedVisitEntity> entities = repository.findAll();
-        entities.forEach(it -> {
-            assertThat(it.getLocationTemporaryPublicId()).isEqualTo(uuid);
-            assertThat(it.getBackwardVisits()).isEqualTo(1);
-        }
-        );
+        assertThat(repository.findAll())
+                .allMatch(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid), "has uuid" + uuid)
+                .allMatch(exposedVisit -> exposedVisit.getBackwardVisits() == 1, "has 1 backward visits");
     }
 
     @Test
@@ -112,12 +104,10 @@ class VisitExpositionAggregatorServiceTest {
 
         long after = repository.count();
         assertThat(before).isEqualTo(after);
-        List<ExposedVisitEntity> entities = repository.findAll();
-        entities.forEach(it -> {
-            assertThat(it.getLocationTemporaryPublicId()).isEqualTo(uuid);
-            assertThat(it.getBackwardVisits()).isEqualTo(2);
-        }
-        );
+
+        assertThat(repository.findAll())
+                .allMatch(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid), "has uuid" + uuid)
+                .allMatch(exposedVisit -> exposedVisit.getBackwardVisits() == 2, "has 2 backward visits");
     }
 
     @Test
@@ -138,23 +128,15 @@ class VisitExpositionAggregatorServiceTest {
         service.updateExposureCount(visit);
         service.updateExposureCount(visit2);
 
-        List<ExposedVisitEntity> entities = repository.findAll();
-        entities.stream()
-                .filter(it -> it.getLocationTemporaryPublicId().equals(uuid))
-                .forEach(it -> {
-                    assertThat(it.getLocationTemporaryPublicId()).isEqualTo(uuid);
-                    assertThat(it.getBackwardVisits()).isEqualTo(1);
-                    assertThat(it.getForwardVisits()).isEqualTo(1);
-                }
-                );
-        entities.stream()
-                .filter(it -> it.getLocationTemporaryPublicId().equals(newUUID))
-                .forEach(it -> {
-                    assertThat(it.getLocationTemporaryPublicId()).isEqualTo(newUUID);
-                    assertThat(it.getBackwardVisits()).isEqualTo(1);
-                    assertThat(it.getForwardVisits()).isZero();
-                }
-                );
+        assertThat(repository.findAll())
+                .filteredOn(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid))
+                .allMatch(exposedVisit -> exposedVisit.getBackwardVisits() == 1, "has 1 backward visit")
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 1, "has 1 forward visit");
+
+        assertThat(repository.findAll())
+                .filteredOn(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(newUUID))
+                .allMatch(exposedVisit -> exposedVisit.getBackwardVisits() == 1, "has 1 backward visit")
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 0, "has 0 forward visit");
     }
 
     @Test
