@@ -10,32 +10,26 @@ import java.util.stream.Collectors;
 public class VisitsUpdateService {
 
     public List<Visit> malformLocalListScanTimes(final List<Visit> localList) {
-        return List.copyOf(localList).stream()
-                .peek(visit -> visit.setQrCodeScanTime(-1L))
+        return localList.stream()
+                .map(visit -> visit.withScanTime(-1L))
                 .collect(Collectors.toList());
     }
 
     public List<Visit> nullifyLocalListScanTimes(final List<Visit> localList) {
-        return List.copyOf(localList).stream()
-                .peek(visit -> visit.setQrCodeScanTime(null))
+        return localList.stream()
+                .map(visit -> visit.withScanTime(null))
                 .collect(Collectors.toList());
     }
 
     public List<Visit> emptyLocalListQrCodesFields(final List<Visit> localList) {
-        return List.copyOf(localList).stream()
-                .peek(visit -> visit.setQrCode(""))
-                .collect(Collectors.toList());
-    }
-
-    public List<Visit> nullifyLocalListQrCodesFields(final List<Visit> localList) {
-        return List.copyOf(localList).stream()
-                .peek(visit -> visit.setQrCode(null))
+        return localList.stream()
+                .map(visit -> visit.withDeepLinkExtractedInformation(""))
                 .collect(Collectors.toList());
     }
 
     public List<Visit> malformLocalListQrCodesFields(final List<Visit> localList) {
-        return List.copyOf(localList).stream()
-                .peek(visit -> visit.setQrCode("malformed"))
+        return localList.stream()
+                .map(visit -> visit.withDeepLinkExtractedInformation("malformed"))
                 .collect(Collectors.toList());
     }
 }

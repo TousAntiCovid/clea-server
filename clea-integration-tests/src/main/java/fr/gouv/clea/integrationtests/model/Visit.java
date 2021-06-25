@@ -1,15 +1,14 @@
 package fr.gouv.clea.integrationtests.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Value
+@With
+@Builder
 @AllArgsConstructor
-@NoArgsConstructor
 public class Visit {
 
-    private String qrCode;
+    String deepLinkExtractedInformation;
 
-    private Long qrCodeScanTime;
+    Long scanTime;
 }

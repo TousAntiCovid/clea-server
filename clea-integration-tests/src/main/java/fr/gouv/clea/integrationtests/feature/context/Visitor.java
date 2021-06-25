@@ -11,10 +11,7 @@ import fr.gouv.clea.integrationtests.utils.QrCodeDecoder;
 import fr.inria.clea.lsp.exception.CleaEncodingException;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import io.minio.errors.*;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -61,7 +58,8 @@ public class Visitor {
                 .max(Comparator.naturalOrder()).orElse(0f);
     }
 
-    private Stream<Stream<Optional<Float>>> getRiskLevelsFromQrCodesMatchingPrefix(int iteration, String prefix) {
+    private Stream<Stream<Optional<Float>>> getRiskLevelsFromQrCodesMatchingPrefix(final int iteration,
+            final String prefix) {
         try {
             return s3Service.getClusterFile(iteration, prefix).stream()
                     .map(cluster -> localList.stream().map(qr -> getQrcodeRiskLevel(cluster, qr)));
@@ -72,11 +70,11 @@ public class Visitor {
         }
     }
 
-    private Optional<Float> getQrcodeRiskLevel(Cluster cluster, Visit qr) {
+    private Optional<Float> getQrcodeRiskLevel(final Cluster cluster, final Visit visit) {
         try {
-            if (QrCodeDecoder.getLocationTemporaryId(qr).toString().equals(cluster.getLocationTemporaryPublicID())) {
+            if (QrCodeDecoder.getLocationTemporaryId(visit).toString().equals(cluster.getLocationTemporaryPublicID())) {
                 return cluster.getExpositions().stream()
-                        .filter(exp -> exp.isInExposition(TimeUtils.instantFromTimestamp(qr.getQrCodeScanTime())))
+                        .filter(exp -> exp.isInExposition(TimeUtils.instantFromTimestamp(visit.getScanTime())))
                         .map(ClusterExposition::getRisk)
                         .max(Float::compare);
             }
@@ -90,21 +88,22 @@ public class Visitor {
         return Optional.ofNullable(lastReportResponse);
     }
 
-    public void scanQrCode(String qrCode, Instant scanTime) {
+    public void registerDeepLink(final String deepLink, final Instant scanTime) {
 
         // check if prefix is present then removes it
-        if (!qrCode.startsWith(applicationProperties.getQrCodePrefix())) {
-            return;
+        if (!deepLink.startsWith(applicationProperties.getQrCodePrefix())) {
+            throw new RuntimeException("Scanned deeplink has wrong prefix");
         }
-        qrCode = qrCode.substring(applicationProperties.getQrCodePrefix().length());
-        var scannedVisit = new Visit();
-        scannedVisit.setQrCode(qrCode);
-        scannedVisit.setQrCodeScanTime(TimeUtils.ntpTimestampFromInstant(scanTime));
+        final var encodedInformation = deepLink.substring(applicationProperties.getQrCodePrefix().length());
 
-        localList.add(scannedVisit);
+        localList.add(
+                Visit.builder()
+                        .deepLinkExtractedInformation(encodedInformation)
+                        .scanTime(TimeUtils.ntpTimestampFromInstant(scanTime)).build()
+        );
     }
 
-    private boolean matchesVisitedPlacesIds(String prefix) {
+    private boolean matchesVisitedPlacesIds(final String prefix) {
         return localList.stream()
                 .map(this::decodeLocationTemporaryId)
                 .filter(Objects::nonNull)
@@ -112,7 +111,7 @@ public class Visitor {
                 .anyMatch(qrId -> qrId.startsWith(prefix));
     }
 
-    private UUID decodeLocationTemporaryId(Visit visit) {
+    private UUID decodeLocationTemporaryId(final Visit visit) {
         try {
             return QrCodeDecoder.getLocationTemporaryId(visit);
         } catch (CleaEncodingException e) {

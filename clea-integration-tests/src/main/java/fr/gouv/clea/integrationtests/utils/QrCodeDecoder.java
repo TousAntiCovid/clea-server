@@ -13,7 +13,7 @@ public class QrCodeDecoder {
 
     public static UUID getLocationTemporaryId(final Visit visit) throws CleaEncodingException {
         return new LocationSpecificPartDecoder()
-                .decodeHeader(Base64.getUrlDecoder().decode(visit.getQrCode()))
+                .decodeHeader(Base64.getUrlDecoder().decode(visit.getDeepLinkExtractedInformation()))
                 .getLocationTemporaryPublicId();
     }
 }

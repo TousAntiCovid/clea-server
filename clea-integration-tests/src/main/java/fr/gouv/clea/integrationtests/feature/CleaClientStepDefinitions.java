@@ -1,7 +1,6 @@
 package fr.gouv.clea.integrationtests.feature;
 
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
-import fr.gouv.clea.integrationtests.dto.ApiErrorResponse;
 import fr.gouv.clea.integrationtests.dto.PivotDateStringWreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportResponse;
@@ -20,7 +19,6 @@ import io.cucumber.java8.En;
 import io.minio.errors.*;
 import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpStatus;
 import org.ocpsoft.prettytime.nlp.PrettyTimeParser;
 
 import java.io.IOException;
@@ -123,8 +121,8 @@ public class CleaClientStepDefinitions implements En {
     public void visitor_scans_qrcode_at_given_instant(String visitorName, String locationName, Instant qrCodeScanTime)
             throws CleaCryptoException {
         final var location = this.scenarioContext.getLocation(locationName);
-        final var qr = location.getQrCodeAt(qrCodeScanTime);
-        this.scenarioContext.getOrCreateUser(visitorName).scanQrCode(qr.getQrCode(), qrCodeScanTime);
+        final var deepLink = location.getQrCodeAt(qrCodeScanTime);
+        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(deepLink.getQrCode(), qrCodeScanTime);
     }
 
     // Visitor scan a staff QR code at given instant
@@ -133,7 +131,7 @@ public class CleaClientStepDefinitions implements En {
             Instant qrCodeScanTime) throws CleaCryptoException {
         final var location = this.scenarioContext.getStaffLocation(locationName);
         final var qr = location.getQrCodeAt(qrCodeScanTime);
-        this.scenarioContext.getOrCreateUser(visitorName).scanQrCode(qr.getQrCode(), qrCodeScanTime);
+        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qr.getQrCode(), qrCodeScanTime);
     }
 
     // Visitor scan a QR code at a given Instant, but the scanned QR code is valid
@@ -143,7 +141,7 @@ public class CleaClientStepDefinitions implements En {
             String locationName, Instant qrCodeScanTime, Instant qrCodeValidTime) throws CleaCryptoException {
         final var location = this.scenarioContext.getLocation(locationName);
         final var qr = location.getQrCodeAt(qrCodeValidTime);
-        this.scenarioContext.getOrCreateUser(visitorName).scanQrCode(qr.getQrCode(), qrCodeScanTime);
+        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qr.getQrCode(), qrCodeScanTime);
     }
 
     @When("Cluster detection triggered")
@@ -331,17 +329,15 @@ public class CleaClientStepDefinitions implements En {
         final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
         final var request = new PivotDateStringWreportRequest("malformed", localList);
 
-        final var apiReportErrorResponse = given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
                 .post(wreportUrl)
                 .then()
                 .contentType(ContentType.JSON)
-                .extract()
-                .as(ApiErrorResponse.class);
-        assertThat(apiReportErrorResponse.getHttpStatus()).isNotNull().isEqualTo(HttpStatus.SC_BAD_REQUEST);
-        assertThat(apiReportErrorResponse.getMessage()).isEqualTo("JSON parse error");
+                .statusCode(400)
+                .body("message", equalTo("JSON parse error"));
     }
 
     private static void noOp() {
