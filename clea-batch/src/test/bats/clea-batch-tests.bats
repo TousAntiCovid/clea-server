@@ -79,7 +79,7 @@ setup() {
     export -f java
 
     # fails for s3cmd sync but not for s3cmd put
-    aws() { echo "CALLING_AWS_S3 ${*}" ; [ $4 == "sync" ] && return 1 || return 0; }
+    aws() { echo "CALLING_AWS_S3 ${*}" ; [ $5 == "sync" ] && return 1 || return 0; }
     export -f aws
 
     mkdir -p /tmp/v1/123
@@ -101,7 +101,7 @@ setup() {
     export -f java
 
     # fails for s3cmd put but not for s3cmd sync
-    aws() { echo "CALLING_AWS_S3 ${*}" ; [ $4 == "cp" ] && return 1 || return 0; }
+    aws() { echo "CALLING_AWS_S3 ${*}" ; [ $5 == "cp" ] && return 1 || return 0; }
     export -f aws
 
     mkdir -p /tmp/v1/123

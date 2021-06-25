@@ -59,7 +59,7 @@ fi
 
 
 info "Copying to OUTSCALE ...."
-AWS_OPTS="--profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE"
+AWS_OPTS="--profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE --no-progress"
 BUCKET="$BUCKET_OUTSCALE"
 
 # All files except indexCluster.json
@@ -71,7 +71,7 @@ aws $AWS_OPTS s3 cp   --acl public-read $(find $WORKDIR -type f -name clusterInd
 # --------------------
 if [ -n "$BUCKET_SCALEWAY" ] &&  [ -n "$PROFILE_SCALEWAY" ]  &&  [ -n "$ENDPOINT_SCALEWAY" ] ; then
   info "Copying to SCALEWAY ...."
-  AWS_OPTS="--profile=$PROFILE_SCALEWAY --endpoint-url=$ENDPOINT_SCALEWAY"
+  AWS_OPTS="--profile=$PROFILE_SCALEWAY --endpoint-url=$ENDPOINT_SCALEWAY --no-progress"
   BUCKET=$BUCKET_SCALEWAY
 
   # All files except indexCluster.json
