@@ -6,9 +6,7 @@ import fr.gouv.clea.integrationtests.model.Cluster;
 import fr.gouv.clea.integrationtests.model.ClusterExposition;
 import fr.gouv.clea.integrationtests.model.Visit;
 import fr.gouv.clea.integrationtests.service.CleaS3Service;
-import fr.gouv.clea.integrationtests.service.VisitsUpdateService;
 import fr.gouv.clea.integrationtests.utils.QrCodeDecoder;
-import fr.inria.clea.lsp.exception.CleaEncodingException;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import io.minio.errors.*;
 import lombok.*;
@@ -21,7 +19,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -34,8 +31,6 @@ public class Visitor {
     private final String name;
 
     private final CleaS3Service s3Service;
-
-    private final VisitsUpdateService visitsUpdateService;
 
     private final ApplicationProperties applicationProperties;
 
@@ -71,17 +66,13 @@ public class Visitor {
     }
 
     private Optional<Float> getQrcodeRiskLevel(final Cluster cluster, final Visit visit) {
-        try {
-            if (QrCodeDecoder.getLocationTemporaryId(visit).toString().equals(cluster.getLocationTemporaryPublicID())) {
-                return cluster.getExpositions().stream()
-                        .filter(exp -> exp.isInExposition(TimeUtils.instantFromTimestamp(visit.getScanTime())))
-                        .map(ClusterExposition::getRisk)
-                        .max(Float::compare);
-            }
-            return Optional.empty();
-        } catch (CleaEncodingException e) {
-            throw new RuntimeException(e);
+        if (QrCodeDecoder.getLocationTemporaryId(visit).toString().equals(cluster.getLocationTemporaryPublicID())) {
+            return cluster.getExpositions().stream()
+                    .filter(exp -> exp.isInExposition(TimeUtils.instantFromTimestamp(visit.getScanTime())))
+                    .map(ClusterExposition::getRisk)
+                    .max(Float::compare);
         }
+        return Optional.empty();
     }
 
     public Optional<WreportResponse> getLastReportResponse() {
@@ -105,18 +96,8 @@ public class Visitor {
 
     private boolean matchesVisitedPlacesIds(final String prefix) {
         return localList.stream()
-                .map(this::decodeLocationTemporaryId)
-                .filter(Objects::nonNull)
+                .map(QrCodeDecoder::getLocationTemporaryId)
                 .map(UUID::toString)
                 .anyMatch(qrId -> qrId.startsWith(prefix));
-    }
-
-    private UUID decodeLocationTemporaryId(final Visit visit) {
-        try {
-            return QrCodeDecoder.getLocationTemporaryId(visit);
-        } catch (CleaEncodingException e) {
-            log.error("an error occured during qr code decoding.Visit: {} ; error : {}", visit, e.getMessage());
-        }
-        return null;
     }
 }

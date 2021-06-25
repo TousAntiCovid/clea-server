@@ -2,7 +2,6 @@ package fr.gouv.clea.integrationtests.feature.context;
 
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
 import fr.gouv.clea.integrationtests.service.CleaS3Service;
-import fr.gouv.clea.integrationtests.service.VisitsUpdateService;
 import fr.gouv.clea.qr.LocationQrCodeGenerator;
 import fr.inria.clea.lsp.CleaEciesEncoder;
 import fr.inria.clea.lsp.exception.CleaCryptoException;
@@ -43,13 +42,9 @@ public class ScenarioContext {
 
     private final CleaS3Service s3service;
 
-    private final VisitsUpdateService visitsUpdateService;
-
-    public ScenarioContext(final ApplicationProperties appConfig, final CleaS3Service s3service,
-            final VisitsUpdateService visitsUpdateService) throws Exception {
+    public ScenarioContext(final ApplicationProperties appConfig, final CleaS3Service s3service) throws Exception {
         this.appConfig = appConfig;
         this.s3service = s3service;
-        this.visitsUpdateService = visitsUpdateService;
         this.initializeKeys(appConfig);
     }
 
@@ -79,7 +74,7 @@ public class ScenarioContext {
     }
 
     private Visitor createVisitor(final String name) {
-        return new Visitor(name, s3service, visitsUpdateService, appConfig);
+        return new Visitor(name, s3service, appConfig);
     }
 
     public Visitor getVisitor(final String visitorName) {

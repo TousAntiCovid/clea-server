@@ -6,7 +6,6 @@ import fr.gouv.clea.integrationtests.dto.WreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportResponse;
 import fr.gouv.clea.integrationtests.feature.context.ScenarioContext;
 import fr.gouv.clea.integrationtests.service.CleaBatchService;
-import fr.gouv.clea.integrationtests.service.VisitsUpdateService;
 import fr.gouv.clea.integrationtests.utils.CleaApiResponseParser;
 import fr.inria.clea.lsp.exception.CleaCryptoException;
 import fr.inria.clea.lsp.utils.TimeUtils;
@@ -28,6 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,17 +40,13 @@ public class CleaClientStepDefinitions implements En {
 
     private final CleaBatchService cleaBatchService;
 
-    private final VisitsUpdateService visitsUpdateService;
-
     private final String wreportUrl;
 
     public CleaClientStepDefinitions(final ScenarioContext scenarioContext,
             final CleaBatchService cleaBatchService,
-            final VisitsUpdateService visitsUpdateService,
             final ApplicationProperties applicationProperties) {
         this.scenarioContext = scenarioContext;
         this.cleaBatchService = cleaBatchService;
-        this.visitsUpdateService = visitsUpdateService;
         this.wreportUrl = applicationProperties.getWsRest().getBaseUrl().toString().concat("/api/clea/v1/wreport");
     }
 
@@ -195,7 +191,9 @@ public class CleaClientStepDefinitions implements En {
     public void visitor_declares_sick_with_pivot_date_and_no_deeplink(String visitorName, Instant pivotDate) {
         final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
         final var request = new WreportRequest(
-                TimeUtils.ntpTimestampFromInstant(pivotDate), visitsUpdateService.emptyLocalListQrCodesFields(localList)
+                TimeUtils.ntpTimestampFromInstant(pivotDate), localList.stream()
+                        .map(visit -> visit.withDeepLinkExtractedInformation(""))
+                        .collect(Collectors.toList())
         );
 
         given()
@@ -215,7 +213,9 @@ public class CleaClientStepDefinitions implements En {
         final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
         final var request = new WreportRequest(
                 TimeUtils.ntpTimestampFromInstant(pivotDate),
-                visitsUpdateService.malformLocalListQrCodesFields(localList)
+                localList.stream()
+                        .map(visit -> visit.withDeepLinkExtractedInformation("malformed"))
+                        .collect(Collectors.toList())
         );
         given()
                 .contentType(ContentType.JSON)
@@ -234,7 +234,9 @@ public class CleaClientStepDefinitions implements En {
         final var visitor = scenarioContext.getVisitor(visitorName);
         final var request = new WreportRequest(
                 TimeUtils.ntpTimestampFromInstant(pivotDate),
-                visitsUpdateService.malformLocalListScanTimes(visitor.getLocalList())
+                visitor.getLocalList().stream()
+                        .map(visit -> visit.withScanTime(-1L))
+                        .collect(Collectors.toList())
         );
         final var response = given()
                 .contentType(ContentType.JSON)
@@ -255,7 +257,9 @@ public class CleaClientStepDefinitions implements En {
         final Instant pivotDate = Instant.now().minus(Duration.ofDays(14));
         final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
         final var request = new WreportRequest(
-                TimeUtils.ntpTimestampFromInstant(pivotDate), visitsUpdateService.nullifyLocalListScanTimes(localList)
+                TimeUtils.ntpTimestampFromInstant(pivotDate), localList.stream()
+                        .map(visit -> visit.withScanTime(null))
+                        .collect(Collectors.toList())
         );
         given()
                 .contentType(ContentType.JSON)

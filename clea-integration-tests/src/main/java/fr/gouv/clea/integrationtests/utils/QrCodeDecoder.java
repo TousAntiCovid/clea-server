@@ -11,9 +11,13 @@ import java.util.UUID;
 @UtilityClass
 public class QrCodeDecoder {
 
-    public static UUID getLocationTemporaryId(final Visit visit) throws CleaEncodingException {
-        return new LocationSpecificPartDecoder()
-                .decodeHeader(Base64.getUrlDecoder().decode(visit.getDeepLinkExtractedInformation()))
-                .getLocationTemporaryPublicId();
+    public static UUID getLocationTemporaryId(final Visit visit) {
+        try {
+            return new LocationSpecificPartDecoder()
+                    .decodeHeader(Base64.getUrlDecoder().decode(visit.getDeepLinkExtractedInformation()))
+                    .getLocationTemporaryPublicId();
+        } catch (CleaEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
