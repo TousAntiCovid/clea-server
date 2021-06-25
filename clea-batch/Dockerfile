@@ -43,4 +43,4 @@ RUN chmod +x *.sh \
 
 USER javaapp
 
-CMD [ "./clea-batch.sh" ]
+CMD [ "./clea-batch-console.sh" ]
