@@ -22,11 +22,11 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.Objects;
-import java.util.Comparator;
 import java.util.stream.Stream;
 
 @Data
@@ -35,17 +35,23 @@ import java.util.stream.Stream;
 public class Visitor {
 
     private final String name;
+
     private final CleaS3Service s3Service;
+
     private final VisitsUpdateService visitsUpdateService;
+
     private final ApplicationProperties applicationProperties;
+
     private List<Visit> localList = new ArrayList<>();
 
     @Getter(AccessLevel.NONE)
     private WreportResponse lastReportResponse = null;
 
-    public float getStatus() throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public float getStatus() throws IOException, ServerException, InsufficientDataException, ErrorResponseException,
+            NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
+            InternalException {
         final var clusterIndex = s3Service.getClusterIndex().orElseThrow();
-        return  clusterIndex.getPrefixes().stream()
+        return clusterIndex.getPrefixes().stream()
                 .filter(this::matchesVisitedPlacesIds)
                 .map(prefix -> getRiskLevelsFromQrCodesMatchingPrefix(clusterIndex.getIteration(), prefix))
                 .flatMap(Stream::distinct)
@@ -59,7 +65,9 @@ public class Visitor {
         try {
             return s3Service.getClusterFile(iteration, prefix).stream()
                     .map(cluster -> localList.stream().map(qr -> getQrcodeRiskLevel(cluster, qr)));
-        } catch (IOException | ServerException | InsufficientDataException | ErrorResponseException | NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
+        } catch (IOException | ServerException | InsufficientDataException | ErrorResponseException
+                | NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException
+                | InternalException e) {
             throw new RuntimeException(e);
         }
     }
@@ -84,7 +92,7 @@ public class Visitor {
 
     public void scanQrCode(String qrCode, Instant scanTime) {
 
-        //check if prefix is present then removes it
+        // check if prefix is present then removes it
         if (!qrCode.startsWith(applicationProperties.getQrCodePrefix())) {
             return;
         }

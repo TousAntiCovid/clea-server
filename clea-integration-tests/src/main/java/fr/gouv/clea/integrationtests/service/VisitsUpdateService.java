@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class VisitsUpdateService {
+
     public List<Visit> malformLocalListScanTimes(final List<Visit> localList) {
         return List.copyOf(localList).stream()
                 .peek(visit -> visit.setQrCodeScanTime(-1L))

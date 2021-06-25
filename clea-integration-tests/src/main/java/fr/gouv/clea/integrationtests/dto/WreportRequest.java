@@ -18,5 +18,4 @@ public class WreportRequest implements Request {
 
     private List<Visit> visits;
 
-
 }
