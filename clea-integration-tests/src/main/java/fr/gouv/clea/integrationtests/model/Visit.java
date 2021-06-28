@@ -1,6 +1,10 @@
 package fr.gouv.clea.integrationtests.model;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Value;
+import lombok.With;
 
 @Value
 @With
@@ -8,7 +12,9 @@ import lombok.*;
 @AllArgsConstructor
 public class Visit {
 
+    @JsonProperty("qrCode")
     String deepLinkExtractedInformation;
 
+    @JsonProperty("qrCodeScanTime")
     Long scanTime;
 }

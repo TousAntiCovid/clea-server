@@ -1,6 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>fr.gouv.clea</groupId>
@@ -13,7 +16,6 @@
     <properties>
         <java.version>11</java.version>
         <maven.compiler.target>11</maven.compiler.target>
-        <restassured.version>3.3.0</restassured.version>
         <org.projectlombok.version>1.18.20</org.projectlombok.version>
         <!-- see https://github.com/rest-assured/rest-assured/issues/1436-->
         <groovy.version>3.0.7</groovy.version>
@@ -112,12 +114,12 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>${restassured.version}</version>
+            <version>${rest-assured.version}</version>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured-all</artifactId>
-            <version>${restassured.version}</version>
+            <version>${rest-assured.version}</version>
         </dependency>
     </dependencies>
 
