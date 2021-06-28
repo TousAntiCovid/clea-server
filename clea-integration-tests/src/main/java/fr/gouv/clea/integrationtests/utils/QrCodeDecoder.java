@@ -14,7 +14,7 @@ public class QrCodeDecoder {
     public static UUID getLocationTemporaryId(final Visit visit) {
         try {
             return new LocationSpecificPartDecoder()
-                    .decodeHeader(Base64.getUrlDecoder().decode(visit.getDeepLinkExtractedInformation()))
+                    .decodeHeader(Base64.getUrlDecoder().decode(visit.getLocalPart()))
                     .getLocationTemporaryPublicId();
         } catch (CleaEncodingException e) {
             throw new RuntimeException(e);
