@@ -13,7 +13,7 @@ import lombok.With;
 public class Visit {
 
     @JsonProperty("qrCode")
-    String localPart;
+    String deepLinkLocationSpecificPart;
 
     @JsonProperty("qrCodeScanTime")
     Long scanTime;

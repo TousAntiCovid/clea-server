@@ -89,7 +89,7 @@ public class Visitor {
 
         localList.add(
                 Visit.builder()
-                        .localPart(encodedInformation)
+                        .deepLinkLocationSpecificPart(encodedInformation)
                         .scanTime(TimeUtils.ntpTimestampFromInstant(scanTime)).build()
         );
     }

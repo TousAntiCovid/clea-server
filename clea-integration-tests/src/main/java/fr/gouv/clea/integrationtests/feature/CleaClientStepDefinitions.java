@@ -192,7 +192,7 @@ public class CleaClientStepDefinitions implements En {
         final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
         final var request = new WreportRequest(
                 TimeUtils.ntpTimestampFromInstant(pivotDate), localList.stream()
-                        .map(visit -> visit.withLocalPart(""))
+                        .map(visit -> visit.withDeepLinkLocationSpecificPart(""))
                         .collect(Collectors.toList())
         );
 
@@ -214,7 +214,7 @@ public class CleaClientStepDefinitions implements En {
         final var request = new WreportRequest(
                 TimeUtils.ntpTimestampFromInstant(pivotDate),
                 localList.stream()
-                        .map(visit -> visit.withLocalPart("malformed"))
+                        .map(visit -> visit.withDeepLinkLocationSpecificPart("malformed"))
                         .collect(Collectors.toList())
         );
         given()
