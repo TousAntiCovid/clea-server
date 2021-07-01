@@ -3,6 +3,7 @@ package fr.gouv.clea.qrcodegenerator;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.BarcodeQRCode;
 import com.itextpdf.text.pdf.PdfWriter;
 import fr.inria.clea.lsp.Location;
@@ -32,7 +33,7 @@ public class Generator {
     private static final String PK_MCTA = "02c3a58bf668fa3fe2fc206152abd6d8d55102adfee68c8b227676d1fe763f5a06";
 
     // number of codes to generate
-    private static final int PLACES_NUMBER = 300000;
+    private static final int PLACES_NUMBER = 1;
 
     // location configuration
     private static final int VENUE_TYPE = 1;
@@ -73,25 +74,26 @@ public class Generator {
     }
 
     private static void generateCsvFromList(ArrayList<URL> urlsList) throws IOException {
-        FileWriter writer = new FileWriter(OUTPUT_DIR + "/codes.csv");
-        final String collect = urlsList.stream()
-                .map(URL::toString)
-                .collect(Collectors.joining(",\n"));
-        writer.write(collect);
-        writer.close();
+        try (var writer = new FileWriter(OUTPUT_DIR + "/codes.csv")) {
+            final String collect = urlsList.stream()
+                    .map(URL::toString)
+                    .collect(Collectors.joining(",\n"));
+            writer.write(collect);
+        }
     }
 
     private static void generateQrCodeAndCreatePdf(int i, URL deepLink) throws DocumentException, FileNotFoundException {
         final var qrCode = new BarcodeQRCode(deepLink.toString(), QR_SIZE_AS_PX, QR_SIZE_AS_PX, null);
         final var filename = format("qrcode-%d.pdf", i);
-        final File targetFile = OUTPUT_DIR.resolve(filename).toFile();
+        final var targetFile = OUTPUT_DIR.resolve(filename).toFile();
         createPdf(targetFile, qrCode);
     }
 
     private static void createPdf(File targetFile, BarcodeQRCode qrCode) throws DocumentException, FileNotFoundException {
-            Document document = new Document();
+            var document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(targetFile));
-            Image image = qrCode.getImage();
+            var image = qrCode.getImage();
+            image.setAbsolutePosition((PageSize.A4.getWidth() - image.getScaledWidth())/2, (PageSize.A4.getHeight() - image.getScaledHeight())/2);
             document.open();
             document.add(image);
             document.close();
