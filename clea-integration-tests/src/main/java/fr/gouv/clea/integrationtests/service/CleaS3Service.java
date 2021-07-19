@@ -34,7 +34,7 @@ public class CleaS3Service {
             ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
             XmlParserException, InternalException {
         byte[] file = this.getFile("clusterIndex" + ".json");
-        ClusterIndex clusterIndex = objectMapper.readValue(file, ClusterIndex.class);
+        final var clusterIndex = objectMapper.readValue(file, ClusterIndex.class);
         return Optional.ofNullable(clusterIndex);
     }
 
@@ -49,7 +49,6 @@ public class CleaS3Service {
             ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
             XmlParserException, InternalException {
 
-        log.info("{}, {}", minioProperties.getBucketName(), minioProperties.getDefaultBaseFolder());
         GetObjectArgs args = GetObjectArgs.builder()
                 .bucket(minioProperties.getBucketName())
                 .object(minioProperties.getDefaultBaseFolder() + "/" + key)
