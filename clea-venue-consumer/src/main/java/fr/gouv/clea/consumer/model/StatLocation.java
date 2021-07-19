@@ -4,26 +4,35 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import java.time.Instant;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "STAT_LOCATION")
+@Document(indexName = "health-clealocations-#{T(java.time.LocalDate).now().toString().replace('-', '.')}")
 public class StatLocation {
 
-    @EmbeddedId
-    private StatLocationKey statLocationKey;
+    @Id
+    private String id;
 
-    @Column(name = "backward_visits")
     private long backwardVisits;
 
-    @Column(name = "forward_visits")
     private long forwardVisits;
+
+    @Field(name = "@period", type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
+    private Instant period;
+
+    private int venueType;
+
+    private int venueCategory1;
+
+    private int venueCategory2;
+
 }
