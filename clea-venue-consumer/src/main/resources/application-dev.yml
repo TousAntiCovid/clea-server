@@ -56,3 +56,8 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: group1
+  elasticsearch:
+    username: ${STATISTIQUES_ELASTIC_USERNAME:elastic}
+    password: ${STATISTIQUES_ELASTIC_PASSWORD:to_define}
+    host: ${STATISTIQUES_ELASTIC_HOST:localhost}
+    port: ${STATISTIQUES_ELASTIC_PORT:9200}
