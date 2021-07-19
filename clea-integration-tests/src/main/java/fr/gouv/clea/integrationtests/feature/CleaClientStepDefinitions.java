@@ -14,7 +14,6 @@ import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cucumber.java8.En;
 import io.minio.errors.*;
 import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 @Slf4j
-public class CleaClientStepDefinitions implements En {
+public class CleaClientStepDefinitions {
 
     private final ScenarioContext scenarioContext;
 
