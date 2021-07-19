@@ -1,6 +1,6 @@
-package fr.gouv.clea.integrationtests.model.malformed;
+package fr.gouv.clea.integrationtests.dto;
 
-import fr.gouv.clea.model.Visit;
+import fr.gouv.clea.integrationtests.model.Visit;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class PivotDateTypeReportRequest {
+public class PivotDateStringWreportRequest implements Request {
 
     private String pivotDate;
 
