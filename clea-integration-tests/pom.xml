@@ -15,8 +15,11 @@
 
     <properties>
         <java.version>11</java.version>
-        <maven.compiler.target>11</maven.compiler.target>
-        <org.projectlombok.version>1.18.20</org.projectlombok.version>
+        <commons-io.version>1.3.2</commons-io.version>
+        <cucumber.version>6.10.4</cucumber.version>
+        <junit.version>4.13</junit.version>
+        <minio.version>8.2.1</minio.version>
+        <prettytime-nlp.version>4.0.6.Final</prettytime-nlp.version>
         <!-- see https://github.com/rest-assured/rest-assured/issues/1436-->
         <groovy.version>3.0.7</groovy.version>
     </properties>
@@ -33,8 +36,7 @@
         <dependency>
             <groupId>fr.gouv.clea</groupId>
             <artifactId>clea-qr-simulator</artifactId>
-            <version>${parent.version}</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>fr.inria.clea</groupId>
@@ -44,61 +46,56 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${org.projectlombok.version}</version>
-            <optional>true</optional>
+            <version>${lombok.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.11.4</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-io</artifactId>
-            <version>1.3.2</version>
+            <version>${commons-io.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.11.4</version>
         </dependency>
         <dependency>
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
-            <version>8.2.1</version>
+            <version>${minio.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ocpsoft.prettytime</groupId>
             <artifactId>prettytime-nlp</artifactId>
-            <version>4.0.6.Final</version>
-            <scope>compile</scope>
+            <version>${prettytime-nlp.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13</version>
+            <version>${junit.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit</artifactId>
-            <version>6.8.1</version>
+            <version>${cucumber.version}</version>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java8</artifactId>
-            <version>6.8.1</version>
+            <version>${cucumber.version}</version>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-spring</artifactId>
-            <version>6.8.1</version>
+            <version>${cucumber.version}</version>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
-            <version>6.10.4</version>
+            <version>${cucumber.version}</version>
         </dependency>
 
         <dependency>
@@ -109,17 +106,10 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>${rest-assured.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured-all</artifactId>
-            <version>${rest-assured.version}</version>
         </dependency>
     </dependencies>
 
@@ -136,7 +126,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>${org.projectlombok.version}</version>
+                            <version>${lombok.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
