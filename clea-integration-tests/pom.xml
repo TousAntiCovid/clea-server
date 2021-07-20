@@ -16,6 +16,7 @@
     <properties>
         <java.version>11</java.version>
         <maven.compiler.target>11</maven.compiler.target>
+        <cucumber.version>6.10.4</cucumber.version>
         <!-- see https://github.com/rest-assured/rest-assured/issues/1436-->
         <groovy.version>3.0.7</groovy.version>
     </properties>
@@ -81,22 +82,22 @@
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit</artifactId>
-            <version>6.8.1</version>
+            <version>${cucumber.version}</version>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java8</artifactId>
-            <version>6.8.1</version>
+            <version>${cucumber.version}</version>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-spring</artifactId>
-            <version>6.8.1</version>
+            <version>${cucumber.version}</version>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
-            <version>6.10.4</version>
+            <version>${cucumber.version}</version>
         </dependency>
 
         <dependency>
