@@ -304,13 +304,13 @@ class StatistiquesServiceIT {
     }
 
     private void recreateIndexes() {
-        if (template.indexExists(StatLocation.class)) {
-            template.deleteIndex(StatLocation.class);
+        if (template.indexOps(StatLocation.class).exists()) {
+            template.indexOps(StatLocation.class).delete();
         }
-        if (template.indexExists(ReportStatEntity.class)) {
-            template.deleteIndex(ReportStatEntity.class);
+        if (template.indexOps(ReportStatEntity.class).exists()) {
+            template.indexOps(ReportStatEntity.class).delete();
         }
-        template.createIndex(StatLocation.class);
-        template.createIndex(ReportStatEntity.class);
+        template.indexOps(ReportStatEntity.class).create();
+        template.indexOps(StatLocation.class).create();
     }
 }

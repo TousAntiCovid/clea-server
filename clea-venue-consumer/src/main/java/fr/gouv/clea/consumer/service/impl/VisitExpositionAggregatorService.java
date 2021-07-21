@@ -3,7 +3,7 @@ package fr.gouv.clea.consumer.service.impl;
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
+import fr.gouv.clea.consumer.repository.visits.IExposedVisitRepository;
 import fr.gouv.clea.consumer.service.IStatService;
 import fr.gouv.clea.consumer.service.IVisitExpositionAggregatorService;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
@@ -86,10 +86,17 @@ public class VisitExpositionAggregatorService implements IVisitExpositionAggrega
                 .collect(Collectors.toList());
         if (!merged.isEmpty()) {
             repository.saveAll(merged);
+            repository.flush();
             log.info("Persisting {} new visits!", toPersist.size());
             log.info("Updating {} existing visits!", toUpdate.size());
 
-            statService.logStats(visit);
+            try {
+                statService.logStats(visit);
+            } catch (Exception e) {
+                log.error("Error while communicating with elasticseach cluster !");
+                log.error(e.getMessage());
+                e.printStackTrace();
+            }
         } else {
             log.info(
                     "LTId: {}, qrScanTime: {} - No visit to persist / update", visit.getLocationTemporaryPublicId(),

@@ -1,7 +1,7 @@
 spring:
   datasource:
     url: jdbc:postgresql://postgres:5432/cleadb
-    username: username
+    username: postgres
     password: password
   h2:
     console:
@@ -11,3 +11,8 @@ spring:
       ddl-auto: create
   kafka:
     bootstrap-servers: kafka:29092
+  elasticsearch:
+    rest:
+      password: password
+      username: elastic
+      uris: http://elastic-statistiques:9200
