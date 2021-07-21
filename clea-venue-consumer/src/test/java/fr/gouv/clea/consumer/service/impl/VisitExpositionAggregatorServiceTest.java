@@ -1,7 +1,7 @@
 package fr.gouv.clea.consumer.service.impl;
 
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
+import fr.gouv.clea.consumer.repository.visits.IExposedVisitRepository;
 import fr.gouv.clea.consumer.service.IStatService;
 import fr.gouv.clea.consumer.service.IVisitExpositionAggregatorService;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;

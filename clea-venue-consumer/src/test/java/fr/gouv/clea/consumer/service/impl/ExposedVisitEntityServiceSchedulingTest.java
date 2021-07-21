@@ -1,7 +1,7 @@
 package fr.gouv.clea.consumer.service.impl;
 
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
-import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
+import fr.gouv.clea.consumer.repository.visits.IExposedVisitRepository;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.AfterEach;

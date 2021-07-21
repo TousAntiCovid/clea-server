@@ -1,7 +1,7 @@
 package fr.gouv.clea.consumer.service.impl;
 
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
-import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
+import fr.gouv.clea.consumer.repository.visits.IExposedVisitRepository;
 import fr.gouv.clea.consumer.service.IExposedVisitEntityService;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;

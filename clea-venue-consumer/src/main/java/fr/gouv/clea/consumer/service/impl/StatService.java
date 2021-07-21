@@ -2,6 +2,7 @@ package fr.gouv.clea.consumer.service.impl;
 
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.ReportStat;
+import fr.gouv.clea.consumer.model.ReportStatEntity;
 import fr.gouv.clea.consumer.model.StatLocation;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.statistiques.IReportStatRepository;
@@ -9,6 +10,8 @@ import fr.gouv.clea.consumer.repository.statistiques.IStatLocationRepository;
 import fr.gouv.clea.consumer.service.IStatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -26,8 +29,15 @@ public class StatService implements IStatService {
 
     private final VenueConsumerProperties properties;
 
+    @Autowired
+    private ElasticsearchOperations template;
+
     @Override
     public void logStats(Visit visit) {
+
+        if (!template.indexOps(StatLocation.class).exists()) {
+            template.indexOps(StatLocation.class).create();
+        }
 
         var statLocation = newStatLocation(visit);
         Optional<StatLocation> optional = repository.findByVenueTypeAndVenueCategory1AndVenueCategory2AndPeriod(
@@ -42,7 +52,7 @@ public class StatService implements IStatService {
             repository.save(statLocation);
         }
         log.info(
-                "saved stat period: {}, venueType: {} venueCategory1: {}, venueCategory2: {}, backwardVisits: {}, forwardVisits: {}",
+                "Saved stat period: {}, venueType: {} venueCategory1: {}, venueCategory2: {}, backwardVisits: {}, forwardVisits: {}",
                 statLocation.getPeriod(),
                 statLocation.getVenueType(),
                 statLocation.getVenueCategory1(),
@@ -54,8 +64,13 @@ public class StatService implements IStatService {
 
     @Override
     public void logStats(ReportStat reportStat) {
+
+        if (!template.indexOps(ReportStatEntity.class).exists()) {
+            template.indexOps(ReportStatEntity.class).create();
+        }
+
         var saved = reportStatRepository.save(reportStat.toEntity());
-        log.info("saved report stat: {}", saved);
+        log.info("Saved report stat: {}", saved);
     }
 
     protected StatLocation newStatLocation(Visit visit) {
