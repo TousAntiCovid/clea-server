@@ -84,7 +84,7 @@ public class StatService implements IStatService {
     @Override
     public void produceErrorStatLocation(Visit visit) {
         var statLocation = newStatLocation(visit);
-        kafkaErrorStatTemplate.send(cleaKafkaProperties.getCleaErrorStats(), statLocation).addCallback(
+        kafkaErrorStatTemplate.send(cleaKafkaProperties.getErrorLocationStatsTopic(), statLocation).addCallback(
                 new ListenableFutureCallback<>() {
 
                     @Override
