@@ -2,15 +2,15 @@
 
 Listener intended to anonymously retrieve decoded visits from the kafka queue and calculate exposures.
 
-in addition, this module processes the statistics on reports issued by clea-ws and generates these own statistics by type of location.
-Statistics are stored on an ELK stack
+In addition, this module processes statistics on reports issued by clea-ws and generates its own statistics by location type.
+Statistics are stored on an ELK stack.
 
 ### Visit inputs
 
-The structure of a visit, received from Kafka is :
+The structure of a visit received from Kafka is:
 
-- qrCodeScanTime: date of scan as NTP Timestamp
-- isBackward: A visit can be backward (scan before pivot/reference date) or forward (scan after pivot Date)
+- qrCodeScanTime: scan date as NTP Timestamp
+- isBackward: A visit can be backward (scanned before pivot/reference date) or forward (scanned after pivot date)
 - version: (internally used by the decoder library)
 - type: (internally used by the decoder library)
 - locationTemporaryPublicId: UUID as string
@@ -27,18 +27,18 @@ An EncryptedLocationMessage is decrypted as :
 - venueCategory1: used to determine the number of exposure period (slots) to consider, used for statistics
 - venueCategory2: used to determine the number of exposure period (slots) to consider, used for statistics
 
-The LocationSpecificPart class combine both structures
+The LocationSpecificPart class combines both structures
 
 ### Verifications
 
 For each record read from the kafka queue, the visit will be decrypted using the configured secret key and the following
 verifications will be applied:
 
-- if there's an error while decrypting a specific visit, it will be rejected.
+- if there an error happens while decrypting a specific visit, it will be rejected.
 - if
   the [drift check]("https://hal.inria.fr/hal-03146022v3/document#processing-of-a-user-location-record-by-the-backend-server")
   fails, it will be rejected.
-- if the temporary public if of the location, is different from the one calculated from the location specific part, it
+- if the public location temporary id is different from the one calculated from the location specific part, it
   will be rejected (see [hasValidTemporaryLocationPublicId]("src/main/java/fr/gouv/clea/consumer/service/impl/DecodedVisitService.java)).
 
 ### Exposition slots calculation
@@ -60,11 +60,11 @@ Outdated entries are processed following the retention date (14 days).
 
 Stats pushed by clea-ws in a specific topic are moved without transformation to ElasticSearch.
 
-If the transfert is unsuccessful (ElasticSearch not available), a retry is continuously made.
+If the transfert fails (ElasticSearch not available), clea-ws constantly tries to transfer it again.
 
 #### By Location
 
-Each valid decrypted visit is recorded in ElasticSearch (without locationTemporaryPublicId)
+Each valid decrypted visit is recorded in ElasticSearch (without locationTemporaryPublicId).
 Document sent to ElasticSearch is:
 
 - qrCodeScanTime
@@ -74,8 +74,8 @@ Document sent to ElasticSearch is:
 - backward: 0/1
 - forward: 0/1
 
-After 14 days (retention date), an aggregate sum the number of backward and forwark visits per period (1/2 hours),
-and the detail document are removed from Elasticsearch.
+After 14 days (retention date), we save an aggregate sum of backward and forward visits per period (1/2 hours),
+and the detailed documents are removed from Elasticsearch.
 
-If a visit cannot be pushed to ElasticSearch (ElasticSearch is not available), a failback consists of writing the document to an error topic.
-A schedule job may try to process this topic periodically.
+If a visit cannot be pushed to ElasticSearch (ElasticSearch is not available), a failback pushes the document to an error topic.
+A scheduled job may try to process this topic periodically.
