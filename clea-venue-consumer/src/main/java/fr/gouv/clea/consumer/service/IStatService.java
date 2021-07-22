@@ -8,4 +8,6 @@ public interface IStatService {
     void logStats(Visit visit);
 
     void logStats(ReportStat reportStat);
+
+    void produceErrorStatLocation(Visit visit);
 }
