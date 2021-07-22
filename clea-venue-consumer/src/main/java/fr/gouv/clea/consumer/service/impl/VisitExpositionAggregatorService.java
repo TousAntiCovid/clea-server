@@ -94,6 +94,7 @@ public class VisitExpositionAggregatorService implements IVisitExpositionAggrega
                 statService.logStats(visit);
             } catch (Exception e) {
                 log.error("Error while communicating with elasticseach cluster !");
+                statService.produceErrorStatLocation(visit);
                 log.error(e.getMessage());
                 e.printStackTrace();
             }

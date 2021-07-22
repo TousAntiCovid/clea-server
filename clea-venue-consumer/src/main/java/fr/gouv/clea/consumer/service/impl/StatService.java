@@ -1,5 +1,6 @@
 package fr.gouv.clea.consumer.service.impl;
 
+import fr.gouv.clea.consumer.configuration.CleaKafkaProperties;
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.ReportStat;
 import fr.gouv.clea.consumer.model.ReportStatEntity;
@@ -12,7 +13,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -22,6 +26,10 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class StatService implements IStatService {
+
+    private final KafkaTemplate<String, StatLocation> kafkaErrorStatTemplate;
+
+    private final CleaKafkaProperties cleaKafkaProperties;
 
     private final IStatLocationRepository repository;
 
@@ -71,6 +79,28 @@ public class StatService implements IStatService {
 
         var saved = reportStatRepository.save(reportStat.toEntity());
         log.info("Saved report stat: {}", saved);
+    }
+
+    @Override
+    public void produceErrorStatLocation(Visit visit) {
+        var statLocation = newStatLocation(visit);
+        kafkaErrorStatTemplate.send(cleaKafkaProperties.getCleaErrorStats(), statLocation).addCallback(
+                new ListenableFutureCallback<>() {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        log.error(
+                                "Error sending location stat {} to error queue. Message : {}", statLocation.toString(),
+                                ex.getLocalizedMessage()
+                        );
+                    }
+
+                    @Override
+                    public void onSuccess(SendResult<String, StatLocation> result) {
+                        log.info("Location Stat {} sent to error queue.", statLocation.toString());
+                    }
+                }
+        );
     }
 
     protected StatLocation newStatLocation(Visit visit) {
