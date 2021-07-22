@@ -39,8 +39,6 @@ tests-docker:
     - currentContainer=$(basename $(cat /proc/1/cpuset))
     - docker-compose up -d
     - docker network connect clea-server_default $currentContainer
-    - echo "Waiting for clea-ws-rest component to be up..."
-    - until curl -s http://clea-ws-rest:8080/actuator/health | grep -q UP; do sleep 0.5; done;
     - java -jar -Dspring.profiles.active=docker clea-integration-tests/target/clea-integration-tests-*.jar
     - docker network disconnect clea-server_default $currentContainer
     - docker-compose down
@@ -49,7 +47,7 @@ tests-docker:
       - "$CI_PROJECT_DIR/target/cucumber-reports.html"
     expire_in: 2 weeks
 
-deploy_int:
+deploy-int:
   stage: deploy
   variables:
     APP_VERSION: develop-SNAPSHOT
