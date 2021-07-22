@@ -54,7 +54,7 @@ LocationSpecificPart:
 - locationTemporaryPublicId: a UUID representing a location
 - encryptedLocationMessage: a binary structure that need a private key to be decrypted.
 
-The data model pushed to Kafka is :
+The data model pushed to Kafka is:
 
 - qrCodeScanTime: date of scan as NTP Timestamp
 - isBackward: boolean, true if qrCodeScanTime < pivotDate
