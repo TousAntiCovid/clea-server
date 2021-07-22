@@ -35,7 +35,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       BUCKET: clea-batch
-      ENDPOINT_OUTSCALE: "http://minio:9000"
+      ENDPOINT_OUTSCALE: ${ENDPOINT_OUTSCALE}
       CLEA_BATCH_LOG_FILE_PATH: /logs
       CLEA_BATCH_LOG_FILE_NAME: clea-batch
     depends_on:
@@ -151,6 +151,7 @@ services:
       - /usr/share/elastic-statistiques/data/statistiques
     ports:
       - "9200:9200"
+
   kibana-statistiques:
     image: docker.elastic.co/kibana/kibana:7.6.2
     container_name: kibana-statistiques
