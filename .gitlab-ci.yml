@@ -13,7 +13,8 @@ default:
 
 stages:
   - build
-  - integration-tests
+  - docker e2e tests
+  - deploy
 
 build:
   image: maven:3.6.3-adoptopenjdk-11
@@ -27,9 +28,9 @@ build:
       junit:
         - "**/target/surefire-reports/TEST-*.xml"
 
-integration-tests:
+tests-docker:
   image: registry.gitlab.inria.fr/stemcovid19/tac-server/docker-image/tac-system-tests:latest
-  stage: integration-tests
+  stage: docker e2e tests
   before_script:
     - export PATH="$PWD/docker-compose:$PATH"
     - export CLEA_ROOT_DIR=$CI_PROJECT_DIR
@@ -46,3 +47,13 @@ integration-tests:
     paths:
       - "$CI_PROJECT_DIR/target/cucumber-reports.html"
     expire_in: 2 weeks
+
+deploy-int:
+  image: curlimages/curl
+  stage: deploy
+  script:
+    - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=dev --form "variables[VERSION]=1.2.2" "https://gitlab.inria.fr/api/v4/projects/29926/trigger/pipeline"
+  environment:
+    name: int
+      #  rules:
+      #    - if: '$CI_COMMIT_BRANCH == "develop"'
