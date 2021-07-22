@@ -23,6 +23,7 @@ clea:
   kafka:
     qrCodesTopic: test.clea.fct.qr-code-scan
     statsTopic: test.clea.fct.report-stat
+    errorLocationStatsTopic: test.clea.fct.clea-error-visit
 
 logging:
   level:
@@ -52,8 +53,3 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: group1
-  elasticsearch:
-    username: ${CLEA_STATISTIQUES_ELASTICSEARCH_USERNAME:user}
-    password: ${CLEA_STATISTIQUES_ELASTICSEARCH_PASSWORD:password}
-    host: ${CLEA_STATISTIQUES_ELASTICSEARCH_HOST:localhost}
-    port: ${CLEA_STATISTIQUES_ELASTICSEARCH_PORT:9200}

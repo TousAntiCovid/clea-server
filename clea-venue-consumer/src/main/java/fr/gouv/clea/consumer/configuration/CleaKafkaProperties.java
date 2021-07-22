@@ -24,6 +24,6 @@ public class CleaKafkaProperties {
     private String statsTopic;
 
     @NotBlank
-    private String cleaErrorStats;
+    private String errorLocationStatsTopic;
 
 }

@@ -26,7 +26,7 @@ clea:
   kafka:
     qrCodesTopic: cleaQrCodes
     statsTopic: cleaStats
-    cleaErrorStats: cleaErrorStats
+    errorLocationStatsTopic: cleaErrorStats
 
 management:
   endpoints:
