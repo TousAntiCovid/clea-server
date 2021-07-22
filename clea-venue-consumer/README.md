@@ -1,6 +1,33 @@
 ## CLEA Venue Consumer
 
-Listener meant to retrieve decoded visits from the kafka queue anonymously, and calculating expositions.
+Listener intended to anonymously retrieve decoded visits from the kafka queue and calculate exposures.
+
+in addition, this module processes the statistics on reports issued by clea-ws and generates these own statistics by type of location.
+Statistics are stored on an ELK stack
+
+### Visit inputs
+
+The structure of a visit, received from Kafka is :
+
+- qrCodeScanTime: date of scan as NTP Timestamp
+- isBackward: A visit can be backward (scan before pivot/reference date) or forward (scan after pivot Date)
+- version: (internally used by the decoder library)
+- type: (internally used by the decoder library)
+- locationTemporaryPublicId: UUID as string
+- encryptedLocationMessage: an array of bytes to be decrypted
+
+An EncryptedLocationMessage is decrypted as :
+
+- staff: The qrcode was generate for a staff (with longueur exposure time)
+- qrCodeRenewalIntervalExponentCompact: 2^n seconds of validity of this qrCode before the need to create a new one with same UUID, new qrCodeValidityStartTime
+- compressedPeriodStartTime: stored validity date as Hour (periodStartTimeAsNtpTimestamp = compressedPeriodStartTime\*3600)
+- locationTemporarySecretKey: used to check the validity of unencrypted locationTemporaryPublicId
+- encryptedLocationContactMessage: currently ignored, can only be decrypted by MSS
+- venueType: used to determine the number of exposure period (slots) to consider, used for statistics
+- venueCategory1: used to determine the number of exposure period (slots) to consider, used for statistics
+- venueCategory2: used to determine the number of exposure period (slots) to consider, used for statistics
+
+The LocationSpecificPart class combine both structures
 
 ### Verifications
 
@@ -9,10 +36,10 @@ verifications will be applied:
 
 - if there's an error while decrypting a specific visit, it will be rejected.
 - if
-  the [drift check]("https://gitlab.inria.fr/stopcovid19/CLEA-exposure-verification/-/blob/master/documents/CLEA-specification-EN.md#processing-of-a-user-location-record-by-the-backend-server")
+  the [drift check]("https://hal.inria.fr/hal-03146022v3/document#processing-of-a-user-location-record-by-the-backend-server")
   fails, it will be rejected.
 - if the temporary public if of the location, is different from the one calculated from the location specific part, it
-  will be rejected.
+  will be rejected (see [hasValidTemporaryLocationPublicId]("src/main/java/fr/gouv/clea/consumer/service/impl/DecodedVisitService.java)).
 
 ### Exposition slots calculation
 
@@ -23,6 +50,32 @@ specs https://gitlab.inria.fr/stopcovid19/backend-server/-/blob/clea-doc/documen
 
 ### Purge
 
-Each day, at 01:00 PM UTC (configurable), a croned job will launch to purge all outdated entries from DB.
+Each day, at 01:00 PM UTC (configurable), a scheduled job will launch to purge all outdated entries from DB.
 
 Outdated entries are processed following the retention date (14 days).
+
+### Statistics
+
+#### By Reports
+
+Stats pushed by clea-ws in a specific topic are moved without transformation to ElasticSearch.
+
+If the transfert is unsuccessful (ElasticSearch not available), a retry is continuously made.
+
+#### By Location
+
+Each valid decrypted visit is recorded in ElasticSearch (without locationTemporaryPublicId)
+Document sent to ElasticSearch is:
+
+- qrCodeScanTime
+- venueType
+- venueCategory1
+- venueCategory2
+- backward: 0/1
+- forward: 0/1
+
+After 14 days (retention date), an aggregate sum the number of backward and forwark visits per period (1/2 hours),
+and the detail document are removed from Elasticsearch.
+
+If a visit cannot be pushed to ElasticSearch (ElasticSearch is not available), a failback consists of writing the document to an error topic.
+A schedule job may try to process this topic periodically.
