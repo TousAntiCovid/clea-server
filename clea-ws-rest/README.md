@@ -29,7 +29,7 @@ After all verifications are applied, the decoded visits are sent to a kafka queu
 
 ### Data Models:
 
-When a user scan an image (qrcode), the mobile application receive an URL with this form:
+When a user scan an image (qrcode), the mobile application receives an URL with this form:
 [https://tac.gouv.fr?v=0#AK4e..u6k]("https://tac.gouv.fr?v=0#AK4ebl4J7VLSQh5hCBQaim7yghhwBGoW8bVgg3iNYKcPwDMFgnFo_DVChp5KZAqyoI85nwMtt5iSLhYp9EM1JZvBP1FmnoPbxSiKyCADPP63hs4_Qa1YbzvcVoe8fU8L3G8nFQvlfOx3XJ3fu6k")
 
 The anchor part (AK...u6k) is stored on phone with the date of the scan. This part is also called LocationSpecificPart.
