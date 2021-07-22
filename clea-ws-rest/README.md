@@ -13,7 +13,7 @@ When a report is sent, the following verifications are applied to the request:
 
 ### Reporting verifications:
 
-Pivot Date must be contained between the retention date (today minus 14 days by default) and today, if not it will be set to the retention Date.
+Pivot Date must be between the retention date (today minus 14 days by default) and today, or else it will be set to the retention Date.
 
 After the validity of the report is checked, all visits are decoded, and the following verifications are applied:
 
