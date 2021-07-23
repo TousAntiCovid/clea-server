@@ -26,16 +26,16 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.HOURS;
 
 public class Generator {
-    // server authority public key
+    // server authority public key (Check that it is "04d....5d" for production)
     private static final String PK_SA = "02c3a58bf668fa3fe2fc206152abd6d8d55102adfee68c8b227676d1fe763f5a06";
 
-    // manual contact tracing authority public key
+    // manual contact tracing authority public key (Check that it is "04c...c5" for production)
     private static final String PK_MCTA = "02c3a58bf668fa3fe2fc206152abd6d8d55102adfee68c8b227676d1fe763f5a06";
 
-    // number of codes to generate
+    // number of codes to generate ( Change for the number of QRCodes to generate)
     private static final int PLACES_NUMBER = 1;
 
-    // location configuration
+    // location configuration '(1 0 0 for Restaurants, ask others values for Discothèques, etc.)
     private static final int VENUE_TYPE = 1;
     private static final int VENUE_CAT_1 = 0;
     private static final int VENUE_CAT_2 = 0;
