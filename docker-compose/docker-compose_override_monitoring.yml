@@ -1,0 +1,56 @@
+version: "3.8"
+services:
+  clea-ws-rest:
+    labels:
+      - prometheus-scrape.enabled=true
+      - prometheus-scrape.port=8080
+      - prometheus-scrape.metrics_path=/actuator/prometheus
+  clea-venue-consumer:
+    labels:
+      - prometheus-scrape.enabled=true
+      - prometheus-scrape.port=8080
+      - prometheus-scrape.metrics_path=/actuator/prometheus
+
+  grafana:
+    image: grafana/grafana:7.5.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./docker-compose/grafana/provisioning:/etc/grafana/provisioning
+      - ./docker-compose/grafana/dashboards:/var/lib/grafana/dashboards
+
+  prometheus:
+    image: prom/prometheus:v2.28.0
+    volumes:
+      - ./docker-compose/prometheus/:/etc/prometheus/
+      - /var/run/docker.sock:/var/run/docker.sock
+      - prometheus-docker-sd:/prometheus-docker-sd:ro
+    ports:
+      - 9090:9090
+
+  alertmanager:
+    image: prom/alertmanager:v0.22.2
+    ports:
+      - 9093:9093
+    volumes:
+      - ./docker-compose/alertmanager/:/etc/alertmanager/
+    command:
+      - "--config.file=/etc/alertmanager/config.yml"
+      - "--storage.path=/alertmanager"
+
+  # ==============================================================================
+  # prometheus-docker-sd
+  # ------------------------------------------------------------------------------
+  # https://github.com/stuckyhm/prometheus-docker-sd
+  prometheus-docker-sd:
+    image: "stucky/prometheus-docker-sd:latest"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - prometheus-docker-sd:/prometheus-docker-sd:rw
+
+# ==============================================================================
+# Volumes
+# ------------------------------------------------------------------------------
+volumes:
+  prometheus-docker-sd:

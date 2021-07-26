@@ -24,8 +24,6 @@ services:
     depends_on:
       - postgres
       - kafka
-    ports:
-      - "7070:8080"
     restart: always
 
   clea-batch:
@@ -53,7 +51,7 @@ services:
       - ./clea-dbmigration/sql:/flyway/sql
     depends_on:
       - postgres
-    restart: always
+    restart: "no"
   kafka:
     image: "wurstmeister/kafka:latest"
     environment:

@@ -20,3 +20,8 @@ datasources:
       sslmode: disable
     secureJsonData:
       password: password
+  - name: prometheus
+    type: prometheus
+    url: http://prometheus:9090
+    jsonData:
+      sslmode: disable
