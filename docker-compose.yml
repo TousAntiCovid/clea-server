@@ -136,7 +136,6 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
-    container_name: elasticsearch
     environment:
       - node.name=elasticsearch
       - discovery.type=single-node
@@ -155,7 +154,6 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.6.2
-    container_name: kibana
     ports:
       - "5601:5601"
     environment:
