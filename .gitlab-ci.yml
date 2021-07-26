@@ -15,6 +15,7 @@ stages:
   - build
   - docker e2e tests
   - deploy
+  - int e2e tests
 
 build:
   image: maven:3.6.3-adoptopenjdk-11
@@ -48,12 +49,13 @@ tests-docker:
       - "$CI_PROJECT_DIR/target/cucumber-reports.html"
     expire_in: 2 weeks
 
-deploy-int:
-  image: curlimages/curl
+deploy_int:
   stage: deploy
-  script:
-    - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=dev --form "variables[VERSION]=1.2.2" "https://gitlab.inria.fr/api/v4/projects/29926/trigger/pipeline"
-  environment:
-    name: int
-      #  rules:
-      #    - if: '$CI_COMMIT_BRANCH == "develop"'
+  variables:
+    APP_VERSION: develop-SNAPSHOT
+  trigger:
+    project: stemcovid19/infrastructure/functional-zone/services/clea/clea-ansible
+    branch: master
+    strategy: depend
+  only:
+    - develop
