@@ -79,3 +79,25 @@ and the detailed documents are removed from Elasticsearch.
 
 If a visit cannot be pushed to ElasticSearch (ElasticSearch is not available), a failback pushes the document to an error topic.
 A scheduled job may try to process this topic periodically.
+
+### Run
+
+This module is an uber-jar. You can use this command to execute it:
+
+```bash
+java -jar target/clea-venue-consumer*-exec.jar
+```
+
+This module can be executed by maven:
+
+```bash
+mvn spring-boot:run
+```
+
+the docker-compose.yml at the root of clea-server execute this service
+
+```bash
+$ docker-compose up
+#or
+$ docker-compose up clea-venue-consumer
+```
