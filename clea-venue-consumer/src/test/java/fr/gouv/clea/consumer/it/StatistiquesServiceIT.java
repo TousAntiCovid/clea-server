@@ -26,7 +26,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -145,9 +144,7 @@ class StatistiquesServiceIT {
 
         assertThat(before).isEqualTo(after);
 
-        // FIXME: find a way to flush or making sure that all is persisted before
-        // retrieving item
-        TimeUnit.SECONDS.sleep(1);
+        template.indexOps(StatLocation.class).refresh();
 
         List<StatLocation> stats = new ArrayList<>();
         statLocationRepository.findAll().forEach((stats::add));
@@ -212,19 +209,16 @@ class StatistiquesServiceIT {
 
         assertThat(statLocationRepository.count()).isEqualTo(1);
 
-        // FIXME: find a way to flush or making sure that all is persisted before
-        // retrieving item
-        // TimeUnit.SECONDS.sleep(1);
-
-        statLocationRepository.findByVenueTypeAndVenueCategory1AndVenueCategory2AndPeriodStart(
-                visit1.getVenueType(),
-                visit1.getVenueCategory1(),
-                visit1.getVenueCategory2(),
-                visit1.getQrCodeScanTime()
-        ).ifPresent(stat -> {
-            assertThat(stat.getBackwardVisits()).as("back visits").isEqualTo(3l);
-            assertThat(stat.getForwardVisits()).as("forward visits").isEqualTo(1l);
-        });
+        final var statLocation = statLocationRepository
+                .findByVenueTypeAndVenueCategory1AndVenueCategory2AndPeriodStart(
+                        visit1.getVenueType(),
+                        visit1.getVenueCategory1(),
+                        visit1.getVenueCategory2(),
+                        visit1.getQrCodeScanTime()
+                )
+                .get();
+        assertThat(statLocation.getBackwardVisits()).as("backward visits").isEqualTo(3l);
+        assertThat(statLocation.getForwardVisits()).as("forward visits").isEqualTo(1l);
 
     }
 
@@ -273,17 +267,16 @@ class StatistiquesServiceIT {
 
         assertThat(reportStatRepository.count()).isEqualTo(1);
 
-        List<ReportStatEntity> stats = new ArrayList<>();
-        reportStatRepository.findAll().forEach(stats::add);
+        final var stat = reportStatRepository.findAll().iterator().next();
 
-        assertThat(stats.get(0).getId()).isInstanceOf(String.class);
-        assertThat(stats.get(0).getId()).isNotBlank();
-        assertThat(stats.get(0).getReported()).isEqualTo(10);
-        assertThat(stats.get(0).getRejected()).isEqualTo(2);
-        assertThat(stats.get(0).getBackwards()).isEqualTo(5);
-        assertThat(stats.get(0).getForwards()).isEqualTo(3);
-        assertThat(stats.get(0).getClose()).isEqualTo(4);
-        assertThat(stats.get(0).getTimestamp().truncatedTo(ChronoUnit.SECONDS))
+        assertThat(stat.getId()).isInstanceOf(String.class);
+        assertThat(stat.getId()).isNotBlank();
+        assertThat(stat.getReported()).isEqualTo(10);
+        assertThat(stat.getRejected()).isEqualTo(2);
+        assertThat(stat.getBackwards()).isEqualTo(5);
+        assertThat(stat.getForwards()).isEqualTo(3);
+        assertThat(stat.getClose()).isEqualTo(4);
+        assertThat(stat.getTimestamp().truncatedTo(ChronoUnit.SECONDS))
                 .isEqualTo(TimeUtils.instantFromTimestamp(timestamp).truncatedTo(ChronoUnit.SECONDS));
     }
 
