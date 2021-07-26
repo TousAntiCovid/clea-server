@@ -368,9 +368,10 @@ public class CleaClientStepDefinitions {
     }
 
     @And("statistics by location are")
-    public void statisticsByLocationAre(List<Map<String, Integer>> data) throws InterruptedException {
+    public void statisticsByLocationAre(List<Map<String, Integer>> expectedIndexContent) throws InterruptedException {
+        // TODO: replace with kafka topics monitoring
         Thread.sleep(20000);
-        data.stream().distinct().forEach(entry -> {
+        expectedIndexContent.stream().distinct().forEach(entry -> {
             List<LocationStat> indexResponse = locationStatIndex
                     .findByVenueTypeAndVenueCategory1AndVenueCategory2AndBackwardVisitsAndForwardVisits(
                             entry.get("venue_type"),
@@ -379,16 +380,16 @@ public class CleaClientStepDefinitions {
                             entry.get("backward_visits"),
                             entry.get("forward_visits")
                     );
-            assertThat(indexResponse).size().isEqualTo(frequency(data, entry));
-        }
-        );
-        assertThat(locationStatIndex.count()).isEqualTo(data.size());
+            assertThat(indexResponse).size().isEqualTo(frequency(expectedIndexContent, entry));
+        });
+        assertThat(locationStatIndex.count()).isEqualTo(expectedIndexContent.size());
     }
 
     @Then("statistics by wreport are")
-    public void statisticsByWreportAre(List<Map<String, Integer>> data) throws InterruptedException {
+    public void statisticsByWreportAre(List<Map<String, Integer>> expectedIndexContent) throws InterruptedException {
+        // TODO: replace with kafka topics monitoring
         Thread.sleep(20000);
-        data.stream().distinct().forEach(entry -> {
+        expectedIndexContent.stream().distinct().forEach(entry -> {
             List<ReportStat> indexResponse = reportStatIndex.findByReportedAndRejectedAndCloseAndBackwardsAndForwards(
                     entry.get("reported"),
                     entry.get("rejected"),
@@ -396,9 +397,8 @@ public class CleaClientStepDefinitions {
                     entry.get("backwards"),
                     entry.get("forwards")
             );
-            assertThat(indexResponse).size().isEqualTo(frequency(data, entry));
-        }
-        );
-        assertThat(reportStatIndex.count()).isEqualTo(data.size());
+            assertThat(indexResponse).size().isEqualTo(frequency(expectedIndexContent, entry));
+        });
+        assertThat(reportStatIndex.count()).isEqualTo(expectedIndexContent.size());
     }
 }
