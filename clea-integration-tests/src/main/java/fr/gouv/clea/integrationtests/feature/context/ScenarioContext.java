@@ -26,8 +26,9 @@ public class ScenarioContext {
     private final Map<String, Visitor> visitors = new HashMap<>(10);
 
     private final Map<String, Map<String, ConfPair>> venueTypeCategories1 = Map.of(
-            "restauration", Map.of("restaurant rapide", new ConfPair(1, 1)),
-            "etablissements sportifs", Map.of("sport indoor", new ConfPair(4, 2), "salle de sport", new ConfPair(4, 1))
+            "restaurant", Map.of("fastfood", new ConfPair(1, 1)),
+            "etablissements sportifs", Map.of("sport indoor", new ConfPair(4, 2), "salle de sport", new ConfPair(4, 1)),
+            "discotheque", Map.of("discotheque", new ConfPair(2, 0))
     );
 
     private final Map<String, LocationQrCodeGenerator> locations = new HashMap<>(10);

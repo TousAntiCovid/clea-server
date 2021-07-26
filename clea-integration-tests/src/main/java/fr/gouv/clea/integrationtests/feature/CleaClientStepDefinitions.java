@@ -5,12 +5,17 @@ import fr.gouv.clea.integrationtests.dto.PivotDateStringWreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportResponse;
 import fr.gouv.clea.integrationtests.feature.context.ScenarioContext;
+import fr.gouv.clea.integrationtests.model.LocationStat;
+import fr.gouv.clea.integrationtests.model.ReportStat;
+import fr.gouv.clea.integrationtests.repository.LocationStatIndex;
+import fr.gouv.clea.integrationtests.repository.ReportStatIndex;
 import fr.gouv.clea.integrationtests.service.CleaBatchService;
 import fr.gouv.clea.integrationtests.utils.CleaApiResponseParser;
 import fr.inria.clea.lsp.exception.CleaCryptoException;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import io.cucumber.core.exception.CucumberException;
 import io.cucumber.java.ParameterType;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -25,10 +30,13 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
+import static java.util.Collections.frequency;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -41,12 +49,19 @@ public class CleaClientStepDefinitions {
 
     private final String wreportUrl;
 
+    private final ReportStatIndex reportStatIndex;
+
+    private final LocationStatIndex locationStatIndex;
+
     public CleaClientStepDefinitions(final ScenarioContext scenarioContext,
             final CleaBatchService cleaBatchService,
-            final ApplicationProperties applicationProperties) {
+            final ApplicationProperties applicationProperties, ReportStatIndex reportStatIndex,
+            LocationStatIndex locationStatIndex) {
         this.scenarioContext = scenarioContext;
         this.cleaBatchService = cleaBatchService;
         this.wreportUrl = applicationProperties.getWsRest().getBaseUrl().toString().concat("/api/clea/v1/wreport");
+        this.reportStatIndex = reportStatIndex;
+        this.locationStatIndex = locationStatIndex;
     }
 
     // TODO Robert registration of the user -> integration tests perimeters to be
@@ -96,7 +111,7 @@ public class CleaClientStepDefinitions {
     public void static_location_without_renewalTime_with_periodDuration(String locationName, Instant periodStartTime,
             String venueType, String venueCategory1, Integer venueCategory2, Integer periodDuration)
             throws CleaCryptoException {
-        this.scenarioContext.getOrCreateStaticLocation(
+        var location = this.scenarioContext.getOrCreateStaticLocation(
                 locationName, periodStartTime, venueType, venueCategory1, venueCategory2, periodDuration
         );
         // TODO: add QR id
@@ -350,5 +365,40 @@ public class CleaClientStepDefinitions {
     @ParameterType(".*")
     public Instant instant(final String naturalLanguage) {
         return new PrettyTimeParser().parse(naturalLanguage).get(0).toInstant();
+    }
+
+    @And("statistics by location are")
+    public void statisticsByLocationAre(List<Map<String, Integer>> data) throws InterruptedException {
+        Thread.sleep(20000);
+        data.stream().distinct().forEach(entry -> {
+            List<LocationStat> indexResponse = locationStatIndex
+                    .findByVenueTypeAndVenueCategory1AndVenueCategory2AndBackwardVisitsAndForwardVisits(
+                            entry.get("venue_type"),
+                            entry.get("venue_category1"),
+                            entry.get("venue_category2"),
+                            entry.get("backward_visits"),
+                            entry.get("forward_visits")
+                    );
+            assertThat(indexResponse).size().isEqualTo(frequency(data, entry));
+        }
+        );
+        assertThat(locationStatIndex.count()).isEqualTo(data.size());
+    }
+
+    @Then("statistics by wreport are")
+    public void statisticsByWreportAre(List<Map<String, Integer>> data) throws InterruptedException {
+        Thread.sleep(20000);
+        data.stream().distinct().forEach(entry -> {
+            List<ReportStat> indexResponse = reportStatIndex.findByReportedAndRejectedAndCloseAndBackwardsAndForwards(
+                    entry.get("reported"),
+                    entry.get("rejected"),
+                    entry.get("is_closed"),
+                    entry.get("backwards"),
+                    entry.get("forwards")
+            );
+            assertThat(indexResponse).size().isEqualTo(frequency(data, entry));
+        }
+        );
+        assertThat(reportStatIndex.count()).isEqualTo(data.size());
     }
 }
