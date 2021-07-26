@@ -15,4 +15,4 @@ spring:
     rest:
       password: password
       username: elastic
-      uris: http://elastic-statistiques:9200
+      uris: http://elasticsearch:9200

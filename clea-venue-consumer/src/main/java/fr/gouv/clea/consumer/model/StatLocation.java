@@ -26,8 +26,8 @@ public class StatLocation {
 
     private long forwardVisits;
 
-    @Field(name = "@period", type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
-    private Instant period;
+    @Field(name = "@timestamp", type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
+    private Instant periodStart;
 
     private int venueType;
 

@@ -21,7 +21,7 @@ public class CleaKafkaProperties {
     private String qrCodesTopic;
 
     @NotBlank
-    private String statsTopic;
+    private String reportStatsTopic;
 
     @NotBlank
     private String errorLocationStatsTopic;

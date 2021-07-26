@@ -84,20 +84,13 @@ public class VisitExpositionAggregatorService implements IVisitExpositionAggrega
 
         List<ExposedVisitEntity> merged = Stream.concat(toUpdate.stream(), toPersist.stream())
                 .collect(Collectors.toList());
+
         if (!merged.isEmpty()) {
             repository.saveAll(merged);
-            repository.flush();
+
             log.info("Persisting {} new visits!", toPersist.size());
             log.info("Updating {} existing visits!", toUpdate.size());
 
-            try {
-                statService.logStats(visit);
-            } catch (Exception e) {
-                log.error("Error while communicating with elasticseach cluster !");
-                statService.produceErrorStatLocation(visit);
-                log.error(e.getMessage());
-                e.printStackTrace();
-            }
         } else {
             log.info(
                     "LTId: {}, qrScanTime: {} - No visit to persist / update", visit.getLocationTemporaryPublicId(),

@@ -5,8 +5,8 @@ import fr.gouv.clea.consumer.model.ReportStat;
 import fr.gouv.clea.consumer.model.ReportStatEntity;
 import fr.gouv.clea.consumer.model.StatLocation;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.statistiques.IReportStatRepository;
-import fr.gouv.clea.consumer.repository.statistiques.IStatLocationRepository;
+import fr.gouv.clea.consumer.repository.statistiques.ReportStatRepository;
+import fr.gouv.clea.consumer.repository.statistiques.StatLocationRepository;
 import fr.gouv.clea.consumer.service.impl.StatService;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -25,7 +25,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -56,10 +55,10 @@ class StatistiquesServiceIT {
     private StatService service;
 
     @Autowired
-    private IReportStatRepository reportStatRepository;
+    private ReportStatRepository reportStatRepository;
 
     @Autowired
-    private IStatLocationRepository statLocationRepository;
+    private StatLocationRepository statLocationRepository;
 
     @Autowired
     private ElasticsearchOperations template;
@@ -116,7 +115,7 @@ class StatistiquesServiceIT {
 
         assertThat(stats.size()).isEqualTo(1L);
         StatLocation statLocation = stats.get(0);
-        assertThat(statLocation.getPeriod()).isEqualTo(TODAY_AT_8AM);
+        assertThat(statLocation.getPeriodStart()).isEqualTo(TODAY_AT_8AM);
         assertThat(statLocation.getVenueType()).isEqualTo(4);
         assertThat(statLocation.getVenueCategory1()).isEqualTo(1);
         assertThat(statLocation.getVenueCategory2()).isEqualTo(2);
@@ -155,7 +154,7 @@ class StatistiquesServiceIT {
 
         assertThat(stats.size()).isEqualTo(1L);
         StatLocation statLocation = stats.get(0);
-        assertThat(statLocation.getPeriod()).isEqualTo(TODAY_AT_8AM);
+        assertThat(statLocation.getPeriodStart()).isEqualTo(TODAY_AT_8AM);
         assertThat(statLocation.getVenueType()).isEqualTo(4);
         assertThat(statLocation.getVenueCategory1()).isEqualTo(1);
         assertThat(statLocation.getVenueCategory2()).isEqualTo(2);
@@ -215,19 +214,17 @@ class StatistiquesServiceIT {
 
         // FIXME: find a way to flush or making sure that all is persisted before
         // retrieving item
-        TimeUnit.SECONDS.sleep(1);
+        // TimeUnit.SECONDS.sleep(1);
 
-        Optional<StatLocation> statLocation = statLocationRepository
-                .findByVenueTypeAndVenueCategory1AndVenueCategory2AndPeriod(
-                        visit1.getVenueType(),
-                        visit1.getVenueCategory1(),
-                        visit1.getVenueCategory2(),
-                        visit1.getQrCodeScanTime()
-                );
-        if (statLocation.isPresent()) {
-            assertThat(statLocation.get().getBackwardVisits()).as("back visits").isEqualTo(3l);
-            assertThat(statLocation.get().getForwardVisits()).as("forward visits").isEqualTo(1l);
-        }
+        statLocationRepository.findByVenueTypeAndVenueCategory1AndVenueCategory2AndPeriodStart(
+                visit1.getVenueType(),
+                visit1.getVenueCategory1(),
+                visit1.getVenueCategory2(),
+                visit1.getQrCodeScanTime()
+        ).ifPresent(stat -> {
+            assertThat(stat.getBackwardVisits()).as("back visits").isEqualTo(3l);
+            assertThat(stat.getForwardVisits()).as("forward visits").isEqualTo(1l);
+        });
 
     }
 
@@ -261,8 +258,7 @@ class StatistiquesServiceIT {
     }
 
     @Test
-    @DisplayName("logStats should add a new entity to DB")
-    void testLogStats() {
+    void should_add_a_new_entity_in_db() {
         long timestamp = TimeUtils.currentNtpTime();
         ReportStat reportStat = ReportStat.builder()
                 .reported(10)
@@ -281,9 +277,7 @@ class StatistiquesServiceIT {
         reportStatRepository.findAll().forEach(stats::add);
 
         assertThat(stats.get(0).getId()).isInstanceOf(String.class);
-        assertThat(stats.get(0).getId()).isNotNull();
         assertThat(stats.get(0).getId()).isNotBlank();
-        assertThat(stats.get(0).getId()).isNotEmpty();
         assertThat(stats.get(0).getReported()).isEqualTo(10);
         assertThat(stats.get(0).getRejected()).isEqualTo(2);
         assertThat(stats.get(0).getBackwards()).isEqualTo(5);
@@ -295,11 +289,11 @@ class StatistiquesServiceIT {
 
     @AfterEach
     void purge() {
-        if (template.indexExists(StatLocation.class)) {
-            template.deleteIndex(StatLocation.class);
+        if (template.indexOps(StatLocation.class).exists()) {
+            template.indexOps(StatLocation.class).delete();
         }
-        if (template.indexExists(ReportStatEntity.class)) {
-            template.deleteIndex(ReportStatEntity.class);
+        if (template.indexOps(ReportStatEntity.class).exists()) {
+            template.indexOps(ReportStatEntity.class).delete();
         }
     }
 

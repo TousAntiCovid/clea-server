@@ -1,12 +1,12 @@
 package fr.gouv.clea.consumer.repository.statistiques;
 
 import fr.gouv.clea.consumer.model.StatLocation;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
+@RequiredArgsConstructor
 public class StatLocationRepositoryCustomImpl implements StatLocationRepositoryCustom {
 
-    @Autowired
     protected ElasticsearchOperations elasticsearchTemplate;
 
     /**

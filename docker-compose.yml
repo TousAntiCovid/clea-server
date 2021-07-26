@@ -24,7 +24,7 @@ services:
     depends_on:
       - postgres
       - kafka
-      - elastic-statistiques
+      - elasticsearch
     ports:
       - "7070:8080"
     restart: always
@@ -35,7 +35,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       BUCKET: clea-batch
-      ENDPOINT_OUTSCALE: ${ENDPOINT_OUTSCALE}
+      ENDPOINT_OUTSCALE: "http://minio:9000"
       CLEA_BATCH_LOG_FILE_PATH: /logs
       CLEA_BATCH_LOG_FILE_NAME: clea-batch
     depends_on:
@@ -55,6 +55,7 @@ services:
     depends_on:
       - postgres
     restart: always
+
   kafka:
     image: "wurstmeister/kafka:latest"
     environment:
@@ -133,13 +134,13 @@ services:
     logging:
       driver: none
 
-  elastic-statistiques:
+  elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
-    container_name: elastic-statistiques
+    container_name: elasticsearch
     environment:
-      - node.name=elastic-statistiques
+      - node.name=elasticsearch
       - discovery.type=single-node
-      - cluster.name=elasticsearchstatistiques
+      - cluster.name=elasticsearch
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - ELASTIC_PASSWORD=password
       - xpack.security.enabled=true
@@ -148,19 +149,19 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - /usr/share/elastic-statistiques/data/statistiques
+      - /usr/share/elasticsearch/data/
     ports:
       - "9200:9200"
 
-  kibana-statistiques:
+  kibana:
     image: docker.elastic.co/kibana/kibana:7.6.2
-    container_name: kibana-statistiques
+    container_name: kibana
     ports:
       - "5601:5601"
     environment:
-      ELASTICSEARCH_URL: http://elastic-statistiques:9200
-      ELASTICSEARCH_HOSTS: '["http://elastic-statistiques:9200"]'
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
       ELASTICSEARCH_USERNAME: elastic
       ELASTICSEARCH_PASSWORD: password
     depends_on:
-      - elastic-statistiques
+      - elasticsearch

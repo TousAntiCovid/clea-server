@@ -41,13 +41,14 @@ public class ConsumerService implements IConsumerService {
                 visit -> {
                     log.debug("Consumer: visit after decrypt + validation: {}, ", visit);
                     visitExpositionAggregatorService.updateExposureCount(visit);
+                    statService.logStats(visit);
                 },
                 () -> log.info("empty visit after decrypt + validation")
         );
     }
 
     @Override
-    @KafkaListener(topics = "${clea.kafka.statsTopic}", containerFactory = "statContainerFactory")
+    @KafkaListener(topics = "${clea.kafka.reportStatsTopic}", containerFactory = "statContainerFactory")
     public void consumeStat(ReportStat reportStat) {
         log.info("stat {} retrieved from queue", reportStat);
         statService.logStats(reportStat);

@@ -6,12 +6,11 @@ import fr.gouv.clea.consumer.model.ReportStat;
 import fr.gouv.clea.consumer.model.ReportStatEntity;
 import fr.gouv.clea.consumer.model.StatLocation;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.statistiques.IReportStatRepository;
-import fr.gouv.clea.consumer.repository.statistiques.IStatLocationRepository;
+import fr.gouv.clea.consumer.repository.statistiques.ReportStatRepository;
+import fr.gouv.clea.consumer.repository.statistiques.StatLocationRepository;
 import fr.gouv.clea.consumer.service.IStatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -31,43 +30,49 @@ public class StatService implements IStatService {
 
     private final CleaKafkaProperties cleaKafkaProperties;
 
-    private final IStatLocationRepository repository;
+    private final StatLocationRepository repository;
 
-    private final IReportStatRepository reportStatRepository;
+    private final ReportStatRepository reportStatRepository;
 
     private final VenueConsumerProperties properties;
 
-    @Autowired
-    private ElasticsearchOperations template;
+    private final ElasticsearchOperations template;
 
     @Override
     public void logStats(Visit visit) {
 
-        if (!template.indexOps(StatLocation.class).exists()) {
-            template.indexOps(StatLocation.class).create();
-        }
+        try {
 
-        var statLocation = newStatLocation(visit);
-        Optional<StatLocation> optional = repository.findByVenueTypeAndVenueCategory1AndVenueCategory2AndPeriod(
-                visit.getVenueType(),
-                visit.getVenueCategory1(),
-                visit.getVenueCategory2(),
-                getStatPeriod(visit)
-        );
-        if (optional.isPresent()) {
-            repository.updateByIncrement(optional.get(), statLocation);
-        } else {
-            repository.save(statLocation);
+            if (!template.indexOps(StatLocation.class).exists()) {
+                template.indexOps(StatLocation.class).create();
+            }
+
+            var statLocation = newStatLocation(visit);
+            Optional<StatLocation> optional = repository
+                    .findByVenueTypeAndVenueCategory1AndVenueCategory2AndPeriodStart(
+                            visit.getVenueType(),
+                            visit.getVenueCategory1(),
+                            visit.getVenueCategory2(),
+                            getStatPeriod(visit)
+                    );
+            if (optional.isPresent()) {
+                repository.updateByIncrement(optional.get(), statLocation);
+            } else {
+                repository.save(statLocation);
+            }
+            log.info(
+                    "Saved stat period: {}, venueType: {} venueCategory1: {}, venueCategory2: {}, backwardVisits: {}, forwardVisits: {}",
+                    statLocation.getPeriodStart(),
+                    statLocation.getVenueType(),
+                    statLocation.getVenueCategory1(),
+                    statLocation.getVenueCategory2(),
+                    statLocation.getBackwardVisits(),
+                    statLocation.getForwardVisits()
+            );
+        } catch (Exception e) {
+            log.error("Error while communicating with elasticseach cluster", e);
+            this.produceErrorStatLocation(visit);
         }
-        log.info(
-                "Saved stat period: {}, venueType: {} venueCategory1: {}, venueCategory2: {}, backwardVisits: {}, forwardVisits: {}",
-                statLocation.getPeriod(),
-                statLocation.getVenueType(),
-                statLocation.getVenueCategory1(),
-                statLocation.getVenueCategory2(),
-                statLocation.getBackwardVisits(),
-                statLocation.getForwardVisits()
-        );
     }
 
     @Override
@@ -91,7 +96,7 @@ public class StatService implements IStatService {
                     public void onFailure(Throwable ex) {
                         log.error(
                                 "Error sending location stat {} to error queue. Message : {}", statLocation.toString(),
-                                ex.getLocalizedMessage()
+                                ex
                         );
                     }
 
@@ -105,7 +110,7 @@ public class StatService implements IStatService {
 
     protected StatLocation newStatLocation(Visit visit) {
         return StatLocation.builder()
-                .period(this.getStatPeriod(visit))
+                .periodStart(this.getStatPeriod(visit))
                 .venueType(visit.getVenueType())
                 .venueCategory1(visit.getVenueCategory1())
                 .venueCategory2(visit.getVenueCategory2())

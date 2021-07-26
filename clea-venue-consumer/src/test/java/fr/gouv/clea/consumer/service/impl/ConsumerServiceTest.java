@@ -30,9 +30,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @DirtiesContext
@@ -108,7 +106,7 @@ class ConsumerServiceTest {
                 .timestamp(timestamp)
                 .build();
 
-        producer.send(new ProducerRecord<>(cleaKafkaProperties.getStatsTopic(), reportStat));
+        producer.send(new ProducerRecord<>(cleaKafkaProperties.getReportStatsTopic(), reportStat));
         producer.flush();
 
         await().atMost(60, TimeUnit.SECONDS)

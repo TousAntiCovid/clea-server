@@ -22,7 +22,7 @@ clea:
         enabled: "false"
   kafka:
     qrCodesTopic: test.clea.fct.qr-code-scan
-    statsTopic: test.clea.fct.report-stat
+    reportStatsTopic: test.clea.fct.report-stat
     errorLocationStatsTopic: test.clea.fct.clea-error-visit
 
 logging:
@@ -53,3 +53,7 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: group1
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

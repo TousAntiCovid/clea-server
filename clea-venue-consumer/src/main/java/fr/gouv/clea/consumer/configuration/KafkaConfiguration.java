@@ -7,7 +7,6 @@ import fr.gouv.clea.consumer.utils.KafkaVisitDeserializer;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -23,15 +22,11 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @RequiredArgsConstructor
 public class KafkaConfiguration {
 
-    private static final String OFFSET_CONFIG = "earliest";
-
     private final KafkaProperties kafkaProperties;
 
     @Bean
     public ConsumerFactory<String, DecodedVisit> visitConsumerFactory() {
         final var props = kafkaProperties.buildConsumerProperties();
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_CONFIG);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaVisitDeserializer.class);
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, DecodedVisit.class);
         return new DefaultKafkaConsumerFactory<>(props);
@@ -47,8 +42,6 @@ public class KafkaConfiguration {
     @Bean
     public ConsumerFactory<String, ReportStat> statConsumerFactory() {
         final var props = kafkaProperties.buildConsumerProperties();
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_CONFIG);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, ReportStat.class);
         return new DefaultKafkaConsumerFactory<>(props);
