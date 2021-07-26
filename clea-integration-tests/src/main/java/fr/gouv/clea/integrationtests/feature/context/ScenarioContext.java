@@ -1,6 +1,5 @@
 package fr.gouv.clea.integrationtests.feature.context;
 
-import fr.gouv.clea.api.CleaApi;
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
 import fr.gouv.clea.integrationtests.service.CleaS3Service;
 import fr.gouv.clea.qr.LocationQrCodeGenerator;
@@ -26,7 +25,10 @@ public class ScenarioContext {
 
     private final Map<String, Visitor> visitors = new HashMap<>(10);
 
-    private final Map<String, Map<String, ConfPair>> venueTypeCategories1 = new HashMap<>();
+    private final Map<String, Map<String, ConfPair>> venueTypeCategories1 = Map.of(
+            "restauration", Map.of("restaurant rapide", new ConfPair(1, 1)),
+            "etablissements sportifs", Map.of("sport indoor", new ConfPair(4, 2), "salle de sport", new ConfPair(4, 1))
+    );
 
     private final Map<String, LocationQrCodeGenerator> locations = new HashMap<>(10);
 
@@ -36,26 +38,14 @@ public class ScenarioContext {
 
     private String manualContactTracingAuthorityPublicKey;
 
-    private final CleaApi cleaApi;
-
     private final ApplicationProperties appConfig;
 
     private final CleaS3Service s3service;
 
-    public ScenarioContext(final ApplicationProperties appConfig, final CleaApi cleaApi, CleaS3Service s3service)
-            throws Exception {
-        this.cleaApi = cleaApi;
+    public ScenarioContext(final ApplicationProperties appConfig, final CleaS3Service s3service) throws Exception {
         this.appConfig = appConfig;
         this.s3service = s3service;
         this.initializeKeys(appConfig);
-        Map<String, ConfPair> currConf = new HashMap<>();
-        venueTypeCategories1.put("restauration", currConf);
-        currConf.put("restaurant rapide", new ConfPair(1, 1));
-        currConf = new HashMap<>();
-        venueTypeCategories1.put("etablissements sportifs", currConf);
-        currConf.put("sport indoor", new ConfPair(4, 2));
-        currConf.put("salle de sport", new ConfPair(4, 1));
-        log.debug("{}", venueTypeCategories1);
     }
 
     public void initializeKeys(final ApplicationProperties appConfig) throws Exception {
@@ -67,8 +57,8 @@ public class ScenarioContext {
     }
 
     public void generateKeys() throws Exception {
-        CleaEciesEncoder cleaEciesEncoder = new CleaEciesEncoder();
-        String[] serverAuthorityKeyPair = cleaEciesEncoder.genKeysPair(true);
+        final var cleaEciesEncoder = new CleaEciesEncoder();
+        final String[] serverAuthorityKeyPair = cleaEciesEncoder.genKeysPair(true);
         this.serverAuthorityPublicKey = serverAuthorityKeyPair[1];
         log.info("Server Authority Private Key: {}", serverAuthorityKeyPair[0]);
         log.info("Server Authority Public Key : {}", this.serverAuthorityPublicKey);
@@ -79,49 +69,50 @@ public class ScenarioContext {
         log.info("Manual Contact Tracing Authority Public Key : {}", this.manualContactTracingAuthorityPublicKey);
     }
 
-    public Visitor getOrCreateUser(String name) {
+    public Visitor getOrCreateUser(final String name) {
         return visitors.computeIfAbsent(name, this::createVisitor);
     }
 
-    private Visitor createVisitor(String name) {
-        return new Visitor(name, cleaApi, s3service, appConfig);
+    private Visitor createVisitor(final String name) {
+        return new Visitor(name, s3service, appConfig);
     }
 
-    public Visitor getVisitor(String visitorName) {
+    public Visitor getVisitor(final String visitorName) {
         return visitors.get(visitorName);
     }
 
-    public void updateOrCreateRiskConfig(String vtype, String vcategory1, Integer vcategory2, Integer backwardThreshold,
-            Integer backwardExposureTime, Float backwardRisk, Integer forwardThreshold, Integer forwardExposureTime,
-            Float forwardRisk) {
+    public void updateOrCreateRiskConfig(final String vtype, final String vcategory1, final Integer vcategory2,
+            final Integer backwardThreshold, final Integer backwardExposureTime, final Float backwardRisk,
+            final Integer forwardThreshold, final Integer forwardExposureTime, final Float forwardRisk) {
         // TODO: Create new ConfPair or just check if it exists?
     }
 
-    private LocationQrCodeGenerator createDynamicLocation(String locationName, Instant periodStartTime,
-            String venueType,
-            String venueCategory1, Integer venueCategory2, Duration qrCodeRenewalInterval, Integer periodDuration)
+    private LocationQrCodeGenerator createDynamicLocation(final String locationName, final Instant periodStartTime,
+            final String venueType, final String venueCategory1, final Integer venueCategory2,
+            final Duration qrCodeRenewalInterval, final Integer periodDuration) throws CleaCryptoException {
+        final var qrCodeRenewalIntervalLong = qrCodeRenewalInterval.getSeconds();
+        final var qrCodeRenewalIntervalExponentCompact = (int) (Math.log(qrCodeRenewalIntervalLong) / Math.log(2));
+        return this.createLocation(
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
+                qrCodeRenewalIntervalExponentCompact, periodDuration
+        );
+    }
+
+    private LocationQrCodeGenerator createStaticLocation(final String locationName, final Instant periodStartTime,
+            final String venueType, final String venueCategory1, final Integer venueCategory2,
+            final Integer periodDuration) throws CleaCryptoException {
+        final var qrCodeRenewalIntervalExponentCompact = 0x1F;
+        return this.createLocation(
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
+                qrCodeRenewalIntervalExponentCompact, periodDuration
+        );
+    }
+
+    private LocationQrCodeGenerator createLocation(final String locationName, final Instant periodStartTime,
+            final String venueType, final String venueCategory1, final Integer venueCategory2,
+            final Integer qrCodeRenewalIntervalExponentCompact, final Integer periodDuration)
             throws CleaCryptoException {
-        long qrCodeRenewalIntervalLong = qrCodeRenewalInterval.getSeconds();
-        int qrCodeRenewalIntervalExponentCompact = (int) (Math.log(qrCodeRenewalIntervalLong) / Math.log(2));
-        return this.createLocation(
-                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
-                qrCodeRenewalIntervalExponentCompact, periodDuration
-        );
-    }
-
-    private LocationQrCodeGenerator createStaticLocation(String locationName, Instant periodStartTime, String venueType,
-            String venueCategory1, Integer venueCategory2, Integer periodDuration) throws CleaCryptoException {
-        int qrCodeRenewalIntervalExponentCompact = 0x1F;
-        return this.createLocation(
-                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
-                qrCodeRenewalIntervalExponentCompact, periodDuration
-        );
-    }
-
-    private LocationQrCodeGenerator createLocation(String locationName, Instant periodStartTime, String venueType,
-            String venueCategory1, Integer venueCategory2, Integer qrCodeRenewalIntervalExponentCompact,
-            Integer periodDuration) throws CleaCryptoException {
-        final String permanentLocationSecretKey = Hex.toHexString(UUID.randomUUID().toString().getBytes());
+        final var permanentLocationSecretKey = Hex.toHexString(UUID.randomUUID().toString().getBytes());
         ConfPair conf;
         if (venueTypeCategories1.containsKey(venueType)
                 && venueTypeCategories1.get(venueType).containsKey(venueCategory1)) {
@@ -129,7 +120,7 @@ public class ScenarioContext {
         } else {
             conf = new ConfPair(9, 9);
         }
-        LocationQrCodeGenerator location = LocationQrCodeGenerator.builder()
+        final var location = LocationQrCodeGenerator.builder()
                 .countryCode(250) // France Country Code
                 .staff(false)
                 .venueType(conf.getType())
@@ -142,7 +133,7 @@ public class ScenarioContext {
                 .serverAuthorityPublicKey(serverAuthorityPublicKey)
                 .permanentLocationSecretKey(permanentLocationSecretKey)
                 .build();
-        LocationQrCodeGenerator staffLocation = LocationQrCodeGenerator.builder()
+        final var staffLocation = LocationQrCodeGenerator.builder()
                 .countryCode(250) // France Country Code
                 .staff(true)
                 .venueType(conf.getType())
@@ -160,18 +151,18 @@ public class ScenarioContext {
         return location;
     }
 
-    public LocationQrCodeGenerator getOrCreateDynamicLocation(String locationName, Instant periodStartTime,
-            String venueType,
-            String venueCategory1, Integer venueCategory2, Duration qrCodeRenewalInterval) throws CleaCryptoException {
+    public LocationQrCodeGenerator getOrCreateDynamicLocation(final String locationName, final Instant periodStartTime,
+            final String venueType, final String venueCategory1, final Integer venueCategory2,
+            final Duration qrCodeRenewalInterval) throws CleaCryptoException {
         return this.getOrCreateDynamicLocation(
                 locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
                 qrCodeRenewalInterval, 24
         );
     }
 
-    public LocationQrCodeGenerator getOrCreateDynamicLocation(String locationName, Instant periodStartTime,
-            String venueType, String venueCategory1, Integer venueCategory2, Duration qrCodeRenewalInterval,
-            Integer periodDuration) throws CleaCryptoException {
+    public LocationQrCodeGenerator getOrCreateDynamicLocation(final String locationName, final Instant periodStartTime,
+            final String venueType, final String venueCategory1, final Integer venueCategory2,
+            final Duration qrCodeRenewalInterval, final Integer periodDuration) throws CleaCryptoException {
         return locations.containsKey(locationName) ? locations.get(locationName)
                 : this.createDynamicLocation(
                         locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
@@ -179,28 +170,28 @@ public class ScenarioContext {
                 );
     }
 
-    public LocationQrCodeGenerator getOrCreateStaticLocation(String locationName, Instant periodStartTime,
-            String venueType,
-            String venueCategory1, Integer venueCategory2, Integer periodDuration) throws CleaCryptoException {
+    public LocationQrCodeGenerator getOrCreateStaticLocation(final String locationName, final Instant periodStartTime,
+            final String venueType, final String venueCategory1, final Integer venueCategory2,
+            final Integer periodDuration) throws CleaCryptoException {
         return locations.containsKey(locationName) ? locations.get(locationName)
                 : this.createStaticLocation(
                         locationName, periodStartTime, venueType, venueCategory1, venueCategory2, periodDuration
                 );
     }
 
-    public LocationQrCodeGenerator getOrCreateStaticLocation(String locationName, Instant periodStartTime,
-            String venueType,
-            String venueCategory1, Integer venueCategory2) throws CleaCryptoException {
+    public LocationQrCodeGenerator getOrCreateStaticLocationWithUnlimitedDuration(final String locationName,
+            final Instant periodStartTime, final String venueType, final String venueCategory1,
+            final Integer venueCategory2) throws CleaCryptoException {
         return this.getOrCreateStaticLocation(
                 locationName, periodStartTime, venueType, venueCategory1, venueCategory2, 24
         );
     }
 
-    public LocationQrCodeGenerator getLocation(String locationName) {
+    public LocationQrCodeGenerator getLocation(final String locationName) {
         return locations.get(locationName);
     }
 
-    public LocationQrCodeGenerator getStaffLocation(String locationName) {
+    public LocationQrCodeGenerator getStaffLocation(final String locationName) {
         return staffLocations.get(locationName);
     }
 
