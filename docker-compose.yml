@@ -35,7 +35,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       BUCKET: clea-batch
-      ENDPOINT_OUTSCALE: ${ENDPOINT_OUTSCALE}
+      ENDPOINT_OUTSCALE: http://minio:9000
       CLEA_BATCH_LOG_FILE_PATH: /logs
       CLEA_BATCH_LOG_FILE_NAME: clea-batch
     depends_on:
