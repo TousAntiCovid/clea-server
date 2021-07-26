@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
+import static java.lang.Integer.parseInt;
 import static java.util.Collections.frequency;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -368,21 +369,21 @@ public class CleaClientStepDefinitions {
     }
 
     @And("statistics by location are")
-    public void statisticsByLocationAre(List<Map<String, Integer>> expectedIndexContent) throws InterruptedException {
+    public void statisticsByLocationAre(List<Map<String, String>> expectedIndexContent) throws InterruptedException {
         // TODO: replace with kafka topics monitoring
         Thread.sleep(20000);
-        expectedIndexContent.stream().distinct().forEach(entry -> {
+        expectedIndexContent.forEach(entry -> {
             List<LocationStat> indexResponse = locationStatIndex
-                    .findByVenueTypeAndVenueCategory1AndVenueCategory2AndBackwardVisitsAndForwardVisits(
-                            entry.get("venue_type"),
-                            entry.get("venue_category1"),
-                            entry.get("venue_category2"),
-                            entry.get("backward_visits"),
-                            entry.get("forward_visits")
+                    .findByVenueTypeAndVenueCategory1AndVenueCategory2AndBackwardVisitsAndForwardVisitsAndPeriod(
+                            parseInt(entry.get("venue_type")),
+                            parseInt(entry.get("venue_category1")),
+                            parseInt(entry.get("venue_category2")),
+                            parseInt(entry.get("backward_visits")),
+                            parseInt(entry.get("forward_visits")),
+                            new PrettyTimeParser().parse(entry.get("period")).get(0).toInstant()
                     );
-            assertThat(indexResponse).size().isEqualTo(frequency(expectedIndexContent, entry));
+            assertThat(indexResponse).size().isEqualTo(1);
         });
-        assertThat(locationStatIndex.count()).isEqualTo(expectedIndexContent.size());
     }
 
     @Then("statistics by wreport are")
