@@ -112,7 +112,7 @@ public class CleaClientStepDefinitions {
     public void static_location_without_renewalTime_with_periodDuration(String locationName, Instant periodStartTime,
             String venueType, String venueCategory1, Integer venueCategory2, Integer periodDuration)
             throws CleaCryptoException {
-        var location = this.scenarioContext.getOrCreateStaticLocation(
+        this.scenarioContext.getOrCreateStaticLocation(
                 locationName, periodStartTime, venueType, venueCategory1, venueCategory2, periodDuration
         );
         // TODO: add QR id

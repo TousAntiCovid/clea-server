@@ -12,7 +12,7 @@ Feature: Several healthy visitors and a single sick visitor visit different plac
   Scenario: One sick and two persons at risk (same location and average RiskLevel)
     Given "Hugo" recorded a visit to "Chez Gusto" at 14:45, 4 days ago
     Given "Henry" recorded a visit to "Chez Gusto" at 14:00, 4 days ago
-    Given "Heather" recorded a visit to "Chez Gusto" at 13:30, 4 days ago
+    Given "Heather" recorded a visit to "Chez Gusto" at 14:00, 4 days ago
 
     When "Heather" declares himself sick
     When Cluster detection triggered
