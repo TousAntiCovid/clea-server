@@ -6,11 +6,11 @@ Feature: Several healthy visitors visit different places
     Given "Laure" registered on TAC
     And "Henry" registered on TAC
     And "Yaël" registered on TAC
-    And VType of "restaurant", VCategory1 of "fastfood" and VCategory2 of 1 has risk configuration of (Threshold , ExposureTime, Risklevel) for backward (3,60,3.0) and for forward (1,60,2.0)
-    And VType of "discotheque", VCategory1 of "discotheque" and VCategory2 of 2 has risk configuration of (Threshold , ExposureTime, Risklevel) for backward (3,180,3.0) and for forward (1,180,2.0)
-    And "Burger king" created a dynamic QRCode at 04:00, 10 days ago with VType as "restaurant" and with VCategory1 as "fastfood" and with VCategory2 as 1 and with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
-    And "Le Klub" created a dynamic QRCode at 04:00, 10 days ago with VType as "discotheque" and with VCategory1 as "discotheque" and with VCategory2 as 2 and with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
-    And "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as "etablissements sportifs" and with VCategory1 as "salle de sport" and with VCategory2 as 2 and with a periodDuration of "24 hours"
+    And VType of "restaurant", VCategory1 of 1 and VCategory2 of 1
+    And VType of "discotheque", VCategory1 of 0 and VCategory2 of 2
+    And "Burger king" created a dynamic QRCode at 04:00, 10 days ago with VType as "restaurant" and with VCategory1 as 1 and with VCategory2 as 1 and with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
+    And "Le Klub" created a dynamic QRCode at 04:00, 10 days ago with VType as "discotheque" and with VCategory1 as 0 and with VCategory2 as 2 and with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
+    And "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as "etablissements sportifs" and with VCategory1 as 4 and with VCategory2 as 2 and with a periodDuration of "24 hours"
 
   Scenario: Sanitary statistics
 
