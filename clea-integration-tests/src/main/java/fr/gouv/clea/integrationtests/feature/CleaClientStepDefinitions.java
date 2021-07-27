@@ -374,13 +374,13 @@ public class CleaClientStepDefinitions {
         Thread.sleep(20000);
         expectedIndexContent.forEach(entry -> {
             List<LocationStat> indexResponse = locationStatIndex
-                    .findByVenueTypeAndVenueCategory1AndVenueCategory2AndBackwardVisitsAndForwardVisitsAndPeriod(
+                    .findByVenueTypeAndVenueCategory1AndVenueCategory2AndBackwardVisitsAndForwardVisitsAndPeriodStart(
                             parseInt(entry.get("venue_type")),
                             parseInt(entry.get("venue_category1")),
                             parseInt(entry.get("venue_category2")),
                             parseInt(entry.get("backward_visits")),
                             parseInt(entry.get("forward_visits")),
-                            new PrettyTimeParser().parse(entry.get("period")).get(0).toInstant()
+                            new PrettyTimeParser().parse(entry.get("period_start")).get(0).toInstant()
                     );
             assertThat(indexResponse).size().isEqualTo(1);
         });

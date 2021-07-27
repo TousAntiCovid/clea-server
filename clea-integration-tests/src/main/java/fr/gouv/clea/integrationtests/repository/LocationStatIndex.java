@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface LocationStatIndex extends ElasticsearchRepository<LocationStat, String> {
 
-    List<LocationStat> findByVenueTypeAndVenueCategory1AndVenueCategory2AndBackwardVisitsAndForwardVisitsAndPeriod(
+    List<LocationStat> findByVenueTypeAndVenueCategory1AndVenueCategory2AndBackwardVisitsAndForwardVisitsAndPeriodStart(
             final int venueType,
             final int venueCategory1,
             final int venueCategory2,
             final int backwardVisits,
             final int forwardVisits,
-            final Instant period);
+            final Instant periodStart);
 }

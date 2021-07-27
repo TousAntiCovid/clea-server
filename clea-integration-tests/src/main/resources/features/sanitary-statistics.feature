@@ -30,7 +30,7 @@ Feature: Several healthy visitors visit different places
       | reported | rejected | is_closed | backwards | forwards |
       | 2        | 0        | 0         | 1         | 1        |
     And statistics by location are
-      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period            |
+      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start            |
       | 1          | 1               | 1               | 1               | 0              | 12:00, 6 days ago |
       | 1          | 1               | 1               | 0               | 1              | 12:00, 4 days ago |
     When "Henry" declares himself sick with a 3 days ago pivot date
@@ -41,7 +41,7 @@ Feature: Several healthy visitors visit different places
       | 2        | 0        | 0         | 1         | 1        |
       | 4        | 1        | 0         | 2         | 1        |
     And statistics by location are
-      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period            |
+      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start            |
       | 2          | 0               | 2               | 1               | 0              | 11:00, 4 days ago |
       | 1          | 1               | 1               | 2               | 0              | 12:00, 6 days ago |
       | 1          | 1               | 1               | 0               | 1              | 12:00, 4 days ago |
@@ -55,7 +55,7 @@ Feature: Several healthy visitors visit different places
       | 4        | 1        | 0         | 2         | 1        |
       | 1        | 1        | 0         | 0         | 0        |
     And statistics by location are
-      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period            |
+      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start            |
       | 2          | 0               | 2               | 1               | 0              | 11:00, 4 days ago |
       | 1          | 1               | 1               | 2               | 0              | 12:00, 6 days ago |
       | 1          | 1               | 1               | 0               | 1              | 12:00, 4 days ago |

@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 @RequiredArgsConstructor
 public class StatLocationRepositoryCustomImpl implements StatLocationRepositoryCustom {
 
-    protected ElasticsearchOperations elasticsearchTemplate;
+    private final ElasticsearchOperations elasticsearchTemplate;
 
     /**
      * Increment backward OR forward visit of an existing stat_location
