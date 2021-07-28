@@ -6,9 +6,9 @@ Feature: Several healthy visitors visit different places
     Given "Hugo" registered on TAC
     Given "Heather" registered on TAC
     Given "Henry" registered on TAC
-    Given VType of "restaurant", VCategory1 of 1 and VCategory2 of 1
-    Given "Chez Gusto" created a dynamic QRCode at 04:00, 10 days ago with VType as "restaurant" and with VCategory1 as 1 and with VCategory2 as 1 and with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
-    Given "La fontaine aux perles" created a dynamic QRCode at 04:00, 10 days ago with VType as "restaurant" and with VCategory1 as 1 and with VCategory2 as 1 and with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
+    Given VType of 1, VCategory1 of 1 and VCategory2 of 1
+    Given "Chez Gusto" created a dynamic QRCode at 04:00, 10 days ago with VType as 1, with VCategory1 as 1, with VCategory2 as 1, with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
+    Given "La fontaine aux perles" created a dynamic QRCode at 04:00, 10 days ago with VType as 1, with VCategory1 as 1, with VCategory2 as 1, with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
 
   Scenario: One healthy visitor alone
     Given "Hugo" recorded a visit to "Chez Gusto" at 12:30, 2 days ago

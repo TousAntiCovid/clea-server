@@ -6,11 +6,11 @@ Feature: Several healthy visitors visit different places
     Given "Laure" registered on TAC
     And "Henry" registered on TAC
     And "Yaël" registered on TAC
-    And VType of "restaurant", VCategory1 of 1 and VCategory2 of 1
-    And VType of "discotheque", VCategory1 of 0 and VCategory2 of 2
-    And "Burger king" created a dynamic QRCode at 04:00, 10 days ago with VType as "restaurant" and with VCategory1 as 1 and with VCategory2 as 1 and with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
-    And "Le Klub" created a dynamic QRCode at 04:00, 10 days ago with VType as "discotheque" and with VCategory1 as 0 and with VCategory2 as 2 and with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
-    And "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as "etablissements sportifs" and with VCategory1 as 4 and with VCategory2 as 2 and with a periodDuration of "24 hours"
+    And VType of 1, VCategory1 of 1 and VCategory2 of 1
+    And VType of 2, VCategory1 of 0 and VCategory2 of 2
+    And "Burger king" created a dynamic QRCode at 04:00, 10 days ago with VType as 1, with VCategory1 as 1, with VCategory2 as 1, with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
+    And "Le Klub" created a dynamic QRCode at 04:00, 10 days ago with VType as 2, with VCategory1 as 0, with VCategory2 as 2, with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
+    And "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as 4, with VCategory1 as 4, with VCategory2 as 2 and with a periodDuration of "24 hours"
 
   Scenario: Sanitary statistics
 
@@ -30,7 +30,7 @@ Feature: Several healthy visitors visit different places
       | reported | rejected | is_closed | backwards | forwards |
       | 2        | 0        | 0         | 1         | 1        |
     And statistics by location are
-      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start            |
+      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start      |
       | 1          | 1               | 1               | 1               | 0              | 12:00, 6 days ago |
       | 1          | 1               | 1               | 0               | 1              | 12:00, 4 days ago |
     When "Henry" declares himself sick with a 3 days ago pivot date
@@ -41,7 +41,7 @@ Feature: Several healthy visitors visit different places
       | 2        | 0        | 0         | 1         | 1        |
       | 4        | 1        | 0         | 2         | 1        |
     And statistics by location are
-      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start            |
+      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start      |
       | 2          | 0               | 2               | 1               | 0              | 11:00, 4 days ago |
       | 1          | 1               | 1               | 2               | 0              | 12:00, 6 days ago |
       | 1          | 1               | 1               | 0               | 1              | 12:00, 4 days ago |
@@ -55,7 +55,7 @@ Feature: Several healthy visitors visit different places
       | 4        | 1        | 0         | 2         | 1        |
       | 1        | 1        | 0         | 0         | 0        |
     And statistics by location are
-      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start            |
+      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start      |
       | 2          | 0               | 2               | 1               | 0              | 11:00, 4 days ago |
       | 1          | 1               | 1               | 2               | 0              | 12:00, 6 days ago |
       | 1          | 1               | 1               | 0               | 1              | 12:00, 4 days ago |

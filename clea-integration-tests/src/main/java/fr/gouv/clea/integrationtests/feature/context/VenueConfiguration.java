@@ -7,11 +7,11 @@ import lombok.Value;
 @AllArgsConstructor
 public class VenueConfiguration {
 
-    VenueType venueType;
+    int venueType;
 
     int venueCategory1;
 
     int venueCategory2;
 
-    static VenueConfiguration DEFAULT = new VenueConfiguration(VenueType.DEFAULT, 9, 0);
+    static VenueConfiguration DEFAULT = new VenueConfiguration(9, 9, 0);
 }

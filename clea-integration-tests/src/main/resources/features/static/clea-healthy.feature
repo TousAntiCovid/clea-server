@@ -11,13 +11,12 @@ Feature: Several healthy visitors visit different places
     Given "Julie" registered on TAC
     Given "Mahe" registered on TAC
     Given "Yäel" registered on TAC
-    #TODO: replace venueType as string with venueType as integer
-    Given VType of "restaurant", VCategory1 of 1 and VCategory2 of 1
-    Given VType of "etablissements sportifs", VCategory1 of 2 and VCategory2 of 2
-    Given VType of "etablissements sportifs", VCategory1 of 1 and VCategory2 of 2
-    Given "Chez McDonald's" created a static QRCode at 11:00, 13 days ago with VType as "restaurant" and with VCategory1 as 1 and with VCategory2 as 1 and with a periodDuration of "24 hours"
-    Given "NRFight Club Olympiades" created a static QRCode at 11:00, 13 days ago with VType as "etablissements sportifs" and with VCategory1 as 2 and with VCategory2 as 2 and with a periodDuration of "24 hours"
-    Given "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as "etablissements sportifs" and with VCategory1 as 1 and with VCategory2 as 2 and with a periodDuration of "24 hours"
+    Given VType of 1, VCategory1 of 1 and VCategory2 of 1
+    Given VType of 4, VCategory1 of 2 and VCategory2 of 2
+    Given VType of 4, VCategory1 of 1 and VCategory2 of 2
+    Given "Chez McDonald's" created a static QRCode at 11:00, 13 days ago with VType as 1, with VCategory1 as 1, with VCategory2 as 1 and with a periodDuration of "24 hours"
+    Given "NRFight Club Olympiades" created a static QRCode at 11:00, 13 days ago with VType as 4, with VCategory1 as 2, with VCategory2 as 2 and with a periodDuration of "24 hours"
+    Given "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as 4, with VCategory1 as 1, with VCategory2 as 2 and with a periodDuration of "24 hours"
 
   Scenario: One location with duplicated visits - Exposure Time 30 min
    Given "Hugo" recorded a visit to "Chez McDonald's" at 12:30, 6 days ago

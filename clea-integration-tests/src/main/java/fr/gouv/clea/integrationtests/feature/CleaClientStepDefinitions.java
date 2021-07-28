@@ -5,7 +5,6 @@ import fr.gouv.clea.integrationtests.dto.PivotDateStringWreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportResponse;
 import fr.gouv.clea.integrationtests.feature.context.ScenarioContext;
-import fr.gouv.clea.integrationtests.feature.context.VenueType;
 import fr.gouv.clea.integrationtests.model.LocationStat;
 import fr.gouv.clea.integrationtests.model.ReportStat;
 import fr.gouv.clea.integrationtests.repository.LocationStatIndex;
@@ -73,46 +72,46 @@ public class CleaClientStepDefinitions {
         this.scenarioContext.getOrCreateUser(username);
     }
 
-    @Given("VType of {string}, VCategory1 of {int} and VCategory2 of {int}")
-    public void create_or_update_venue_with_specific_configuration(String venueType, Integer venueCategory1,
+    @Given("VType of {int}, VCategory1 of {int} and VCategory2 of {int}")
+    public void create_or_update_venue_with_specific_configuration(Integer venueType, Integer venueCategory1,
             Integer venueCategory2) {
         this.scenarioContext.updateOrCreateRiskConfig(venueType, venueCategory1, venueCategory2);
     }
 
     // Dynamic Location
-    @Given("{string} created a dynamic QRCode at {instant} with VType as {string} and with VCategory1 as {int} and with VCategory2 as {int} and with a renewal time of \"{int} {word}\" and with a periodDuration of \"{int} hours\"")
+    @Given("{string} created a dynamic QRCode at {instant} with VType as {int}, with VCategory1 as {int}, with VCategory2 as {int}, with a renewal time of \"{int} {word}\" and with a periodDuration of \"{int} hours\"")
     public void dynamic_location_with_a_periodDuration_and_renewalTime(String locationName, Instant periodStartTime,
-            String venueType, Integer venueCategory1, Integer venueCategory2, Integer qrCodeRenewalInterval,
+            Integer venueType, Integer venueCategory1, Integer venueCategory2, Integer qrCodeRenewalInterval,
             String qrCodeRenewalIntervalUnit, Integer periodDuration) throws CleaCryptoException {
         final var qrCodeRenewalIntervalDuration = Duration
                 .of(qrCodeRenewalInterval, ChronoUnit.valueOf(qrCodeRenewalIntervalUnit.toUpperCase()));
         this.scenarioContext.getOrCreateDynamicLocation(
-                locationName, periodStartTime, VenueType.valueFromName(venueType), venueCategory1, venueCategory2,
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
                 qrCodeRenewalIntervalDuration,
                 periodDuration
         );
         // TODO: add QR id
     }
 
-    @Given("{string} created a dynamic QRCode at {instant} with VType as {string} and with VCategory1 as {int} and with VCategory2 as {int} and with and with a renewal time of \"{int} {word}\"")
+    @Given("{string} created a dynamic QRCode at {instant} with VType as {int} and with VCategory1 as {int} and with VCategory2 as {int} and with and with a renewal time of \"{int} {word}\"")
     public void dynamic_location_without_periodDuration_with_renewalTime(String locationName, Instant periodStartTime,
-            String venueType, Integer venueCategory1, Integer venueCategory2, Integer qrCodeRenewalInterval,
+            Integer venueType, Integer venueCategory1, Integer venueCategory2, Integer qrCodeRenewalInterval,
             String qrCodeRenewalIntervalUnit) throws CleaCryptoException {
         final var qrCodeRenewalIntervalDuration = Duration
                 .of(qrCodeRenewalInterval, ChronoUnit.valueOf(qrCodeRenewalIntervalUnit.toUpperCase()));
         this.scenarioContext.getOrCreateDynamicLocation(
-                locationName, periodStartTime, VenueType.valueFromName(venueType), venueCategory1, venueCategory2,
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
                 qrCodeRenewalIntervalDuration
         );
         // TODO: add QR id
     }
 
-    @Given("{string} created a static QRCode at {instant} with VType as {string} and with VCategory1 as {int} and with VCategory2 as {int} and with a periodDuration of \"{int} hours\"")
+    @Given("{string} created a static QRCode at {instant} with VType as {int}, with VCategory1 as {int}, with VCategory2 as {int} and with a periodDuration of \"{int} hours\"")
     public void static_location_without_renewalTime_with_periodDuration(String locationName, Instant periodStartTime,
-            String venueType, Integer venueCategory1, Integer venueCategory2, Integer periodDuration)
+            Integer venueType, Integer venueCategory1, Integer venueCategory2, Integer periodDuration)
             throws CleaCryptoException {
         this.scenarioContext.getOrCreateStaticLocation(
-                locationName, periodStartTime, VenueType.valueFromName(venueType), venueCategory1, venueCategory2,
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
                 periodDuration
         );
         // TODO: add QR id
@@ -120,9 +119,9 @@ public class CleaClientStepDefinitions {
 
     @Given("{string} created a static QRCode at {instant} with VType as {string} and VCategory1 as {int} and with VCategory2 as {int}")
     public void static_location_with_default_periodDuration(String locationName, Instant periodStartTime,
-            String venueType, Integer venueCategory1, Integer venueCategory2) throws CleaCryptoException {
+            Integer venueType, Integer venueCategory1, Integer venueCategory2) throws CleaCryptoException {
         this.scenarioContext.getOrCreateStaticLocationWithUnlimitedDuration(
-                locationName, periodStartTime, VenueType.valueFromName(venueType), venueCategory1, venueCategory2
+                locationName, periodStartTime, venueType, venueCategory1, venueCategory2
         );
         // TODO: add QR id
     }

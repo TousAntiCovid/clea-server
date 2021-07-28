@@ -79,12 +79,13 @@ public class ScenarioContext {
     }
 
     // TODO remonter le venueType au niveau maximum
-    public void updateOrCreateRiskConfig(final String vtype, final Integer vcategory1, final Integer vcategory2) {
-        venueConfigurations.add(new VenueConfiguration(VenueType.valueFromName(vtype), vcategory1, vcategory2));
+    public void updateOrCreateRiskConfig(final Integer venueType, final Integer venueCategory1,
+            final Integer venueCategory2) {
+        venueConfigurations.add(new VenueConfiguration(venueType, venueCategory1, venueCategory2));
     }
 
     private LocationQrCodeGenerator createDynamicLocation(final String locationName, final Instant periodStartTime,
-            final VenueType venueType, final Integer venueCategory1, final Integer venueCategory2,
+            final Integer venueType, final Integer venueCategory1, final Integer venueCategory2,
             final Duration qrCodeRenewalInterval, final Integer periodDuration) throws CleaCryptoException {
         final var qrCodeRenewalIntervalLong = qrCodeRenewalInterval.getSeconds();
         final var qrCodeRenewalIntervalExponentCompact = (int) (Math.log(qrCodeRenewalIntervalLong) / Math.log(2));
@@ -95,7 +96,7 @@ public class ScenarioContext {
     }
 
     private LocationQrCodeGenerator createStaticLocation(final String locationName, final Instant periodStartTime,
-            final VenueType venueType, final Integer venueCategory1, final Integer venueCategory2,
+            final Integer venueType, final Integer venueCategory1, final Integer venueCategory2,
             final Integer periodDuration) throws CleaCryptoException {
         final var qrCodeRenewalIntervalExponentCompact = 0x1F;
         return this.createLocation(
@@ -105,7 +106,7 @@ public class ScenarioContext {
     }
 
     private LocationQrCodeGenerator createLocation(final String locationName, final Instant periodStartTime,
-            final VenueType venueType, final Integer venueCategory1, final Integer venueCategory2,
+            final Integer venueType, final Integer venueCategory1, final Integer venueCategory2,
             final Integer qrCodeRenewalIntervalExponentCompact, final Integer periodDuration)
             throws CleaCryptoException {
         final var permanentLocationSecretKey = Hex.toHexString(UUID.randomUUID().toString().getBytes());
@@ -113,7 +114,7 @@ public class ScenarioContext {
         final var location = LocationQrCodeGenerator.builder()
                 .countryCode(250) // France Country Code
                 .staff(false)
-                .venueType(venueConfiguration.getVenueType().getValue())
+                .venueType(venueConfiguration.getVenueType())
                 .venueCategory1(venueConfiguration.getVenueCategory1())
                 .venueCategory2(venueConfiguration.getVenueCategory2())
                 .periodDuration(periodDuration)
@@ -126,7 +127,7 @@ public class ScenarioContext {
         final var staffLocation = LocationQrCodeGenerator.builder()
                 .countryCode(250) // France Country Code
                 .staff(true)
-                .venueType(venueConfiguration.getVenueType().getValue())
+                .venueType(venueConfiguration.getVenueType())
                 .venueCategory1(venueConfiguration.getVenueCategory1())
                 .venueCategory2(venueConfiguration.getVenueCategory2())
                 .periodDuration(periodDuration)
@@ -141,7 +142,7 @@ public class ScenarioContext {
         return location;
     }
 
-    private VenueConfiguration findOrCreate(VenueType venueType, Integer venueCategory1, Integer venueCategory2) {
+    private VenueConfiguration findOrCreate(Integer venueType, Integer venueCategory1, Integer venueCategory2) {
         return venueConfigurations.stream()
                 .filter(matchingConfigurationExists(venueType, venueCategory1, venueCategory2))
                 .findFirst()
@@ -154,15 +155,15 @@ public class ScenarioContext {
                 });
     }
 
-    private Predicate<VenueConfiguration> matchingConfigurationExists(VenueType venueType, Integer venueCategory1,
+    private Predicate<VenueConfiguration> matchingConfigurationExists(Integer venueType, Integer venueCategory1,
             Integer venueCategory2) {
-        return config -> config.getVenueType().equals(venueType) &&
+        return config -> config.getVenueType() == venueType &&
                 config.getVenueCategory1() == venueCategory1 &&
                 config.getVenueCategory2() == venueCategory2;
     }
 
     public LocationQrCodeGenerator getOrCreateDynamicLocation(final String locationName, final Instant periodStartTime,
-            final VenueType venueType, final Integer venueCategory1, final Integer venueCategory2,
+            final Integer venueType, final Integer venueCategory1, final Integer venueCategory2,
             final Duration qrCodeRenewalInterval) throws CleaCryptoException {
         return this.getOrCreateDynamicLocation(
                 locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
@@ -171,7 +172,7 @@ public class ScenarioContext {
     }
 
     public LocationQrCodeGenerator getOrCreateDynamicLocation(final String locationName, final Instant periodStartTime,
-            final VenueType venueType, final Integer venueCategory1, final Integer venueCategory2,
+            final Integer venueType, final Integer venueCategory1, final Integer venueCategory2,
             final Duration qrCodeRenewalInterval, final Integer periodDuration) throws CleaCryptoException {
         return locations.containsKey(locationName) ? locations.get(locationName)
                 : this.createDynamicLocation(
@@ -181,7 +182,7 @@ public class ScenarioContext {
     }
 
     public LocationQrCodeGenerator getOrCreateStaticLocation(final String locationName, final Instant periodStartTime,
-            final VenueType venueType, final Integer venueCategory1, final Integer venueCategory2,
+            final Integer venueType, final Integer venueCategory1, final Integer venueCategory2,
             final Integer periodDuration) throws CleaCryptoException {
         return locations.containsKey(locationName) ? locations.get(locationName)
                 : this.createStaticLocation(
@@ -190,7 +191,7 @@ public class ScenarioContext {
     }
 
     public LocationQrCodeGenerator getOrCreateStaticLocationWithUnlimitedDuration(final String locationName,
-            final Instant periodStartTime, final VenueType venueType, final Integer venueCategory1,
+            final Instant periodStartTime, final Integer venueType, final Integer venueCategory1,
             final Integer venueCategory2) throws CleaCryptoException {
         return this.getOrCreateStaticLocation(
                 locationName, periodStartTime, venueType, venueCategory1, venueCategory2, 24
