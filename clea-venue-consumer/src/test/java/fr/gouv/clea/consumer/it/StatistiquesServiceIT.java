@@ -8,7 +8,7 @@ import fr.gouv.clea.consumer.model.ReportStatEntity;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.statistiques.ReportStatIndex;
 import fr.gouv.clea.consumer.repository.statistiques.StatLocationIndex;
-import fr.gouv.clea.consumer.service.impl.StatService;
+import fr.gouv.clea.consumer.service.StatisticsService;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.*;
@@ -57,7 +57,7 @@ class StatistiquesServiceIT {
     private VenueConsumerProperties properties;
 
     @Autowired
-    private StatService service;
+    private StatisticsService service;
 
     @Autowired
     private ReportStatIndex reportStatIndex;

@@ -1,4 +1,4 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
@@ -32,7 +32,7 @@ public class VisitExpositionAggregatorService {
 
     private final VenueConsumerProperties properties;
 
-    private final StatService statService;
+    private final StatisticsService statisticsService;
 
     @Transactional
     public void updateExposureCount(Visit visit) {

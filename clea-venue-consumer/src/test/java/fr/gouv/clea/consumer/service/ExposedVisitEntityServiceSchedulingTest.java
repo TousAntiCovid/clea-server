@@ -1,4 +1,4 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
 import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
@@ -73,7 +73,7 @@ class ExposedVisitEntityServiceSchedulingTest {
                 .containsExactly(
                         tuple(
                                 cronValue,
-                                "fr.gouv.clea.consumer.service.impl.ExposedVisitEntityService.deleteOutdatedExposedVisits"
+                                "fr.gouv.clea.consumer.service.ExposedVisitEntityService.deleteOutdatedExposedVisits"
                         )
                 );
     }

@@ -1,4 +1,4 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
@@ -36,7 +36,7 @@ class VisitExpositionAggregatorServiceTest {
     private ExposureTimeConfiguration exposureTimeConfiguration;
 
     @MockBean
-    private StatService statService;
+    private StatisticsService statisticsService;
 
     private Instant todayAtMidnight;
 
@@ -65,7 +65,7 @@ class VisitExpositionAggregatorServiceTest {
                                 .build()
                 );
 
-        doNothing().when(statService).logStats(any(Visit.class));
+        doNothing().when(statisticsService).logStats(any(Visit.class));
     }
 
     @AfterEach

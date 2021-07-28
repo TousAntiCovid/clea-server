@@ -1,4 +1,4 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.model.DecodedVisit;
 import fr.gouv.clea.consumer.model.ReportStat;
@@ -22,7 +22,7 @@ public class ConsumerService {
 
     private final VisitExpositionAggregatorService visitExpositionAggregatorService;
 
-    private final StatService statService;
+    private final StatisticsService statisticsService;
 
     @KafkaListener(topics = "${clea.kafka.qrCodesTopic}", containerFactory = "visitContainerFactory")
     public void consumeVisit(DecodedVisit decodedVisit) {
@@ -36,7 +36,7 @@ public class ConsumerService {
                 visit -> {
                     log.debug("Consumer: visit after decrypt + validation: {}, ", visit);
                     visitExpositionAggregatorService.updateExposureCount(visit);
-                    statService.logStats(visit);
+                    statisticsService.logStats(visit);
                 },
                 () -> log.info("empty visit after decrypt + validation")
         );
@@ -45,6 +45,6 @@ public class ConsumerService {
     @KafkaListener(topics = "${clea.kafka.reportStatsTopic}", containerFactory = "statContainerFactory")
     public void consumeStat(ReportStat reportStat) {
         log.info("stat {} retrieved from queue", reportStat);
-        statService.logStats(reportStat);
+        statisticsService.logStats(reportStat);
     }
 }

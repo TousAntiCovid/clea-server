@@ -1,4 +1,4 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.configuration.CleaKafkaProperties;
 import fr.gouv.clea.consumer.model.DecodedVisit;
@@ -49,7 +49,7 @@ class ConsumerServiceTest {
     private DecodedVisitService decodedVisitService;
 
     @SpyBean
-    private StatService statService;
+    private StatisticsService statisticsService;
 
     @Test
     @DisplayName("test that consumeVisit listener triggers when something is sent to visit queue")
@@ -109,7 +109,7 @@ class ConsumerServiceTest {
 
         await().atMost(60, TimeUnit.SECONDS)
                 .untilAsserted(
-                        () -> verify(statService, times(1))
+                        () -> verify(statisticsService, times(1))
                                 .logStats(any(ReportStat.class))
                 );
 

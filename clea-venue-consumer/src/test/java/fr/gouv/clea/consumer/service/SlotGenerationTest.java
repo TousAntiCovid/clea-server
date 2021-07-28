@@ -1,4 +1,4 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
@@ -43,7 +43,7 @@ class SlotGenerationTest {
     private ExposedVisitRepository repository;
 
     @Mock
-    private StatService statService;
+    private StatisticsService statisticsService;
 
     @Captor
     private ArgumentCaptor<List<ExposedVisitEntity>> exposedVisitEntitiesCaptor;
@@ -66,7 +66,7 @@ class SlotGenerationTest {
                 )
         );
         properties.setDurationUnitInSeconds(Duration.ofMinutes(30).toSeconds());
-        service = new VisitExpositionAggregatorService(repository, exposureTimeConfig, properties, statService);
+        service = new VisitExpositionAggregatorService(repository, exposureTimeConfig, properties, statisticsService);
     }
 
     @Test
