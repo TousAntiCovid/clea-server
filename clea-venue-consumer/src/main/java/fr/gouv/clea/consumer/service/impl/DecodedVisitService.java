@@ -3,7 +3,6 @@ package fr.gouv.clea.consumer.service.impl;
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.DecodedVisit;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.service.IDecodedVisitService;
 import fr.gouv.clea.consumer.utils.MessageFormatter;
 import fr.inria.clea.lsp.CleaEciesEncoder;
 import fr.inria.clea.lsp.LocationSpecificPart;
@@ -20,7 +19,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class DecodedVisitService implements IDecodedVisitService {
+public class DecodedVisitService {
 
     private final LocationSpecificPartDecoder decoder;
 
@@ -28,7 +27,6 @@ public class DecodedVisitService implements IDecodedVisitService {
 
     private final VenueConsumerProperties properties;
 
-    @Override
     public Optional<Visit> decryptAndValidate(DecodedVisit decodedVisit) {
         try {
             LocationSpecificPart lsp = this.decoder.decrypt(decodedVisit.getEncryptedLocationSpecificPart());

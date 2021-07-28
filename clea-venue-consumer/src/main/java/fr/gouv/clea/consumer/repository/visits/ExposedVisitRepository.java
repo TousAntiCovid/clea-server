@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface IExposedVisitRepository extends JpaRepository<ExposedVisitEntity, String> {
+public interface ExposedVisitRepository extends JpaRepository<ExposedVisitEntity, String> {
 
     @Modifying
     @Query(value = "DELETE FROM EXPOSED_VISITS e WHERE ((?1 - (e.PERIOD_START + (e.TIMESLOT * ?2))) / ?3) > ?4", nativeQuery = true)

@@ -1,8 +1,8 @@
 package fr.gouv.clea.consumer.configuration;
 
 import fr.gouv.clea.consumer.model.DecodedVisit;
+import fr.gouv.clea.consumer.model.LocationStat;
 import fr.gouv.clea.consumer.model.ReportStat;
-import fr.gouv.clea.consumer.model.StatLocation;
 import fr.gouv.clea.consumer.utils.KafkaVisitDeserializer;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -55,7 +55,7 @@ public class KafkaConfiguration {
     }
 
     @Bean
-    public ProducerFactory<String, StatLocation> cleaErrorStatsTopicFactory() {
+    public ProducerFactory<String, LocationStat> cleaErrorStatsTopicFactory() {
         final var configProps = kafkaProperties.buildConsumerProperties();
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
@@ -64,7 +64,7 @@ public class KafkaConfiguration {
     }
 
     @Bean
-    public KafkaTemplate<String, StatLocation> cleaErrorStatsTopicKafkaTemplate() {
+    public KafkaTemplate<String, LocationStat> cleaErrorStatsTopicKafkaTemplate() {
         return new KafkaTemplate<>(cleaErrorStatsTopicFactory());
     }
 }

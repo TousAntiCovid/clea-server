@@ -1,8 +1,7 @@
 package fr.gouv.clea.consumer.service.impl;
 
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
-import fr.gouv.clea.consumer.repository.visits.IExposedVisitRepository;
-import fr.gouv.clea.consumer.service.IExposedVisitEntityService;
+import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +15,12 @@ import javax.transaction.Transactional;
 @RefreshScope
 @RequiredArgsConstructor
 @Slf4j
-public class ExposedVisitEntityService implements IExposedVisitEntityService {
+public class ExposedVisitEntityService {
 
-    private final IExposedVisitRepository repository;
+    private final ExposedVisitRepository repository;
 
     private final VenueConsumerProperties properties;
 
-    @Override
     @Transactional
     @Scheduled(cron = "${clea.conf.scheduling.purge.cron}")
     public void deleteOutdatedExposedVisits() {

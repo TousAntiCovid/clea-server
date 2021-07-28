@@ -3,8 +3,7 @@ package fr.gouv.clea.consumer.service.impl;
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.visits.IExposedVisitRepository;
-import fr.gouv.clea.consumer.service.IStatService;
+import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.gouv.clea.scoring.configuration.ScoringRule;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
@@ -41,10 +40,10 @@ class SlotGenerationTest {
     private final ExposureTimeConfiguration exposureTimeConfig = new ExposureTimeConfiguration();
 
     @Mock
-    private IExposedVisitRepository repository;
+    private ExposedVisitRepository repository;
 
     @Mock
-    private IStatService statService;
+    private StatService statService;
 
     @Captor
     private ArgumentCaptor<List<ExposedVisitEntity>> exposedVisitEntitiesCaptor;

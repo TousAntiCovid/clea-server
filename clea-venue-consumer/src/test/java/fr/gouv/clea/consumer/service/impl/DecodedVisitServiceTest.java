@@ -3,7 +3,6 @@ package fr.gouv.clea.consumer.service.impl;
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.DecodedVisit;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.service.IDecodedVisitService;
 import fr.inria.clea.lsp.CleaEciesEncoder;
 import fr.inria.clea.lsp.EncryptedLocationSpecificPart;
 import fr.inria.clea.lsp.LocationSpecificPart;
@@ -11,11 +10,7 @@ import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import fr.inria.clea.lsp.exception.CleaEncodingException;
 import fr.inria.clea.lsp.exception.CleaEncryptionException;
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -43,7 +38,7 @@ class DecodedVisitServiceTest {
             .cleaClockDriftInSecs(cleaClockDriftInSecs)
             .build();
 
-    private final IDecodedVisitService decodedVisitService = new DecodedVisitService(
+    private final DecodedVisitService decodedVisitService = new DecodedVisitService(
             decoder, cleaEciesEncoder, properties
     );
 

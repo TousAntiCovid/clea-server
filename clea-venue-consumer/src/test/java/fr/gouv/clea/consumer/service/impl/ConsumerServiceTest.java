@@ -3,8 +3,6 @@ package fr.gouv.clea.consumer.service.impl;
 import fr.gouv.clea.consumer.configuration.CleaKafkaProperties;
 import fr.gouv.clea.consumer.model.DecodedVisit;
 import fr.gouv.clea.consumer.model.ReportStat;
-import fr.gouv.clea.consumer.service.IDecodedVisitService;
-import fr.gouv.clea.consumer.service.IStatService;
 import fr.gouv.clea.consumer.utils.KafkaVisitSerializer;
 import fr.inria.clea.lsp.EncryptedLocationSpecificPart;
 import fr.inria.clea.lsp.utils.TimeUtils;
@@ -48,10 +46,10 @@ class ConsumerServiceTest {
      * https://github.com/spring-cloud/spring-cloud-consumerConfig/issues/944
      */
     @SpyBean
-    private IDecodedVisitService decodedVisitService;
+    private DecodedVisitService decodedVisitService;
 
     @SpyBean
-    private IStatService statService;
+    private StatService statService;
 
     @Test
     @DisplayName("test that consumeVisit listener triggers when something is sent to visit queue")

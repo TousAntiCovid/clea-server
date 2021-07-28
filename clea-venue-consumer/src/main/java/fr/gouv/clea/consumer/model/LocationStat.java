@@ -9,6 +9,7 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.core.query.SeqNoPrimaryTerm;
 
 import java.time.Instant;
 
@@ -17,10 +18,12 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(indexName = "health-clealocations-#{T(java.time.LocalDate).now().toString().replace('-', '.')}")
-public class StatLocation {
+public class LocationStat {
 
     @Id
     private String id;
+
+    private SeqNoPrimaryTerm optimisticConcurrencyLock;
 
     private long backwardVisits;
 
