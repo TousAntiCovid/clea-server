@@ -67,7 +67,7 @@ If the transfert fails (ElasticSearch not available), clea-ws constantly tries t
 Each valid decrypted visit is recorded in ElasticSearch (without locationTemporaryPublicId).
 Document sent to ElasticSearch is:
 
-- qrCodeScanTime
+- qrCodeScanTime : TODO / Trunc by ExposureTimeE property.
 - venueType
 - venueCategory1
 - venueCategory2
