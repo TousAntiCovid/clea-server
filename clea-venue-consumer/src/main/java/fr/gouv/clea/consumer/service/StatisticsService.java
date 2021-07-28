@@ -94,7 +94,7 @@ public class StatisticsService {
                 .truncatedTo(ChronoUnit.SECONDS);
         final var stringStatPeriod = statPeriod
                 .atOffset(ZoneOffset.UTC)
-                .format(DateTimeFormatter.ofPattern("yyyy-mm-dd'T'hh:mm'Z'"));
+                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
         final var id = String.format(
                 "%s-vt%d-vc1%d-vc2%d", stringStatPeriod, visit.getVenueType(), visit.getVenueCategory1(),
                 visit.getVenueCategory2()
