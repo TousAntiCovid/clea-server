@@ -58,21 +58,16 @@ public class ReportService implements IReportService {
         pruned.stream().sorted(Comparator.comparing((DecodedVisit::getQrCodeScanTime)))
                 .forEach(closeScanTimeVisits::incrementIfScannedInSameTimeUnitThanLastScanTime);
 
-        ReportStat reportStat = ReportStat.builder()
-                .reported(reportVisits.size())
-                .rejected(reportVisits.size() - pruned.size())
-                .backwards((int) pruned.stream().filter(DecodedVisit::isBackward).count())
-                .forwards((int) pruned.stream().filter(DecodedVisit::isForward).count())
-                .close(closeScanTimeVisits.getCount())
-                .timestamp(TimeUtils.currentNtpTime())
-                .build();
-
-        log.info(
-                "BATCH_REPORT {}#{}#{}#{}#{}", reportStat.getReported(), reportStat.getRejected(),
-                reportStat.getBackwards(), reportStat.getForwards(), reportStat.getClose()
+        producerService.produceStat(
+                ReportStat.builder()
+                        .reported(reportVisits.size())
+                        .rejected(reportVisits.size() - pruned.size())
+                        .backwards((int) pruned.stream().filter(DecodedVisit::isBackward).count())
+                        .forwards((int) pruned.stream().filter(DecodedVisit::isForward).count())
+                        .close(closeScanTimeVisits.getCount())
+                        .timestamp(TimeUtils.currentNtpTime())
+                        .build()
         );
-
-        producerService.produceStat(reportStat);
         return pruned;
     }
 
