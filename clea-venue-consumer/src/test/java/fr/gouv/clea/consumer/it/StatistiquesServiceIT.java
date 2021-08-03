@@ -13,17 +13,24 @@ import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +38,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 
 @Testcontainers
+@EnableRetry
+@RunWith(SpringJUnit4ClassRunner.class)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -58,6 +70,12 @@ class StatistiquesServiceIT {
 
     @Autowired
     private StatisticsService service;
+
+    @Mock
+    private StatisticsService serviceMock;
+
+    @Mock
+    private StatLocationIndex statLocationIndexMock;
 
     @Autowired
     private ReportStatIndex reportStatIndex;
@@ -215,14 +233,8 @@ class StatistiquesServiceIT {
 
         assertThat(statLocationIndex.count()).isEqualTo(1);
 
-        final var statLocation = statLocationIndex
-                .findByVenueTypeAndVenueCategory1AndVenueCategory2AndPeriodStart(
-                        visit1.getVenueType(),
-                        visit1.getVenueCategory1(),
-                        visit1.getVenueCategory2(),
-                        visit1.getQrCodeScanTime()
-                )
-                .get();
+        final var statLocation = statLocationIndex.findById(generateLocationStatKey(visit1)).get();
+
         assertThat(statLocation.getBackwardVisits()).as("backward visits").isEqualTo(3l);
         assertThat(statLocation.getForwardVisits()).as("forward visits").isEqualTo(1l);
 
@@ -291,21 +303,64 @@ class StatistiquesServiceIT {
         Visit visit1 = defaultVisit().toBuilder().build();
 
         service.logStats(visit1);
-        assertThat(reportStatIndex.count()).isEqualTo(1);
 
-        Optional<LocationStat> statLocation = statLocationIndex
-                .findByVenueTypeAndVenueCategory1AndVenueCategory2AndPeriodStart(4, 1, 2, this.getStatPeriod(visit1));
+        template.indexOps(LocationStat.class).refresh();
 
-        statLocation.get().setForwardVisits(1);
+        List<LocationStat> stats = new ArrayList<>();
+        statLocationIndex.findAll().forEach(stats::add);
+        assertThat(stats.size()).isEqualTo(1);
 
-        statLocationIndex.save(statLocation.get());
+        Optional<LocationStat> statLocation = statLocationIndex.findById(generateLocationStatKey(visit1));
 
-        statLocation.get().setForwardVisits(2);
+        LocationStat locationStat = statLocation.get();
+        locationStat.setForwardVisits(1);
+
+        statLocationIndex.save(locationStat);
+        template.indexOps(LocationStat.class).refresh();
+
+        LocationStat locationStatLocked1 = LocationStat.builder()
+                .id(locationStat.getId())
+                .forwardVisits(2)
+                .build();
+
+        LocationStat locationStatLocked2 = LocationStat.builder()
+                .id(locationStat.getId())
+                .forwardVisits(3)
+                .build();
 
         Assertions.assertThrows(OptimisticLockingFailureException.class, () -> {
-            statLocationIndex.save(statLocation.get());
-        });
+            Thread thread1 = new Thread("t1") {
 
+                public void run() {
+                    statLocationIndex.save(locationStatLocked1);
+                }
+            };
+            Thread thread2 = new Thread("t2") {
+
+                public void run() {
+                    statLocationIndex.save(locationStatLocked2);
+                }
+            };
+            thread1.start();
+            thread2.start();
+        });
+    }
+
+    @Test
+    void should_send_location_stat_in_error_queue_after_3_saves_try() {
+
+        Visit visit1 = defaultVisit().toBuilder().build();
+
+        Mockito.when(statLocationIndexMock.findById(anyString()))
+                .thenThrow(new RuntimeException("Whatever reason"))
+                .thenThrow(new RuntimeException("Whatever reason"))
+                .thenThrow(new RuntimeException("Whatever reason"));
+
+        try {
+            serviceMock.logStats(visit1);
+        } catch (RuntimeException e) {
+            Mockito.verify(serviceMock, times(1)).logStatToKafka(any(), any());
+        }
     }
 
     @AfterEach
@@ -331,6 +386,7 @@ class StatistiquesServiceIT {
 
     private LocationStat newStatLocation(Visit visit) {
         return LocationStat.builder()
+                .id(generateLocationStatKey(visit))
                 .periodStart(this.getStatPeriod(visit))
                 .venueType(visit.getVenueType())
                 .venueCategory1(visit.getVenueCategory1())
@@ -344,4 +400,18 @@ class StatistiquesServiceIT {
         long secondsToRemove = visit.getQrCodeScanTime().getEpochSecond() % properties.getStatSlotDurationInSeconds();
         return visit.getQrCodeScanTime().minus(secondsToRemove, ChronoUnit.SECONDS).truncatedTo(ChronoUnit.SECONDS);
     }
+
+    private String generateLocationStatKey(Visit visit) {
+        final var stringStatPeriod = getStatPeriod(visit)
+                .atOffset(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        return String.format(
+                "%s-vt%d-vc1%d-vc2%d",
+                stringStatPeriod,
+                visit.getVenueType(),
+                visit.getVenueCategory1(),
+                visit.getVenueCategory2()
+        );
+    }
+
 }
