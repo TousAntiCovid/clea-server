@@ -9,12 +9,6 @@ clea:
     qrCodesTopic: cleaQrCodes
     statsTopic: cleaStats
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,metrics
-
 server:
   port: 8080
 
