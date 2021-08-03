@@ -9,10 +9,6 @@ clea:
     qrCodesTopic: cleaQrCodes
     statsTopic: cleaStats
 
-controller:
-  path:
-    prefix: /api/clea
-
 logging:
   level:
     fr.gouv.clea.consumer: INFO

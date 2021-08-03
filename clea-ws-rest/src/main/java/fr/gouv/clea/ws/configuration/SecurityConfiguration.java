@@ -1,76 +1,51 @@
 package fr.gouv.clea.ws.configuration;
 
-import fr.inria.clea.lsp.LocationSpecificPartDecoder;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import static org.springframework.security.oauth2.jose.jws.SignatureAlgorithm.RS256;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final CleaWsProperties properties;
+    private final CleaWsProperties cleaWsProperties;
 
-    private final HandlerExceptionResolver handlerExceptionResolver;
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+        http
+                .sessionManagement().sessionCreationPolicy(STATELESS);
+
+        http.oauth2ResourceServer()
+                .jwt();
+
+        http.authorizeRequests()
+                .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
+                .anyRequest().authenticated();
+    }
 
     @Bean
-    public LocationSpecificPartDecoder getLocationSpecificPartDecoder() {
-        return new LocationSpecificPartDecoder();
-    }
-
-    private PublicKey initPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] encoded = Decoders.BASE64.decode(this.properties.getRobertJwtPublicKey());
-        KeyFactory keyFactory = KeyFactory.getInstance(SignatureAlgorithm.RS256.getFamilyName());
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
-        return keyFactory.generatePublic(keySpec);
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .antMatchers("/api/clea/**").permitAll()
-                .and()
-                .addFilterAfter(
-                        new JwtValidationFilter(
-                                this.properties.isAuthorizationCheckActive(), this.initPublicKey(),
-                                handlerExceptionResolver
-                        ), BasicAuthenticationFilter.class
-                )
-                .httpBasic().disable()
-                .csrf().disable()
-                .cors();
-    }
-
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(
-                // Swagger UI v2
-                "/v2/api-docs",
-                "/swagger-resources",
-                "/swagger-resources/**",
-                "/configuration/ui",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**",
-                // Swagger UI v3
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                // other public endpoints
-                "/actuator/**"
-        );
+    public JwtDecoder jwtDecoder() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        final var keySpec = Base64.getMimeDecoder()
+                .decode(cleaWsProperties.getRobertJwtPublicKey());
+        final var publicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
+                .generatePublic(new X509EncodedKeySpec(keySpec));
+        return NimbusJwtDecoder.withPublicKey(publicKey)
+                .signatureAlgorithm(RS256)
+                .build();
     }
 }
