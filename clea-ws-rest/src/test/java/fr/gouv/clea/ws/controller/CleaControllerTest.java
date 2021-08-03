@@ -155,16 +155,11 @@ class CleaControllerTest {
                 .body("httpStatus", equalTo(BAD_REQUEST.value()))
                 .body("timestamp", isStringDateBetweenNowAndTenSecondsAgo())
                 .body("message", equalTo("Invalid request"))
-                .body("validationErrors[0].object", equalTo("ReportRequest"))
+                .body("validationErrors[0].object", equalTo("reportRequest"))
                 .body("validationErrors[0].field", equalTo("visits"))
                 .body("validationErrors[0].rejectedValue", equalTo(null))
                 .body("validationErrors[0].message", equalTo("must not be null"))
-                // FIXME why to we report 2 validation errors on visit field? 🤔
-                .body("validationErrors[1].object", equalTo("ReportRequest"))
-                .body("validationErrors[1].field", equalTo("visits"))
-                .body("validationErrors[1].rejectedValue", equalTo(null))
-                .body("validationErrors[1].message", containsString("must not be empty"))
-                .body("validationErrors", hasSize(2));
+                .body("validationErrors", hasSize(1));
     }
 
     @Test
@@ -181,10 +176,10 @@ class CleaControllerTest {
                 .body("httpStatus", equalTo(BAD_REQUEST.value()))
                 .body("timestamp", isStringDateBetweenNowAndTenSecondsAgo())
                 .body("message", equalTo("Invalid request"))
-                .body("validationErrors[0].object", equalTo("ReportRequest"))
+                .body("validationErrors[0].object", equalTo("reportRequest"))
                 .body("validationErrors[0].field", equalTo("visits"))
                 .body("validationErrors[0].rejectedValue", hasSize(0))
-                .body("validationErrors[0].message", containsString("must not be empty"))
+                .body("validationErrors[0].message", startsWith("size must be between 1 and"))
                 .body("validationErrors", hasSize(1));
     }
 
