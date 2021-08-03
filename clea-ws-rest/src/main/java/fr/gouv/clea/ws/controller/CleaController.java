@@ -1,7 +1,7 @@
 package fr.gouv.clea.ws.controller;
 
-import fr.gouv.clea.ws.api.CleaWsRestAPI;
-import fr.gouv.clea.ws.dto.ReportResponse;
+import fr.gouv.clea.ws.api.CleaApi;
+import fr.gouv.clea.ws.api.model.ReportResponse;
 import fr.gouv.clea.ws.exception.CleaBadRequestException;
 import fr.gouv.clea.ws.model.DecodedVisit;
 import fr.gouv.clea.ws.service.IReportService;
@@ -10,9 +10,7 @@ import fr.gouv.clea.ws.vo.ReportRequest;
 import fr.gouv.clea.ws.vo.Visit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
@@ -23,13 +21,14 @@ import javax.validation.Validator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @RestController
-@RequestMapping(path = "/api/clea")
+@RequestMapping(path = "/api/clea/v1")
 @RequiredArgsConstructor
 @Slf4j
-public class CleaController implements CleaWsRestAPI {
+public class CleaController implements CleaApi {
 
     public static final String MALFORMED_VISIT_LOG_MESSAGE = "Filtered out %d malformed visits of %d while Exposure Status Request";
 
@@ -42,8 +41,13 @@ public class CleaController implements CleaWsRestAPI {
     private final Validator validator;
 
     @Override
-    @PostMapping(path = "/v1/wreport", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ReportResponse report(@RequestBody ReportRequest reportRequestVo) {
+    public ResponseEntity<ReportResponse> reportUsingPOST(fr.gouv.clea.ws.api.model.ReportRequest reportRequest) {
+        final var reportRequestVo = new ReportRequest(
+                reportRequest.getVisits().stream()
+                        .map(visit -> new Visit(visit.getQrCode(), visit.getQrCodeScanTime()))
+                        .collect(toList()),
+                reportRequest.getPivotDate()
+        );
         ReportRequest filtered = this.filterReports(reportRequestVo, webRequest);
         List<DecodedVisit> reported = List.of();
         if (!filtered.getVisits().isEmpty()) {
@@ -54,7 +58,7 @@ public class CleaController implements CleaWsRestAPI {
                 reportRequestVo.getVisits().size() - reported.size()
         );
         log.info(message);
-        return new ReportResponse(true, message);
+        return ResponseEntity.ok(new ReportResponse(message, true));
     }
 
     private ReportRequest filterReports(ReportRequest report, WebRequest webRequest) {
@@ -75,7 +79,7 @@ public class CleaController implements CleaWsRestAPI {
                                     return true;
                                 }
                             }
-                    ).collect(Collectors.toList());
+                    ).collect(toList());
             if (validVisits.isEmpty()) {
                 throw new CleaBadRequestException(Set.of(), visitViolations);
             }

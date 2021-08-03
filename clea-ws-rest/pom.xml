@@ -70,6 +70,11 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
@@ -126,6 +131,36 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>5.1.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/src/main/resources/api-report-v1.yml
+                            </inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>fr.gouv.clea.ws.api</apiPackage>
+                            <modelPackage>fr.gouv.clea.ws.api.model</modelPackage>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useBeanValidation>false</useBeanValidation>
+                                <useTags>true</useTags>
+                                <additionalModelTypeAnnotations>
+                                    @lombok.Builder
+                                    @lombok.AllArgsConstructor
+                                    @lombok.NoArgsConstructor
+                                </additionalModelTypeAnnotations>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
