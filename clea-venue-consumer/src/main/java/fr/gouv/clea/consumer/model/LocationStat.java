@@ -17,7 +17,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(indexName = "health-clealocations-#{T(java.time.LocalDate).now().toString().replace('-', '.')}")
+@Document(indexName = "health-clealocations-#{T(java.time.LocalDate).now().toString().replace('-', '.')}", createIndex = false)
 public class LocationStat {
 
     @Id

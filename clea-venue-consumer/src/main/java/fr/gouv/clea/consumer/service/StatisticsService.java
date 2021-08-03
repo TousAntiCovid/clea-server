@@ -10,7 +10,6 @@ import fr.gouv.clea.consumer.repository.statistiques.ReportStatIndex;
 import fr.gouv.clea.consumer.repository.statistiques.StatLocationIndex;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -65,7 +64,7 @@ public class StatisticsService {
     }
 
     @Recover
-    void logStatToKafka(OptimisticLockingFailureException e, Visit visit) {
+    public void logStatToKafka(Exception e, Visit visit) {
         log.info("Failed to log location stat for visit after 3 attempts : {}", visit, e);
         final var statLocation = toLocationStat(visit);
         kafkaErrorStatTemplate.send(cleaKafkaProperties.getErrorLocationStatsTopic(), statLocation).addCallback(
@@ -94,7 +93,7 @@ public class StatisticsService {
                 .truncatedTo(ChronoUnit.SECONDS);
         final var stringStatPeriod = statPeriod
                 .atOffset(ZoneOffset.UTC)
-                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         final var id = String.format(
                 "%s-vt%d-vc1%d-vc2%d", stringStatPeriod, visit.getVenueType(), visit.getVenueCategory1(),
                 visit.getVenueCategory2()
@@ -109,6 +108,7 @@ public class StatisticsService {
                 .backwardVisits(visit.isBackward() ? 1 : 0)
                 .forwardVisits(visit.isBackward() ? 0 : 1)
                 .build();
+
     }
 
     public void logStats(ReportStat reportStat) {
