@@ -28,7 +28,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 public class RestAssuredManager implements TestExecutionListener {
 
-    private static final KeyPair JWT_KEY_PAIR;
+    public static final KeyPair JWT_KEY_PAIR;
 
     static {
         // generate a JWT key pair and export system property to configure the test

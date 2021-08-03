@@ -3,10 +3,18 @@ package fr.gouv.clea.ws.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import fr.gouv.clea.ws.dto.ApiError;
 import fr.gouv.clea.ws.service.impl.ReportService;
+import fr.gouv.clea.ws.test.IntegrationTest;
+import fr.gouv.clea.ws.test.RestAssuredManager;
 import fr.gouv.clea.ws.vo.ReportRequest;
 import fr.gouv.clea.ws.vo.Visit;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.json.JSONException;
@@ -18,23 +26,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@IntegrationTest
 class CleaControllerTest {
 
     @Captor
@@ -58,6 +63,22 @@ class CleaControllerTest {
     @BeforeEach
     void init() {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        restTemplate.getRestTemplate().getInterceptors().add((request, body, execution) -> {
+            request.getHeaders().setBearerAuth(generateToken());
+            return execution.execute(request, body);
+        });
+    }
+
+    @SneakyThrows
+    private static String generateToken() {
+        final var claims = new JWTClaimsSet.Builder()
+                .jwtID(UUID.randomUUID().toString())
+                .issueTime(Date.from(Instant.now()))
+                .expirationTime(Date.from(Instant.now().plus(2, MINUTES)));
+        final var header = new JWSHeader.Builder(JWSAlgorithm.RS256).build();
+        final var signedJWT = new SignedJWT(header, claims.build());
+        signedJWT.sign(new RSASSASigner(RestAssuredManager.JWT_KEY_PAIR.getPrivate()));
+        return signedJWT.serialize();
     }
 
     @Test
