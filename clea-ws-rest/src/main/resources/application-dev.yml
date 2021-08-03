@@ -9,10 +9,6 @@ clea:
     qrCodesTopic: cleaQrCodes
     statsTopic: cleaStats
 
-controller:
-  path:
-    prefix: /api/clea
-
 management:
   endpoints:
     web:
