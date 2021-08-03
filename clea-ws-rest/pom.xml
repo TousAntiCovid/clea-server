@@ -20,9 +20,9 @@
     </description>
 
     <properties>
+        <hamcrestdate.version>2.0.7</hamcrestdate.version>
         <restassured.version>4.3.3</restassured.version>
         <springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
-        <io.jsonwebtoken.version>0.11.2</io.jsonwebtoken.version>
     </properties>
 
     <dependencies>
@@ -115,6 +115,12 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.exparity</groupId>
+            <artifactId>hamcrest-date</artifactId>
+            <version>${hamcrestdate.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -1,51 +1,32 @@
 package fr.gouv.clea.ws.service.impl;
 
-import fr.gouv.clea.ws.configuration.CleaKafkaProperties;
 import fr.gouv.clea.ws.model.DecodedVisit;
 import fr.gouv.clea.ws.model.ReportStat;
 import fr.gouv.clea.ws.service.IProducerService;
-import fr.gouv.clea.ws.utils.KafkaVisitDeserializer;
+import fr.gouv.clea.ws.test.IntegrationTest;
+import fr.gouv.clea.ws.test.KafkaManager;
 import fr.inria.clea.lsp.EncryptedLocationSpecificPart;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.assertj.core.groups.Tuple;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.test.EmbeddedKafkaBroker;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import java.time.Instant;
-import java.util.Collections;
+import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static fr.gouv.clea.ws.test.KafkaRecordAssert.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-@SpringBootTest
-@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
+@IntegrationTest
 class ProducerServiceTest {
 
     @Autowired
     private IProducerService producerService;
-
-    @Autowired
-    private EmbeddedKafkaBroker embeddedKafkaBroker;
-
-    @Autowired
-    private CleaKafkaProperties cleaKafkaProperties;
 
     private static DecodedVisit createSerializableDecodedVisit(Instant qrCodeScanTime, boolean isBackward,
             UUID locationTemporaryPublicId, byte[] encryptedLocationMessage) {
@@ -64,13 +45,6 @@ class ProducerServiceTest {
     @Test
     @DisplayName("test that produceVisits can send decoded lsps to kafka and that we can read them back")
     void can_send_decrypted_lsps_to_kafka() {
-        final Map<String, Object> configs = KafkaTestUtils.consumerProps("visitConsumer", "false", embeddedKafkaBroker);
-        final Consumer<String, DecodedVisit> visitConsumer = new DefaultKafkaConsumerFactory<>(
-                configs,
-                new StringDeserializer(),
-                new KafkaVisitDeserializer()
-        ).createConsumer();
-        visitConsumer.subscribe(Collections.singleton(cleaKafkaProperties.getQrCodesTopic()));
 
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
@@ -96,34 +70,36 @@ class ProducerServiceTest {
 
         producerService.produceVisits(decoded);
 
-        assertThat(KafkaTestUtils.getRecords(visitConsumer))
+        final var records = KafkaManager.getRecords();
+        Assertions.assertThat(records)
                 .extracting(ConsumerRecord::value)
                 .extracting(
                         value -> tuple(
-                                value.getLocationTemporaryPublicId(),
-                                value.getEncryptedLocationSpecificPart().getEncryptedLocationMessage(),
-                                value.getQrCodeScanTime(),
-                                value.isBackward()
+                                value.get("locationTemporaryPublicId").asText(),
+                                value.get("encryptedLocationMessage").asText(),
+                                value.get("qrCodeScanTime").asLong() / 1000,
+                                value.get("isBackward").asBoolean()
                         )
                 )
                 .containsExactly(
-                        Tuple.tuple(uuid1, encryptedLocationMessage1, qrCodeScanTime1, isBackward1),
-                        Tuple.tuple(uuid2, encryptedLocationMessage2, qrCodeScanTime2, isBackward2),
-                        Tuple.tuple(uuid3, encryptedLocationMessage3, qrCodeScanTime3, isBackward3)
+                        tuple(
+                                uuid1.toString(), Base64.getEncoder().encodeToString(encryptedLocationMessage1),
+                                qrCodeScanTime1.getEpochSecond(), isBackward1
+                        ),
+                        tuple(
+                                uuid2.toString(), Base64.getEncoder().encodeToString(encryptedLocationMessage2),
+                                qrCodeScanTime2.getEpochSecond(), isBackward2
+                        ),
+                        tuple(
+                                uuid3.toString(), Base64.getEncoder().encodeToString(encryptedLocationMessage3),
+                                qrCodeScanTime3.getEpochSecond(), isBackward3
+                        )
                 );
     }
 
     @Test
     @DisplayName("test that produceStat can send a stat to kafka and that we can read it back")
     void can_send_report_stat_to_kafka() {
-        final Map<String, Object> configs = KafkaTestUtils.consumerProps("statConsumer", "false", embeddedKafkaBroker);
-        final Consumer<String, ReportStat> statConsumer = new DefaultKafkaConsumerFactory<>(
-                configs,
-                new StringDeserializer(),
-                new JsonDeserializer<>(ReportStat.class)
-        ).createConsumer();
-        statConsumer.subscribe(Collections.singleton(cleaKafkaProperties.getStatsTopic()));
-
         long timestamp = TimeUtils.currentNtpTime();
 
         ReportStat reportStat = ReportStat.builder()
@@ -137,22 +113,16 @@ class ProducerServiceTest {
 
         producerService.produceStat(reportStat);
 
-        ConsumerRecords<String, ReportStat> records = KafkaTestUtils.getRecords(statConsumer);
-        assertThat(records.count()).isEqualTo(1);
-
-        List<ReportStat> extracted = StreamSupport
-                .stream(records.spliterator(), true)
-                .map(ConsumerRecord::value)
-                .collect(Collectors.toList());
-        assertThat(extracted.size()).isEqualTo(1);
-
-        var response = extracted.stream().findFirst().get();
-        assertThat(response.getReported()).isEqualTo(10);
-        assertThat(response.getRejected()).isEqualTo(2);
-        assertThat(response.getBackwards()).isEqualTo(5);
-        assertThat(response.getForwards()).isEqualTo(3);
-        assertThat(response.getClose()).isEqualTo(4);
-        assertThat(response.getTimestamp()).isEqualTo(timestamp);
+        final var record = KafkaManager.getSingleRecord("dev.clea.fct.report-stats");
+        assertThat(record)
+                .hasNoKey()
+                .hasNoHeader("__TypeId__")
+                .hasJsonValue("reported", 10)
+                .hasJsonValue("rejected", 2)
+                .hasJsonValue("backwards", 5)
+                .hasJsonValue("forwards", 3)
+                .hasJsonValue("close", 4)
+                .hasJsonValue("timestamp", timestamp);
     }
 
     private Instant newRandomInstant() {

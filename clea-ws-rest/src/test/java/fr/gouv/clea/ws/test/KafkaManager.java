@@ -60,11 +60,12 @@ public class KafkaManager implements TestExecutionListener {
     @Override
     public void afterTestMethod(TestContext testContext) {
         consumer.commitSync();
+        KafkaTestUtils.getRecords(consumer, 1000);
         consumer.close();
     }
 
     public static ConsumerRecords<String, JsonNode> getRecords() {
-        return KafkaTestUtils.getRecords(consumer);
+        return KafkaTestUtils.getRecords(consumer, 100);
     }
 
     public static ConsumerRecord<String, JsonNode> getSingleRecord(String topic) {
