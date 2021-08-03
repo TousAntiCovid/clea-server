@@ -61,7 +61,7 @@ class CleaControllerTest {
     }
 
     @Test
-    void testInfectedUserCanReportHimselfAsInfected() {
+    void infected_user_can_report_himself_as_infected() {
         List<Visit> visits = List.of(new Visit("qrCode", 0L));
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(visits, 0L), newJsonHeader());
         ResponseEntity<String> response = restTemplate
@@ -71,7 +71,7 @@ class CleaControllerTest {
     }
 
     @Test
-    void testWhenReportRequestWithInvalidMediaTypeThenGetUnsupportedMediaType() {
+    void invalid_content_type_body_causes_415_unsupported_media_type() {
         ResponseEntity<String> response = restTemplate
                 .postForEntity("/api/clea/v1/wreport", "foo", String.class);
 
@@ -80,7 +80,7 @@ class CleaControllerTest {
     }
 
     @Test
-    void testWhenReportRequestWithNullVisitListThenGetBadRequest() {
+    void a_report_with_a_null_visits_list_causes_400_bad_request() {
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(null, 0L), newJsonHeader());
         ResponseEntity<String> response = restTemplate
                 .postForEntity("/api/clea/v1/wreport", request, String.class);
@@ -90,7 +90,7 @@ class CleaControllerTest {
     }
 
     @Test
-    void testWhenReportRequestWithInvalidJsonDataThenGetBadRequest() throws JSONException {
+    void a_report_with_malformed_body_causes_400_bad_request() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", 1);
         ResponseEntity<String> response = restTemplate.postForEntity(
@@ -105,7 +105,7 @@ class CleaControllerTest {
 
     @Test
     @DisplayName("when pivotDate is null, reject everything")
-    void nullPivotDate() throws JsonProcessingException {
+    void a_null_pivot_date_causes_400_bad_request() throws JsonProcessingException {
         List<Visit> visits = List.of(new Visit(RandomStringUtils.randomAlphanumeric(20), RandomUtils.nextLong()));
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(visits, null), newJsonHeader());
         ResponseEntity<String> response = restTemplate
@@ -127,7 +127,7 @@ class CleaControllerTest {
 
     @Test
     @DisplayName("when pivotDate is not numeric, reject everything")
-    void notNumericPivotDate() throws JsonProcessingException {
+    void invalid_pivot_date_format_causes_400_bad_request() throws JsonProcessingException {
         ReportRequest reportRequest = new ReportRequest(
                 List.of(new Visit(RandomStringUtils.randomAlphanumeric(20), 1L)), 0L
         );
@@ -147,7 +147,7 @@ class CleaControllerTest {
 
     @Test
     @DisplayName("when visit list is null, reject everything")
-    void nullVisitList() throws JsonProcessingException {
+    void a_report_with_a_null_visits_list_causes_400_bad_request_2() throws JsonProcessingException {
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(null, 0L), newJsonHeader());
         ResponseEntity<String> response = restTemplate
                 .postForEntity("/api/clea/v1/wreport", request, String.class);
@@ -162,7 +162,7 @@ class CleaControllerTest {
 
     @Test
     @DisplayName("when visit list is empty, reject everything")
-    void emptyVisitList() throws JsonProcessingException {
+    void a_report_with_an_empty_visits_list_causes_400_bad_request() throws JsonProcessingException {
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(List.of(), 0L), newJsonHeader());
         ResponseEntity<String> response = restTemplate
                 .postForEntity("/api/clea/v1/wreport", request, String.class);
@@ -177,7 +177,7 @@ class CleaControllerTest {
 
     @Test
     @DisplayName("when a qrCode is null reject just the visit")
-    void nullQrCode() {
+    void a_visit_with_a_null_qrcode_is_ignored() {
         HttpEntity<ReportRequest> request = new HttpEntity<>(
                 new ReportRequest(List.of(new Visit("qr1", 1L), new Visit(null, 2L)), 3L),
                 newJsonHeader()
@@ -199,7 +199,7 @@ class CleaControllerTest {
 
     @Test
     @DisplayName("when a qrCode is empty reject just the visit")
-    void emptyQrCode() {
+    void a_visit_with_an_empty_qrcode_is_ignored() {
         HttpEntity<ReportRequest> request = new HttpEntity<>(
                 new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("", 2L)), 3L),
                 newJsonHeader()
@@ -221,7 +221,7 @@ class CleaControllerTest {
 
     @Test
     @DisplayName("when a qrCode is blank reject just the visit")
-    void blankQrCode() {
+    void a_visit_with_a_blank_qrcode_is_ignored() {
         HttpEntity<ReportRequest> request = new HttpEntity<>(
                 new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("     ", 2L)), 3L),
                 newJsonHeader()
@@ -243,7 +243,7 @@ class CleaControllerTest {
 
     @Test
     @DisplayName("when a qrScan is null reject just the visit")
-    void nullQrScan() {
+    void a_visit_with_a_null_qrcode_scantime_is_ignored() {
         HttpEntity<ReportRequest> request = new HttpEntity<>(
                 new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("qr2", null)), 3L),
                 newJsonHeader()
@@ -265,7 +265,7 @@ class CleaControllerTest {
 
     @Test
     @DisplayName("when a qrScan is not numeric reject everything")
-    void notNumericQrScan() throws JsonProcessingException {
+    void a_visit_with_a_malformed_qrcode_scantime_is_ignored() throws JsonProcessingException {
         ReportRequest reportRequest = new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("qr2", 2L)), 3L);
         String json = objectMapper.writeValueAsString(reportRequest);
         String badJson = json.replace("2", "a");
@@ -283,7 +283,7 @@ class CleaControllerTest {
 
     @Test
     @DisplayName("when no valid visit then reject everything")
-    void noValidVisits() throws JsonProcessingException {
+    void a_report_with_no_valid_visit_causes_400_bad_request() throws JsonProcessingException {
         ReportRequest reportRequest = new ReportRequest(List.of(new Visit(" ", 1L)), 2L);
         String json = objectMapper.writeValueAsString(reportRequest);
         HttpEntity<String> request = new HttpEntity<>(json, newJsonHeader());

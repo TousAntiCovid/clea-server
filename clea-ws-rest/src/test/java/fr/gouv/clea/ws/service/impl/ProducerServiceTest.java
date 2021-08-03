@@ -63,7 +63,7 @@ class ProducerServiceTest {
 
     @Test
     @DisplayName("test that produceVisits can send decoded lsps to kafka and that we can read them back")
-    void testProduceVisits() {
+    void can_send_decrypted_lsps_to_kafka() {
         final Map<String, Object> configs = KafkaTestUtils.consumerProps("visitConsumer", "false", embeddedKafkaBroker);
         final Consumer<String, DecodedVisit> visitConsumer = new DefaultKafkaConsumerFactory<>(
                 configs,
@@ -115,7 +115,7 @@ class ProducerServiceTest {
 
     @Test
     @DisplayName("test that produceStat can send a stat to kafka and that we can read it back")
-    void testProduceStat() {
+    void can_send_report_stat_to_kafka() {
         final Map<String, Object> configs = KafkaTestUtils.consumerProps("statConsumer", "false", embeddedKafkaBroker);
         final Consumer<String, ReportStat> statConsumer = new DefaultKafkaConsumerFactory<>(
                 configs,

@@ -49,7 +49,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("test successful report with no rejection")
-    void report() {
+    void can_process_a_valid_report() {
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
         UUID uuid3 = UUID.randomUUID();
@@ -68,7 +68,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("test report with non valid qr codes")
-    void testWithNonValidReports() {
+    void a_visit_in_the_future_is_not_processed() {
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
         UUID uuid3 = UUID.randomUUID();
@@ -88,7 +88,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("test report with outdated scans")
-    void testWithOutdatedReports() {
+    void an_outdated_visit_is_not_processed() {
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
         UUID uuid3 = UUID.randomUUID();
@@ -110,7 +110,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("test report with future scans")
-    void testWithFutureReports() {
+    void a_visit_in_the_future_is_not_processed_2() {
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
         List<Visit> visits = List.of(
@@ -128,7 +128,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("test report with duplicated qr codes")
-    void testWithDuplicates() {
+    void successive_visits_in_less_than_duplicateThresholdConfig__3h__are_deduplicated() {
         UUID uuidA = UUID.fromString("60f5ebf7-d2af-4451-a575-7d1a2de7a9fd");
         UUID uuidA2 = UUID.fromString("60f5ebf7-d2af-4451-a575-7d1a2de7a9fd");
         UUID uuidB = UUID.fromString("de4c7b16-d5a2-45fa-a4f4-50fbf1e3880b");
@@ -157,7 +157,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("if pivot date is in future, set it to retentionDate and check that all visits are forward")
-    void testWithPivotDateInFuture() {
+    void a_report_with_a_future_pivotDate_is_processed_like_a_report_with_a_pivotDate_set_to_retentionDate_and_all_visits_should_be_forwards() {
         long pivotDateInFutureAsNtp = TimeUtils.ntpTimestampFromInstant(now.plus(1, ChronoUnit.MINUTES));
 
         UUID uuid1 = UUID.randomUUID();
@@ -178,7 +178,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("if pivot date is before retentionDate, set it to retentionDate and check that all visits are forward")
-    void testWithPivotDateTooOld() {
+    void a_report_with_an_outdated_pivotDate_is_processed_like_a_report_with_a_pivotDate_set_to_retentionDate_and_all_visits_should_be_forwards() {
         long pivotDateTooOldAsNtp = TimeUtils.ntpTimestampFromInstant(now.minus(15, ChronoUnit.DAYS));
 
         UUID uuid1 = UUID.randomUUID();
@@ -199,7 +199,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("if pivot date is before or equal qrScanTime, visits should be marked as forward")
-    void testForward() {
+    void visits_with_qrScanTime_after_or_equal_to_pivotDate_should_be_forwards() {
         long pivotDate = TimeUtils.ntpTimestampFromInstant(now.minus(1, ChronoUnit.DAYS));
         long qrScan = TimeUtils.ntpTimestampFromInstant(now);
         UUID uuid1 = UUID.randomUUID();
@@ -218,7 +218,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("if pivot date is strictly after qrScanTime, visits should be marked as backward")
-    void testBackward() {
+    void visits_with_qrScanTime_strictly_before_pivotDate_should_be_backwards() {
         long pivotDate = TimeUtils.ntpTimestampFromInstant(now);
         long qrScan = TimeUtils.ntpTimestampFromInstant(now.minus(1, ChronoUnit.DAYS));
         UUID uuid = UUID.randomUUID();
