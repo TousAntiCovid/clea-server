@@ -2,7 +2,6 @@ package fr.gouv.clea.ws.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.gouv.clea.ws.dto.ApiError;
-import fr.gouv.clea.ws.utils.UriConstants;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -30,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JwtValidationFilterTest {
 
     private final MockHttpServletRequest request = new MockHttpServletRequest(
-            "POST", UriConstants.API_V1 + UriConstants.REPORT
+            "POST", "/api/clea/v1/wreport"
     );
 
     private final MockHttpServletResponse response = new MockHttpServletResponse();

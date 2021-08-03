@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import fr.gouv.clea.ws.dto.ApiError;
 import fr.gouv.clea.ws.service.impl.ReportService;
-import fr.gouv.clea.ws.utils.UriConstants;
 import fr.gouv.clea.ws.vo.ReportRequest;
 import fr.gouv.clea.ws.vo.Visit;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -19,7 +18,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -41,9 +39,6 @@ class CleaControllerTest {
 
     @Captor
     private ArgumentCaptor<ReportRequest> reportRequestArgumentCaptor;
-
-    @Value("${controller.path.prefix}" + UriConstants.API_V1)
-    private String pathPrefix;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -70,7 +65,7 @@ class CleaControllerTest {
         List<Visit> visits = List.of(new Visit("qrCode", 0L));
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(visits, 0L), newJsonHeader());
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
@@ -78,7 +73,7 @@ class CleaControllerTest {
     @Test
     void testWhenReportRequestWithInvalidMediaTypeThenGetUnsupportedMediaType() {
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, "foo", String.class);
+                .postForEntity("/api/clea/v1/wreport", "foo", String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         verifyNoMoreInteractions(reportService);
@@ -88,7 +83,7 @@ class CleaControllerTest {
     void testWhenReportRequestWithNullVisitListThenGetBadRequest() {
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(null, 0L), newJsonHeader());
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
@@ -99,7 +94,7 @@ class CleaControllerTest {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", 1);
         ResponseEntity<String> response = restTemplate.postForEntity(
-                pathPrefix + UriConstants.REPORT,
+                "/api/clea/v1/wreport",
                 new HttpEntity<>(jsonObject.toString(), newJsonHeader()),
                 String.class
         );
@@ -114,7 +109,7 @@ class CleaControllerTest {
         List<Visit> visits = List.of(new Visit(RandomStringUtils.randomAlphanumeric(20), RandomUtils.nextLong()));
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(visits, null), newJsonHeader());
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -140,7 +135,7 @@ class CleaControllerTest {
         String badJson = json.replace("0", "a");
         HttpEntity<String> request = new HttpEntity<>(badJson, newJsonHeader());
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -155,7 +150,7 @@ class CleaControllerTest {
     void nullVisitList() throws JsonProcessingException {
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(null, 0L), newJsonHeader());
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -170,7 +165,7 @@ class CleaControllerTest {
     void emptyVisitList() throws JsonProcessingException {
         HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(List.of(), 0L), newJsonHeader());
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -188,7 +183,7 @@ class CleaControllerTest {
                 newJsonHeader()
         );
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
         Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
         assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
@@ -210,7 +205,7 @@ class CleaControllerTest {
                 newJsonHeader()
         );
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
         Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
         assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
@@ -232,7 +227,7 @@ class CleaControllerTest {
                 newJsonHeader()
         );
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
         Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
         assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
@@ -254,7 +249,7 @@ class CleaControllerTest {
                 newJsonHeader()
         );
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
         Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
         assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
         assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
@@ -276,7 +271,7 @@ class CleaControllerTest {
         String badJson = json.replace("2", "a");
         HttpEntity<String> request = new HttpEntity<>(badJson, newJsonHeader());
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
@@ -293,7 +288,7 @@ class CleaControllerTest {
         String json = objectMapper.writeValueAsString(reportRequest);
         HttpEntity<String> request = new HttpEntity<>(json, newJsonHeader());
         ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+                .postForEntity("/api/clea/v1/wreport", request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoMoreInteractions(reportService);
         ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);

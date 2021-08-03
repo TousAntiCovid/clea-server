@@ -6,7 +6,6 @@ import fr.gouv.clea.ws.exception.CleaBadRequestException;
 import fr.gouv.clea.ws.model.DecodedVisit;
 import fr.gouv.clea.ws.service.IReportService;
 import fr.gouv.clea.ws.utils.BadArgumentsLoggerService;
-import fr.gouv.clea.ws.utils.UriConstants;
 import fr.gouv.clea.ws.vo.ReportRequest;
 import fr.gouv.clea.ws.vo.Visit;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(path = "${controller.path.prefix}")
+@RequestMapping(path = "/api/clea")
 @RequiredArgsConstructor
 @Slf4j
 public class CleaController implements CleaWsRestAPI {
@@ -43,8 +42,7 @@ public class CleaController implements CleaWsRestAPI {
     private final Validator validator;
 
     @Override
-    @PostMapping(path = UriConstants.API_V1
-            + UriConstants.REPORT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/v1/wreport", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ReportResponse report(@RequestBody ReportRequest reportRequestVo) {
         ReportRequest filtered = this.filterReports(reportRequestVo, webRequest);
         List<DecodedVisit> reported = List.of();
