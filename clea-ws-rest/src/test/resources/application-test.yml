@@ -1,2 +1,3 @@
 clea.conf:
   duplicateScanThresholdInSeconds: 10800
+logging.level.org.apache.kafka: WARN

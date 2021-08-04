@@ -18,6 +18,7 @@ import org.springframework.web.context.request.WebRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,10 +43,12 @@ public class CleaController implements CleaApi {
 
     @Override
     public ResponseEntity<ReportResponse> reportUsingPOST(fr.gouv.clea.ws.api.model.ReportRequest reportRequest) {
-        final var reportRequestVo = new ReportRequest(
-                reportRequest.getVisits().stream()
+        final var visits = reportRequest.getVisits() == null ? Collections.<Visit>emptyList()
+                : reportRequest.getVisits().stream()
                         .map(visit -> new Visit(visit.getQrCode(), visit.getQrCodeScanTime()))
-                        .collect(toList()),
+                        .collect(toList());
+        final var reportRequestVo = new ReportRequest(
+                visits,
                 reportRequest.getPivotDate()
         );
         ReportRequest filtered = this.filterReports(reportRequestVo, webRequest);

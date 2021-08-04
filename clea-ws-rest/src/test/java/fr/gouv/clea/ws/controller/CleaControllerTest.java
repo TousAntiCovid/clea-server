@@ -52,9 +52,6 @@ class CleaControllerTest {
 
                 .then()
                 .statusCode(UNSUPPORTED_MEDIA_TYPE.value());
-
-        assertThat(KafkaManager.getRecords())
-                .isEmpty();
     }
 
     @Test
@@ -67,11 +64,6 @@ class CleaControllerTest {
 
                 .then()
                 .statusCode(BAD_REQUEST.value());
-
-        final var records = KafkaManager.getRecords()
-                .records("dev.clea.fct.visit-scan");
-        assertThat(records)
-                .isEmpty();
     }
 
     @Test
@@ -83,11 +75,6 @@ class CleaControllerTest {
 
                 .then()
                 .statusCode(BAD_REQUEST.value());
-
-        final var records = KafkaManager.getRecords()
-                .records("dev.clea.fct.visit-scan");
-        assertThat(records)
-                .isEmpty();
     }
 
     @Test
@@ -110,9 +97,6 @@ class CleaControllerTest {
                 .body("validationErrors[0].rejectedValue", equalTo(null))
                 .body("validationErrors[0].message", containsString("null"))
                 .body("validationErrors", hasSize(1));
-
-        assertThat(KafkaManager.getRecords())
-                .isEmpty();
     }
 
     @Test
@@ -155,10 +139,10 @@ class CleaControllerTest {
                 .body("httpStatus", equalTo(BAD_REQUEST.value()))
                 .body("timestamp", isStringDateBetweenNowAndTenSecondsAgo())
                 .body("message", equalTo("Invalid request"))
-                .body("validationErrors[0].object", equalTo("reportRequest"))
+                .body("validationErrors[0].object", equalTo("ReportRequest"))
                 .body("validationErrors[0].field", equalTo("visits"))
-                .body("validationErrors[0].rejectedValue", equalTo(null))
-                .body("validationErrors[0].message", equalTo("must not be null"))
+                .body("validationErrors[0].rejectedValue", hasSize(0))
+                .body("validationErrors[0].message", equalTo("must not be empty"))
                 .body("validationErrors", hasSize(1));
     }
 
@@ -176,10 +160,10 @@ class CleaControllerTest {
                 .body("httpStatus", equalTo(BAD_REQUEST.value()))
                 .body("timestamp", isStringDateBetweenNowAndTenSecondsAgo())
                 .body("message", equalTo("Invalid request"))
-                .body("validationErrors[0].object", equalTo("reportRequest"))
+                .body("validationErrors[0].object", equalTo("ReportRequest"))
                 .body("validationErrors[0].field", equalTo("visits"))
                 .body("validationErrors[0].rejectedValue", hasSize(0))
-                .body("validationErrors[0].message", startsWith("size must be between 1 and"))
+                .body("validationErrors[0].message", equalTo("must not be empty"))
                 .body("validationErrors", hasSize(1));
     }
 
@@ -203,8 +187,7 @@ class CleaControllerTest {
                 .body("success", is(true))
                 .body("message", is("1 reports processed, 1 rejected"));
 
-        final var records = KafkaManager.getRecords()
-                .records("dev.clea.fct.visit-scan");
+        final var records = KafkaManager.getRecords(1, "dev.clea.fct.visit-scan");
 
         assertThat(records)
                 .extracting(ConsumerRecord::value)
@@ -241,8 +224,7 @@ class CleaControllerTest {
                 .body("success", is(true))
                 .body("message", is("1 reports processed, 1 rejected"));
 
-        final var records = KafkaManager.getRecords()
-                .records("dev.clea.fct.visit-scan");
+        final var records = KafkaManager.getRecords(1, "dev.clea.fct.visit-scan");
 
         assertThat(records)
                 .extracting(ConsumerRecord::value)
@@ -279,8 +261,7 @@ class CleaControllerTest {
                 .body("success", is(true))
                 .body("message", is("1 reports processed, 1 rejected"));
 
-        final var records = KafkaManager.getRecords()
-                .records("dev.clea.fct.visit-scan");
+        final var records = KafkaManager.getRecords(1, "dev.clea.fct.visit-scan");
 
         assertThat(records)
                 .extracting(ConsumerRecord::value)
@@ -317,8 +298,7 @@ class CleaControllerTest {
                 .body("success", is(true))
                 .body("message", is("1 reports processed, 1 rejected"));
 
-        final var records = KafkaManager.getRecords()
-                .records("dev.clea.fct.visit-scan");
+        final var records = KafkaManager.getRecords(1, "dev.clea.fct.visit-scan");
 
         assertThat(records)
                 .extracting(ConsumerRecord::value)

@@ -86,7 +86,9 @@ public class CleaRestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleOtherException(Exception ex, WebRequest webRequest) {
         final HttpStatus status = getHttpStatus(ex);
-        log.error(String.format(ERROR_MESSAGE_TEMPLATE, ex.getLocalizedMessage(), webRequest.getDescription(false)));
+        log.error(
+                String.format(ERROR_MESSAGE_TEMPLATE, ex.getLocalizedMessage(), webRequest.getDescription(false)), ex
+        );
         return this.jsonResponseEntity(this.exceptionToApiError(ex, status));
     }
 
