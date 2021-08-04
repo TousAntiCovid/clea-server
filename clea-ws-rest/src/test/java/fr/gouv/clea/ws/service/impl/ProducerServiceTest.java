@@ -19,7 +19,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
-import static fr.gouv.clea.ws.test.KafkaRecordAssert.assertThat;
+import static fr.gouv.clea.ws.test.KafkaManager.assertThatKafkaRecordInTopic;
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.tuple;
 
 @IntegrationTest
@@ -46,31 +47,27 @@ class ProducerServiceTest {
     @DisplayName("test that produceVisits can send decoded lsps to kafka and that we can read them back")
     void can_send_decrypted_lsps_to_kafka() {
 
-        UUID uuid1 = UUID.randomUUID();
-        UUID uuid2 = UUID.randomUUID();
-        UUID uuid3 = UUID.randomUUID();
+        UUID uuid1 = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID uuid2 = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID uuid3 = UUID.fromString("33333333-3333-3333-3333-333333333333");
 
         byte[] encryptedLocationMessage1 = RandomUtils.nextBytes(21);
         byte[] encryptedLocationMessage2 = RandomUtils.nextBytes(22);
         byte[] encryptedLocationMessage3 = RandomUtils.nextBytes(23);
 
-        boolean isBackward1 = RandomUtils.nextBoolean();
-        boolean isBackward2 = RandomUtils.nextBoolean();
-        boolean isBackward3 = RandomUtils.nextBoolean();
-
-        Instant qrCodeScanTime1 = newRandomInstant();
-        Instant qrCodeScanTime2 = newRandomInstant();
-        Instant qrCodeScanTime3 = newRandomInstant();
+        Instant qrCodeScanTime1 = Instant.now().minus(1, DAYS);
+        Instant qrCodeScanTime2 = Instant.now().minus(2, DAYS);
+        Instant qrCodeScanTime3 = Instant.now().minus(3, DAYS);
 
         List<DecodedVisit> decoded = List.of(
-                createSerializableDecodedVisit(qrCodeScanTime1, isBackward1, uuid1, encryptedLocationMessage1),
-                createSerializableDecodedVisit(qrCodeScanTime2, isBackward2, uuid2, encryptedLocationMessage2),
-                createSerializableDecodedVisit(qrCodeScanTime3, isBackward3, uuid3, encryptedLocationMessage3)
+                createSerializableDecodedVisit(qrCodeScanTime1, true, uuid1, encryptedLocationMessage1),
+                createSerializableDecodedVisit(qrCodeScanTime2, true, uuid2, encryptedLocationMessage2),
+                createSerializableDecodedVisit(qrCodeScanTime3, false, uuid3, encryptedLocationMessage3)
         );
 
         producerService.produceVisits(decoded);
 
-        final var records = KafkaManager.getRecords();
+        final var records = KafkaManager.getRecords(3, "dev.clea.fct.visit-scan");
         Assertions.assertThat(records)
                 .extracting(ConsumerRecord::value)
                 .extracting(
@@ -83,16 +80,19 @@ class ProducerServiceTest {
                 )
                 .containsExactly(
                         tuple(
-                                uuid1.toString(), Base64.getEncoder().encodeToString(encryptedLocationMessage1),
-                                qrCodeScanTime1.getEpochSecond(), isBackward1
+                                "11111111-1111-1111-1111-111111111111",
+                                Base64.getEncoder().encodeToString(encryptedLocationMessage1),
+                                qrCodeScanTime1.getEpochSecond(), true
                         ),
                         tuple(
-                                uuid2.toString(), Base64.getEncoder().encodeToString(encryptedLocationMessage2),
-                                qrCodeScanTime2.getEpochSecond(), isBackward2
+                                "22222222-2222-2222-2222-222222222222",
+                                Base64.getEncoder().encodeToString(encryptedLocationMessage2),
+                                qrCodeScanTime2.getEpochSecond(), true
                         ),
                         tuple(
-                                uuid3.toString(), Base64.getEncoder().encodeToString(encryptedLocationMessage3),
-                                qrCodeScanTime3.getEpochSecond(), isBackward3
+                                "33333333-3333-3333-3333-333333333333",
+                                Base64.getEncoder().encodeToString(encryptedLocationMessage3),
+                                qrCodeScanTime3.getEpochSecond(), false
                         )
                 );
     }
@@ -113,8 +113,7 @@ class ProducerServiceTest {
 
         producerService.produceStat(reportStat);
 
-        final var record = KafkaManager.getSingleRecord("dev.clea.fct.report-stats");
-        assertThat(record)
+        assertThatKafkaRecordInTopic("dev.clea.fct.report-stats")
                 .hasNoKey()
                 .hasNoHeader("__TypeId__")
                 .hasJsonValue("reported", 10)
@@ -123,9 +122,5 @@ class ProducerServiceTest {
                 .hasJsonValue("forwards", 3)
                 .hasJsonValue("close", 4)
                 .hasJsonValue("timestamp", timestamp);
-    }
-
-    private Instant newRandomInstant() {
-        return Instant.ofEpochSecond(RandomUtils.nextLong(0, Instant.now().getEpochSecond()));
     }
 }
