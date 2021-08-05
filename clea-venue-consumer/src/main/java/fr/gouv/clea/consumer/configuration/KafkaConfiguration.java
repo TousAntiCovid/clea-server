@@ -6,8 +6,6 @@ import fr.gouv.clea.consumer.model.ReportStat;
 import fr.gouv.clea.consumer.utils.KafkaVisitDeserializer;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,8 +55,6 @@ public class KafkaConfiguration {
     @Bean
     public ProducerFactory<String, LocationStat> cleaErrorStatsTopicFactory() {
         final var configProps = kafkaProperties.buildConsumerProperties();
-        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         configProps.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
