@@ -54,7 +54,7 @@ public class KafkaConfiguration {
 
     @Bean
     public ProducerFactory<String, LocationStat> cleaErrorStatsTopicFactory() {
-        final var configProps = kafkaProperties.buildConsumerProperties();
+        final var configProps = kafkaProperties.buildProducerProperties();
         configProps.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
