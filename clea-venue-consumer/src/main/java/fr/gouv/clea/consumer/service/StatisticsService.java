@@ -56,7 +56,7 @@ public class StatisticsService {
                     return existingLocationStat;
                 })
                 .ifPresentOrElse(
-                        statLocationIndex::save,
+                        existingLocationStat -> statLocationIndex.save(existingLocationStat),
                         () -> statLocationIndex.save(statLocation)
                 );
 
@@ -95,7 +95,7 @@ public class StatisticsService {
                 .atOffset(ZoneOffset.UTC)
                 .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         final var id = String.format(
-                "%s-vt%d-vc1%d-vc2%d", stringStatPeriod, visit.getVenueType(), visit.getVenueCategory1(),
+                "%s-vt:%d-vc1:%d-vc2:%d", stringStatPeriod, visit.getVenueType(), visit.getVenueCategory1(),
                 visit.getVenueCategory2()
         );
 
