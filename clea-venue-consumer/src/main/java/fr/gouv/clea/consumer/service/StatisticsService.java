@@ -41,9 +41,6 @@ public class StatisticsService {
 
     @Retryable
     public void logStats(Visit visit) {
-        if (!template.indexOps(LocationStat.class).exists()) {
-            template.indexOps(LocationStat.class).create();
-        }
 
         final var statLocation = toLocationStat(visit);
         statLocationIndex.findById(statLocation.getId())
