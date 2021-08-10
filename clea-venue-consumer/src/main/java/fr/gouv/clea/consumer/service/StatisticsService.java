@@ -56,7 +56,7 @@ public class StatisticsService {
                     return existingLocationStat;
                 })
                 .ifPresentOrElse(
-                        existingLocationStat -> statLocationIndex.save(existingLocationStat),
+                        statLocationIndex::saveWithIndexTargeting,
                         () -> statLocationIndex.save(statLocation)
                 );
 

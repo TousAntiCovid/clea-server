@@ -11,10 +11,11 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
-public class CustomStatLocationIndexImpl implements CustomStatLocationIndex<LocationStat> {
+public class CustomStatLocationIndexImpl implements CustomStatLocationIndex {
 
     private final ElasticsearchOperations operations;
 
@@ -22,16 +23,16 @@ public class CustomStatLocationIndexImpl implements CustomStatLocationIndex<Loca
     private Document mapping;
 
     @Override
-    public <S extends LocationStat> S save(S locationStat) {
+    public Optional<LocationStat> saveWithIndexTargeting(LocationStat locationStat) {
 
         IndexCoordinates indexCoordinates = getIndexCoordinates(locationStat);
 
         log.debug("Saving {} to {}", locationStat, indexCoordinates);
 
-        S saved = operations.save(locationStat, indexCoordinates);
+        LocationStat saved = operations.save(locationStat, indexCoordinates);
         operations.indexOps(indexCoordinates).refresh();
 
-        return saved;
+        return Optional.of(saved);
     }
 
     private <S extends LocationStat> IndexCoordinates getIndexCoordinates(S locationStat) {

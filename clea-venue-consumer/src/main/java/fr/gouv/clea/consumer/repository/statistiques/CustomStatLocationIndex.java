@@ -1,6 +1,10 @@
 package fr.gouv.clea.consumer.repository.statistiques;
 
-public interface CustomStatLocationIndex<T> {
+import fr.gouv.clea.consumer.model.LocationStat;
 
-    <S extends T> S save(S entity);
+import java.util.Optional;
+
+public interface CustomStatLocationIndex {
+
+    Optional<LocationStat> saveWithIndexTargeting(LocationStat locationStat);
 }
