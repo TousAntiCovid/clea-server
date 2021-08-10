@@ -57,7 +57,7 @@ public class StatisticsService {
                 })
                 .ifPresentOrElse(
                         statLocationIndex::saveWithIndexTargeting,
-                        () -> statLocationIndex.save(statLocation)
+                        () -> statLocationIndex.saveWithIndexTargeting(statLocation)
                 );
 
         log.debug("Location stat saved to elastic: {}", statLocation);
