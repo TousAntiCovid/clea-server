@@ -29,6 +29,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -372,16 +374,19 @@ public class CleaClientStepDefinitions {
         // TODO: replace with kafka topics monitoring
         Thread.sleep(20000);
         expectedIndexContent.forEach(entry -> {
-            List<LocationStat> indexResponse = locationStatIndex
-                    .findByVenueTypeAndVenueCategory1AndVenueCategory2AndBackwardVisitsAndForwardVisitsAndPeriodStart(
-                            parseInt(entry.get("venue_type")),
-                            parseInt(entry.get("venue_category1")),
-                            parseInt(entry.get("venue_category2")),
-                            parseInt(entry.get("backward_visits")),
-                            parseInt(entry.get("forward_visits")),
-                            new PrettyTimeParser().parse(entry.get("period_start")).get(0).toInstant()
-                    );
-            assertThat(indexResponse).size().isEqualTo(1);
+            var stringStatPeriod = new PrettyTimeParser().parse(entry.get("period_start")).get(0).toInstant()
+                    .atOffset(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            var id = String.format(
+                    "%s-vt:%d-vc1:%d-vc2:%d",
+                    stringStatPeriod,
+                    parseInt(entry.get("venue_type")),
+                    parseInt(entry.get("venue_category1")),
+                    parseInt(entry.get("venue_category2"))
+            );
+            Optional<LocationStat> indexResponse = locationStatIndex.findById(id);
+
+            assertThat(indexResponse).isPresent();
         });
     }
 
