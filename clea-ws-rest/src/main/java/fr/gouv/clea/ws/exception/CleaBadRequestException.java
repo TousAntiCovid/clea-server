@@ -1,34 +1,23 @@
 package fr.gouv.clea.ws.exception;
 
-import fr.gouv.clea.ws.vo.ReportRequest;
-import fr.gouv.clea.ws.vo.Visit;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import fr.gouv.clea.ws.api.model.ValidationError;
+import lombok.Getter;
 
-import javax.validation.ConstraintViolation;
+import java.util.Collections;
+import java.util.List;
 
-import java.util.Set;
+public class CleaBadRequestException extends RuntimeException {
 
-@Data
-@EqualsAndHashCode(callSuper = true)
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class CleaBadRequestException extends AbstractCleaException {
+    @Getter
+    private final List<ValidationError> validationErrors;
 
-    private static final String EX_CODE = "clea-003";
+    public CleaBadRequestException(String message) {
+        super(message);
+        this.validationErrors = Collections.emptyList();
+    }
 
-    private static final String MESSAGE = "Invalid request";
-
-    private Set<ConstraintViolation<ReportRequest>> reportRequestViolations;
-
-    private Set<ConstraintViolation<Visit>> visitViolations;
-
-    public CleaBadRequestException(
-            Set<ConstraintViolation<ReportRequest>> reportRequestViolations,
-            Set<ConstraintViolation<Visit>> visitViolations) {
-        super(MESSAGE, EX_CODE);
-        this.reportRequestViolations = reportRequestViolations;
-        this.visitViolations = visitViolations;
+    public CleaBadRequestException(ValidationError error) {
+        super("Invalid request");
+        validationErrors = List.of(error);
     }
 }

@@ -1,4 +1,4 @@
-package fr.gouv.clea.ws.service.impl;
+package fr.gouv.clea.ws.service;
 
 import fr.gouv.clea.ws.model.DecodedVisit;
 import lombok.RequiredArgsConstructor;

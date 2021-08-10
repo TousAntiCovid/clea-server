@@ -1,6 +1,7 @@
 package fr.gouv.clea.ws.configuration;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,6 +20,7 @@ import java.util.Base64;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 import static org.springframework.security.oauth2.jose.jws.SignatureAlgorithm.RS256;
 
+@Slf4j
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -28,14 +30,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
-                .sessionManagement().sessionCreationPolicy(STATELESS);
+                .sessionManagement().sessionCreationPolicy(STATELESS)
+                .and()
+                .csrf().disable();
 
-        http.oauth2ResourceServer()
-                .jwt();
-
-        http.authorizeRequests()
-                .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
-                .anyRequest().authenticated();
+        if (cleaWsProperties.isAuthorizationCheckActive()) {
+            http.oauth2ResourceServer()
+                    .jwt();
+            http.authorizeRequests()
+                    .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
+                    .anyRequest().authenticated();
+        } else {
+            log.warn("Authentication is disabled");
+            http.authorizeRequests()
+                    .anyRequest().permitAll();
+        }
     }
 
     @Bean
