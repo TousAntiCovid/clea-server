@@ -2,7 +2,7 @@ version: "3"
 services:
   flyway:
     image: flyway/flyway:7.8
-    #command: migrate
+    #command: migrate -connectRetries=60
     #command: migrate -baselineOnMigrate=true -baselineVersion=4
     entrypoint: ["tail", "-f", "/dev/null"]
     environment:
@@ -10,8 +10,7 @@ services:
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: password
     volumes:
-      - ../conf/:/flyway/conf
-      - ../sql/:/flyway/sql
+      - ../src/main/resources/db/migrations:/flyway/sql
     depends_on:
       - postgres
 

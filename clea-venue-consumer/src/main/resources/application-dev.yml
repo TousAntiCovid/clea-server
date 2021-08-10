@@ -24,9 +24,9 @@ clea:
       risk:
         enabled: "false"
   kafka:
-    qrCodesTopic: cleaQrCodes
-    reportStatsTopic: cleaStats
-    errorLocationStatsTopic: cleaErrorStats
+    qrCodesTopic: dev.clea.fct.visit-scans
+    reportStatsTopic: dev.clea.fct.report-stats
+    errorLocationStatsTopic: dev.clea.fct.clea-error-visit
 
 management:
   endpoints:

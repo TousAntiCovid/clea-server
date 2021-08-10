@@ -1,24 +1,20 @@
-package fr.gouv.clea.ws.service.impl;
+package fr.gouv.clea.ws.service;
 
 import fr.gouv.clea.ws.model.DecodedVisit;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class VisitsInSameCounterTest {
 
     private static final Duration exposureTimeUnitInSeconds = Duration.ofSeconds(1800);
-
-    private final DecodedVisit decodedVisit = Mockito.mock(DecodedVisit.class);
 
     @Test
     void incrementIfScannedInSameTimeUnitThanLastScanTime_increments_counter_when_difference_between_scan_time_is_lower_than_exposureTimeUnit() {
@@ -30,7 +26,9 @@ class VisitsInSameCounterTest {
         // 1s after
         final Instant currentVisitScanTime = Instant.now();
         counter.setLastScanTime(lastScanTime);
-        when(decodedVisit.getQrCodeScanTime()).thenReturn(currentVisitScanTime);
+        final var decodedVisit = DecodedVisit.builder()
+                .qrCodeScanTime(currentVisitScanTime)
+                .build();
 
         counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisit);
 
@@ -46,7 +44,9 @@ class VisitsInSameCounterTest {
         final Instant lastScanTime = Instant.now().minus(exposureTimeUnitInSeconds.plus(1, ChronoUnit.SECONDS));
         final Instant currentVisitScanTime = Instant.now();
         counter.setLastScanTime(lastScanTime);
-        when(decodedVisit.getQrCodeScanTime()).thenReturn(currentVisitScanTime);
+        final var decodedVisit = DecodedVisit.builder()
+                .qrCodeScanTime(currentVisitScanTime)
+                .build();
 
         counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisit);
 
@@ -60,7 +60,9 @@ class VisitsInSameCounterTest {
         counter.setCount(initialCount);
 
         final Instant currentVisitScanTime = Instant.now();
-        when(decodedVisit.getQrCodeScanTime()).thenReturn(currentVisitScanTime);
+        final var decodedVisit = DecodedVisit.builder()
+                .qrCodeScanTime(currentVisitScanTime)
+                .build();
 
         counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisit);
 

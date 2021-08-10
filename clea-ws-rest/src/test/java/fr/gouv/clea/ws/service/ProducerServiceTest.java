@@ -1,15 +1,12 @@
-package fr.gouv.clea.ws.service.impl;
+package fr.gouv.clea.ws.service;
 
 import fr.gouv.clea.ws.model.DecodedVisit;
 import fr.gouv.clea.ws.model.ReportStat;
-import fr.gouv.clea.ws.service.IProducerService;
 import fr.gouv.clea.ws.test.IntegrationTest;
-import fr.gouv.clea.ws.test.KafkaManager;
 import fr.inria.clea.lsp.EncryptedLocationSpecificPart;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +16,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
-import static fr.gouv.clea.ws.test.KafkaManager.assertThatKafkaRecordInTopic;
+import static fr.gouv.clea.ws.test.KafkaManager.*;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -27,20 +24,22 @@ import static org.assertj.core.api.Assertions.tuple;
 class ProducerServiceTest {
 
     @Autowired
-    private IProducerService producerService;
+    private ProducerService producerService;
 
     private static DecodedVisit createSerializableDecodedVisit(Instant qrCodeScanTime, boolean isBackward,
             UUID locationTemporaryPublicId, byte[] encryptedLocationMessage) {
-        return new DecodedVisit(
-                qrCodeScanTime,
-                EncryptedLocationSpecificPart.builder()
-                        .version(RandomUtils.nextInt())
-                        .type(RandomUtils.nextInt())
-                        .locationTemporaryPublicId(locationTemporaryPublicId)
-                        .encryptedLocationMessage(encryptedLocationMessage)
-                        .build(),
-                isBackward
-        );
+        return DecodedVisit.builder()
+                .qrCodeScanTime(qrCodeScanTime)
+                .encryptedLocationSpecificPart(
+                        EncryptedLocationSpecificPart.builder()
+                                .version(RandomUtils.nextInt())
+                                .type(RandomUtils.nextInt())
+                                .locationTemporaryPublicId(locationTemporaryPublicId)
+                                .encryptedLocationMessage(encryptedLocationMessage)
+                                .build()
+                )
+                .isBackward(isBackward)
+                .build();
     }
 
     @Test
@@ -67,8 +66,7 @@ class ProducerServiceTest {
 
         producerService.produceVisits(decoded);
 
-        final var records = KafkaManager.getRecords(3, "dev.clea.fct.visit-scan");
-        Assertions.assertThat(records)
+        assertThatNextRecordsInTopic(3, "dev.clea.fct.visit-scans")
                 .extracting(ConsumerRecord::value)
                 .extracting(
                         value -> tuple(
@@ -113,7 +111,7 @@ class ProducerServiceTest {
 
         producerService.produceStat(reportStat);
 
-        assertThatKafkaRecordInTopic("dev.clea.fct.report-stats")
+        assertThatNextRecordInTopic("dev.clea.fct.report-stats")
                 .hasNoKey()
                 .hasNoHeader("__TypeId__")
                 .hasJsonValue("reported", 10)

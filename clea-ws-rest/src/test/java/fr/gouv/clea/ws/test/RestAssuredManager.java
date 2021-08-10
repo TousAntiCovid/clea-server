@@ -38,6 +38,7 @@ public class RestAssuredManager implements TestExecutionListener {
                     .generateKeyPair();
             final var jwtPublicKey = Base64.getEncoder()
                     .encodeToString(JWT_KEY_PAIR.getPublic().getEncoded());
+            System.setProperty("clea.conf.authorization-check-active", "true");
             System.setProperty("clea.conf.robert-jwt-public-key", jwtPublicKey);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);

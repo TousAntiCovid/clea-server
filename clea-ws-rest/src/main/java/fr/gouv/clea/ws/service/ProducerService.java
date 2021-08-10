@@ -1,9 +1,8 @@
-package fr.gouv.clea.ws.service.impl;
+package fr.gouv.clea.ws.service;
 
 import fr.gouv.clea.ws.configuration.CleaKafkaProperties;
 import fr.gouv.clea.ws.model.DecodedVisit;
 import fr.gouv.clea.ws.model.ReportStat;
-import fr.gouv.clea.ws.service.IProducerService;
 import fr.gouv.clea.ws.utils.MessageFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProducerService implements IProducerService {
+public class ProducerService {
 
     private final KafkaTemplate<String, DecodedVisit> kafkaQrTemplate;
 
@@ -25,7 +24,6 @@ public class ProducerService implements IProducerService {
 
     private final CleaKafkaProperties cleaKafkaProperties;
 
-    @Override
     public void produceVisits(List<DecodedVisit> serializableDecodedVisits) {
         serializableDecodedVisits.forEach(
                 it -> kafkaQrTemplate.send(cleaKafkaProperties.getQrCodesTopic(), it).addCallback(
@@ -54,7 +52,6 @@ public class ProducerService implements IProducerService {
         );
     }
 
-    @Override
     public void produceStat(ReportStat reportStat) {
         kafkaStatTemplate.send(cleaKafkaProperties.getStatsTopic(), reportStat).addCallback(
                 new ListenableFutureCallback<>() {

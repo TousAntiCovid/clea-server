@@ -38,7 +38,7 @@ integration-tests:
     - docker-compose up -d
     - docker network connect clea-server_default $currentContainer
     - echo "Waiting for clea-ws-rest component to be up..."
-    - until curl -s http://clea-ws-rest:8080/actuator/health | grep -q UP; do sleep 0.5; done;
+    - until curl -s http://clea-ws-rest:8081/actuator/health | grep -q UP; do sleep 0.5; done;
     - java -jar -Dspring.profiles.active=docker clea-integration-tests/target/clea-integration-tests-*.jar
     - docker network disconnect clea-server_default $currentContainer
     - docker-compose down

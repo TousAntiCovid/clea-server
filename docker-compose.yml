@@ -6,29 +6,31 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      CLEA_CONF_AUTHORIZATION_CHECK_ACTIVE: "false"
       CLEA_WS_REST_LOG_FILE_PATH: /logs
       CLEA_WS_REST_LOG_FILE_NAME: clea-ws-rest
     depends_on:
       - kafka
     ports:
       - "8080:8080"
-    restart: always
 
   clea-venue-consumer:
     image: clea-venue-consumer
     build: clea-venue-consumer
     environment:
-      SPRING_PROFILES_ACTIVE: dev,docker
-      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       CLEA_VENUE_CONSUMER_LOG_FILE_PATH: /logs
       CLEA_VENUE_CONSUMER_LOG_FILE_NAME: clea-venue-consumer
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cleadb
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
     depends_on:
       - postgres
       - kafka
       - elasticsearch
     ports:
       - "7070:8080"
-    restart: always
 
   clea-batch:
     image: clea-batch:latest
@@ -41,21 +43,18 @@ services:
       CLEA_BATCH_LOG_FILE_NAME: clea-batch
     depends_on:
       - postgres
-    restart: "no"
 
   clea-dbmigration:
     image: flyway/flyway:7.8
-    command: migrate
+    command: migrate -connectRetries=60
     environment:
       FLYWAY_URL: jdbc:postgresql://postgres/cleadb
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: password
     volumes:
-      - ./clea-dbmigration/conf:/flyway/conf
-      - ./clea-dbmigration/sql:/flyway/sql
+      - ./clea-dbmigration/src/main/resources/db/migrations:/flyway/sql
     depends_on:
       - postgres
-    restart: always
 
   kafka:
     image: "wurstmeister/kafka:latest"
@@ -72,7 +71,6 @@ services:
       - "9092:9092"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    restart: always
 
   minio:
     image: minio/minio:edge
@@ -93,7 +91,6 @@ services:
     image: wurstmeister/zookeeper:latest
     ports:
       - "2181:2181"
-    restart: always
 
   kafdrop:
     image: "obsidiandynamics/kafdrop:latest"
@@ -105,7 +102,6 @@ services:
       - kafka
     ports:
       - "9100:9000"
-    restart: always
 
   postgres:
     image: "postgres:latest"
@@ -117,9 +113,6 @@ services:
       - "5432:5432"
     volumes:
       - "./docker-compose/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
-    restart: always
-    logging:
-      driver: none
 
   pgadmin:
     image: "dpage/pgadmin4:latest"
@@ -131,9 +124,6 @@ services:
       - postgres
     ports:
       - "8081:80"
-    restart: always
-    logging:
-      driver: none
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
