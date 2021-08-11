@@ -6,8 +6,8 @@ import fr.gouv.clea.consumer.model.LocationStat;
 import fr.gouv.clea.consumer.model.ReportStat;
 import fr.gouv.clea.consumer.model.ReportStatEntity;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.statistiques.ReportStatIndex;
-import fr.gouv.clea.consumer.repository.statistiques.StatLocationIndex;
+import fr.gouv.clea.consumer.repository.statistiques.LocationStatRepository;
+import fr.gouv.clea.consumer.repository.statistiques.ReportStatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -29,9 +29,9 @@ public class StatisticsService {
 
     private final CleaKafkaProperties cleaKafkaProperties;
 
-    private final StatLocationIndex statLocationIndex;
+    private final LocationStatRepository locationStatRepository;
 
-    private final ReportStatIndex reportStatIndex;
+    private final ReportStatRepository reportStatRepository;
 
     private final VenueConsumerProperties properties;
 
@@ -43,7 +43,7 @@ public class StatisticsService {
     public void logStats(Visit visit) {
 
         final var statLocation = toLocationStat(visit);
-        statLocationIndex.findByIdentifier(statLocation)
+        locationStatRepository.findByIdentifier(statLocation)
                 .map(existingLocationStat -> {
                     if (visit.isBackward()) {
                         existingLocationStat.setBackwardVisits(existingLocationStat.getBackwardVisits() + 1);
@@ -53,8 +53,8 @@ public class StatisticsService {
                     return existingLocationStat;
                 })
                 .ifPresentOrElse(
-                        statLocationIndex::saveWithIndexTargeting,
-                        () -> statLocationIndex.saveWithIndexTargeting(statLocation)
+                        locationStatRepository::saveWithIndexTargeting,
+                        () -> locationStatRepository.saveWithIndexTargeting(statLocation)
                 );
 
         log.debug("Location stat saved to elastic: {}", statLocation);
@@ -83,6 +83,16 @@ public class StatisticsService {
         );
     }
 
+    public void logStats(ReportStat reportStat) {
+
+        if (!operations.indexOps(ReportStatEntity.class).exists()) {
+            operations.indexOps(ReportStatEntity.class).create();
+        }
+
+        var saved = reportStatRepository.save(reportStat.toEntity());
+        log.info("Report stat saved to elastic: {}", saved);
+    }
+
     private LocationStat toLocationStat(Visit visit) {
         final var secondsToRemove = visit.getQrCodeScanTime().getEpochSecond()
                 % properties.getStatSlotDurationInSeconds();
@@ -106,16 +116,6 @@ public class StatisticsService {
                 .forwardVisits(visit.isBackward() ? 0 : 1)
                 .build();
 
-    }
-
-    public void logStats(ReportStat reportStat) {
-
-        if (!operations.indexOps(ReportStatEntity.class).exists()) {
-            operations.indexOps(ReportStatEntity.class).create();
-        }
-
-        var saved = reportStatIndex.save(reportStat.toEntity());
-        log.debug("Report stat saved to elastic: {}", saved);
     }
 
 }

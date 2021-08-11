@@ -5,5 +5,5 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ReportStatIndex extends ElasticsearchRepository<ReportStatEntity, Long> {
+public interface ReportStatRepository extends ElasticsearchRepository<ReportStatEntity, Long> {
 }

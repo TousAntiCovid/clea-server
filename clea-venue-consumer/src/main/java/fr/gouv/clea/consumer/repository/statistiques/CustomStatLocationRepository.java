@@ -4,7 +4,7 @@ import fr.gouv.clea.consumer.model.LocationStat;
 
 import java.util.Optional;
 
-public interface CustomStatLocationIndex {
+public interface CustomStatLocationRepository {
 
     Optional<LocationStat> saveWithIndexTargeting(LocationStat locationStat);
 

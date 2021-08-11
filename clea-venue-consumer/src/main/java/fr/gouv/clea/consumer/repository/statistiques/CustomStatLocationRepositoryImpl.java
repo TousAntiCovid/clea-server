@@ -19,7 +19,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
-public class CustomStatLocationIndexImpl implements CustomStatLocationIndex {
+public class CustomStatLocationRepositoryImpl implements CustomStatLocationRepository {
 
     private final ElasticsearchOperations operations;
 
@@ -41,25 +41,36 @@ public class CustomStatLocationIndexImpl implements CustomStatLocationIndex {
 
     @Override
     public Optional<LocationStat> findByIdentifier(LocationStat locationStat) {
+
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(QueryBuilders.matchQuery("id.keyword", locationStat.getId()))
                 .build();
-        SearchHits<LocationStat> LocationStats = operations
+
+        SearchHits<LocationStat> locationStatsHits = operations
                 .search(
                         searchQuery, LocationStat.class,
                         IndexCoordinates.of(getIndexCoordinates(locationStat).getIndexName())
                 );
-        log.info("Searchhits : {}", LocationStats);
-        if (!LocationStats.getSearchHits().isEmpty()) {
-            log.info("FindBy identifier : {}", LocationStats.getSearchHits().stream().findFirst().get().getContent());
-            return Optional.of(LocationStats.getSearchHits().stream().findFirst().get().getContent());
+
+        log.debug("SearchHits for {} : {}", locationStat.getId(), locationStatsHits);
+
+        if (!locationStatsHits.getSearchHits().isEmpty()) {
+            log.debug(
+                    "Found match for idenfifier {} : {}",
+                    locationStat.getId(),
+                    locationStatsHits.getSearchHits().stream().findFirst().get().getContent()
+            );
+
+            return Optional.of(locationStatsHits.getSearchHits().stream().findFirst().get().getContent());
         } else {
+
             return Optional.empty();
         }
 
     }
 
     private <S extends LocationStat> IndexCoordinates getIndexCoordinates(S locationStat) {
+
         String indexName = "health-clealocations-" + LocalDate.ofInstant(
                 locationStat.getPeriodStart(),
                 ZoneOffset.UTC

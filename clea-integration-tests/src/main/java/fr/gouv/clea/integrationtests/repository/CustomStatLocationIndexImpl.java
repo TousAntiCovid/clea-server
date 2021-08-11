@@ -42,21 +42,18 @@ public class CustomStatLocationIndexImpl implements CustomStatLocationIndex {
 
     @Override
     public Optional<LocationStat> findByIdentifier(String id, Instant periodStart) {
+
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(QueryBuilders.matchQuery("id", id))
                 .build();
-        SearchHits<LocationStat> LocationStats = operations
+
+        SearchHits<LocationStat> locationStats = operations
                 .search(
                         searchQuery, LocationStat.class,
                         IndexCoordinates.of(getIndexCoordinates(periodStart).getIndexName())
                 );
-        log.info("(int) Searchhits : {}", LocationStats);
-        if (!LocationStats.getSearchHits().isEmpty()) {
-            log.info(
-                    "(int) FindBy identifier : {}",
-                    LocationStats.getSearchHits().stream().findFirst().get().getContent()
-            );
-            return Optional.of(LocationStats.getSearchHits().stream().findFirst().get().getContent());
+        if (!locationStats.getSearchHits().isEmpty()) {
+            return Optional.of(locationStats.getSearchHits().stream().findFirst().get().getContent());
         } else {
             return Optional.empty();
         }

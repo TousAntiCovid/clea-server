@@ -5,7 +5,6 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StatLocationIndex
-        extends ElasticsearchRepository<LocationStat, String>, CustomStatLocationIndex {
-
+public interface LocationStatRepository
+        extends ElasticsearchRepository<LocationStat, String>, CustomStatLocationRepository {
 }

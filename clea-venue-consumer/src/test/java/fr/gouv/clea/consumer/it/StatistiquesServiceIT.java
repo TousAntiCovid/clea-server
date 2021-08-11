@@ -6,8 +6,8 @@ import fr.gouv.clea.consumer.model.LocationStat;
 import fr.gouv.clea.consumer.model.ReportStat;
 import fr.gouv.clea.consumer.model.ReportStatEntity;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.statistiques.ReportStatIndex;
-import fr.gouv.clea.consumer.repository.statistiques.StatLocationIndex;
+import fr.gouv.clea.consumer.repository.statistiques.LocationStatRepository;
+import fr.gouv.clea.consumer.repository.statistiques.ReportStatRepository;
 import fr.gouv.clea.consumer.service.StatisticsService;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -75,13 +75,13 @@ class StatistiquesServiceIT {
     private StatisticsService serviceMock;
 
     @Mock
-    private StatLocationIndex statLocationIndexMock;
+    private LocationStatRepository locationStatRepositoryMock;
 
     @Autowired
-    private ReportStatIndex reportStatIndex;
+    private ReportStatRepository reportStatRepository;
 
     @Autowired
-    private StatLocationIndex statLocationIndex;
+    private LocationStatRepository locationStatRepository;
 
     @Autowired
     private ElasticsearchOperations template;
@@ -134,7 +134,7 @@ class StatistiquesServiceIT {
         service.logStats(visit);
 
         List<LocationStat> stats = new ArrayList<>();
-        statLocationIndex.findAll().forEach((stats::add));
+        locationStatRepository.findAll().forEach((stats::add));
 
         assertThat(stats.size()).isEqualTo(1L);
         LocationStat locationStat = stats.get(0);
@@ -158,20 +158,20 @@ class StatistiquesServiceIT {
                 .qrCodeScanTime(TODAY_AT_8AM.plus(15, ChronoUnit.MINUTES))
                 .build();
         service.logStats(visit1);
-        long before = statLocationIndex.count();
+        long before = locationStatRepository.count();
 
         Visit visit2 = defaultVisit().toBuilder()
                 .qrCodeScanTime(TODAY_AT_8AM.plus(15, ChronoUnit.MINUTES))
                 .build();
         service.logStats(visit2);
-        long after = statLocationIndex.count();
+        long after = locationStatRepository.count();
 
         assertThat(before).isEqualTo(after);
 
         template.indexOps(LocationStat.class).refresh();
 
         List<LocationStat> stats = new ArrayList<>();
-        statLocationIndex.findAll().forEach((stats::add));
+        locationStatRepository.findAll().forEach((stats::add));
 
         assertThat(stats.size()).isEqualTo(1L);
         LocationStat locationStat = stats.get(0);
@@ -191,7 +191,7 @@ class StatistiquesServiceIT {
         service.logStats(visit1);
         service.logStats(visit2);
 
-        assertThat(statLocationIndex.count()).isEqualTo(2);
+        assertThat(locationStatRepository.count()).isEqualTo(2);
     }
 
     @Test
@@ -202,7 +202,7 @@ class StatistiquesServiceIT {
         service.logStats(visit1);
         service.logStats(visit2);
 
-        assertThat(statLocationIndex.count()).isEqualTo(2);
+        assertThat(locationStatRepository.count()).isEqualTo(2);
     }
 
     @Test
@@ -231,9 +231,9 @@ class StatistiquesServiceIT {
         service.logStats(visit3);
         service.logStats(visit4);
 
-        assertThat(statLocationIndex.count()).isEqualTo(1);
+        assertThat(locationStatRepository.count()).isEqualTo(1);
 
-        final var statLocation = statLocationIndex.findById(generateLocationStatKey(visit1)).get();
+        final var statLocation = locationStatRepository.findById(generateLocationStatKey(visit1)).get();
 
         assertThat(statLocation.getBackwardVisits()).as("backward visits").isEqualTo(3l);
         assertThat(statLocation.getForwardVisits()).as("forward visits").isEqualTo(1l);
@@ -252,7 +252,7 @@ class StatistiquesServiceIT {
         service.logStats(visit1);
         service.logStats(visit2);
 
-        assertThat(statLocationIndex.count()).isEqualTo(2);
+        assertThat(locationStatRepository.count()).isEqualTo(2);
     }
 
     @Test
@@ -264,7 +264,7 @@ class StatistiquesServiceIT {
         service.logStats(visit2);
 
         List<LocationStat> stats = new ArrayList<>();
-        statLocationIndex.findAll().forEach(stats::add);
+        locationStatRepository.findAll().forEach(stats::add);
 
         assertThat(stats.size()).isEqualTo(2);
     }
@@ -283,9 +283,9 @@ class StatistiquesServiceIT {
 
         service.logStats(reportStat);
 
-        assertThat(reportStatIndex.count()).isEqualTo(1);
+        assertThat(reportStatRepository.count()).isEqualTo(1);
 
-        final var stat = reportStatIndex.findAll().iterator().next();
+        final var stat = reportStatRepository.findAll().iterator().next();
 
         assertThat(stat.getId()).isInstanceOf(String.class);
         assertThat(stat.getId()).isNotBlank();
@@ -307,15 +307,15 @@ class StatistiquesServiceIT {
         template.indexOps(LocationStat.class).refresh();
 
         List<LocationStat> stats = new ArrayList<>();
-        statLocationIndex.findAll().forEach(stats::add);
+        locationStatRepository.findAll().forEach(stats::add);
         assertThat(stats.size()).isEqualTo(1);
 
-        Optional<LocationStat> statLocation = statLocationIndex.findById(generateLocationStatKey(visit1));
+        Optional<LocationStat> statLocation = locationStatRepository.findById(generateLocationStatKey(visit1));
 
         LocationStat locationStat = statLocation.get();
         locationStat.setForwardVisits(1);
 
-        statLocationIndex.save(locationStat);
+        locationStatRepository.save(locationStat);
         template.indexOps(LocationStat.class).refresh();
 
         LocationStat locationStatLocked1 = LocationStat.builder()
@@ -332,13 +332,13 @@ class StatistiquesServiceIT {
             Thread thread1 = new Thread("t1") {
 
                 public void run() {
-                    statLocationIndex.save(locationStatLocked1);
+                    locationStatRepository.save(locationStatLocked1);
                 }
             };
             Thread thread2 = new Thread("t2") {
 
                 public void run() {
-                    statLocationIndex.save(locationStatLocked2);
+                    locationStatRepository.save(locationStatLocked2);
                 }
             };
             thread1.start();
@@ -351,7 +351,7 @@ class StatistiquesServiceIT {
 
         Visit visit1 = defaultVisit().toBuilder().build();
 
-        Mockito.when(statLocationIndexMock.findById(anyString()))
+        Mockito.when(locationStatRepositoryMock.findById(anyString()))
                 .thenThrow(new RuntimeException("Whatever reason"))
                 .thenThrow(new RuntimeException("Whatever reason"))
                 .thenThrow(new RuntimeException("Whatever reason"));
