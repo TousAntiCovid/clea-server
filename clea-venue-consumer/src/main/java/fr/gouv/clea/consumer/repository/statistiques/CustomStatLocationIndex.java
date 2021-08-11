@@ -7,4 +7,6 @@ import java.util.Optional;
 public interface CustomStatLocationIndex {
 
     Optional<LocationStat> saveWithIndexTargeting(LocationStat locationStat);
+
+    Optional<LocationStat> findByIdentifier(LocationStat locationStat);
 }

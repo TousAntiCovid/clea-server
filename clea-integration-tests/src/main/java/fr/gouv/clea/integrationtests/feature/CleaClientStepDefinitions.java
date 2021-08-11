@@ -374,7 +374,8 @@ public class CleaClientStepDefinitions {
         // TODO: replace with kafka topics monitoring
         Thread.sleep(20000);
         expectedIndexContent.forEach(entry -> {
-            var stringStatPeriod = new PrettyTimeParser().parse(entry.get("period_start")).get(0).toInstant()
+            Instant periodStart = new PrettyTimeParser().parse(entry.get("period_start")).get(0).toInstant();
+            var stringStatPeriod = periodStart
                     .atOffset(ZoneOffset.UTC)
                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             var id = String.format(
@@ -384,7 +385,7 @@ public class CleaClientStepDefinitions {
                     parseInt(entry.get("venue_category1")),
                     parseInt(entry.get("venue_category2"))
             );
-            Optional<LocationStat> indexResponse = locationStatIndex.findById(id);
+            Optional<LocationStat> indexResponse = locationStatIndex.findByIdentifier(id, periodStart);
 
             assertThat(indexResponse).isPresent();
         });

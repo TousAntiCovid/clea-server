@@ -37,13 +37,13 @@ public class StatisticsService {
 
     private final KafkaTemplate<String, LocationStat> kafkaErrorStatTemplate;
 
-    private final ElasticsearchOperations template;
+    private final ElasticsearchOperations operations;
 
     @Retryable
     public void logStats(Visit visit) {
 
         final var statLocation = toLocationStat(visit);
-        statLocationIndex.findById(statLocation.getId())
+        statLocationIndex.findByIdentifier(statLocation)
                 .map(existingLocationStat -> {
                     if (visit.isBackward()) {
                         existingLocationStat.setBackwardVisits(existingLocationStat.getBackwardVisits() + 1);
@@ -110,11 +110,12 @@ public class StatisticsService {
 
     public void logStats(ReportStat reportStat) {
 
-        if (!template.indexOps(ReportStatEntity.class).exists()) {
-            template.indexOps(ReportStatEntity.class).create();
+        if (!operations.indexOps(ReportStatEntity.class).exists()) {
+            operations.indexOps(ReportStatEntity.class).create();
         }
 
         var saved = reportStatIndex.save(reportStat.toEntity());
         log.debug("Report stat saved to elastic: {}", saved);
     }
+
 }

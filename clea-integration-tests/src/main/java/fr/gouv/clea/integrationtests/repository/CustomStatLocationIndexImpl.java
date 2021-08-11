@@ -4,11 +4,16 @@ import fr.gouv.clea.integrationtests.model.LocationStat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.Nullable;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -25,7 +30,7 @@ public class CustomStatLocationIndexImpl implements CustomStatLocationIndex {
     @Override
     public Optional<LocationStat> saveWithIndexTargeting(LocationStat locationStat) {
 
-        IndexCoordinates indexCoordinates = getIndexCoordinates(locationStat);
+        IndexCoordinates indexCoordinates = getIndexCoordinates(locationStat.getPeriodStart());
 
         log.debug("Saving {} to {}", locationStat, indexCoordinates);
 
@@ -35,11 +40,26 @@ public class CustomStatLocationIndexImpl implements CustomStatLocationIndex {
         return Optional.of(saved);
     }
 
-    private <S extends LocationStat> IndexCoordinates getIndexCoordinates(S locationStat) {
-        String indexName = "health-clealocations-" + LocalDate.ofInstant(
-                locationStat.getPeriodStart(),
-                ZoneOffset.UTC
-        )
+    @Override
+    public Optional<LocationStat> findByIdentifier(String id, Instant periodStart) {
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.matchQuery("id", id))
+                .build();
+        SearchHits<LocationStat> LocationStats = operations
+                .search(
+                        searchQuery, LocationStat.class,
+                        IndexCoordinates.of(getIndexCoordinates(periodStart).getIndexName())
+                );
+        if (LocationStats.iterator().hasNext()) {
+            return Optional.of(LocationStats.iterator().next().getContent());
+        } else {
+            return Optional.empty();
+        }
+
+    }
+
+    private <S extends LocationStat> IndexCoordinates getIndexCoordinates(Instant periodStart) {
+        String indexName = "health-clealocations-" + LocalDate.ofInstant(periodStart, ZoneOffset.UTC)
                 .toString()
                 .replace('-', '.');
 
