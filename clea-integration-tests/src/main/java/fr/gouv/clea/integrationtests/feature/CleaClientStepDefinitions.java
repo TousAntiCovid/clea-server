@@ -387,7 +387,7 @@ public class CleaClientStepDefinitions {
             );
             Optional<LocationStat> indexResponse = locationStatIndex.findByIdentifier(id, periodStart);
 
-            assertThat(indexResponse).isPresent();
+            assertThat(indexResponse).isNotEmpty();
         });
     }
 

@@ -50,8 +50,13 @@ public class CustomStatLocationIndexImpl implements CustomStatLocationIndex {
                         searchQuery, LocationStat.class,
                         IndexCoordinates.of(getIndexCoordinates(periodStart).getIndexName())
                 );
-        if (LocationStats.iterator().hasNext()) {
-            return Optional.of(LocationStats.iterator().next().getContent());
+        log.info("(int) Searchhits : {}", LocationStats);
+        if (!LocationStats.getSearchHits().isEmpty()) {
+            log.info(
+                    "(int) FindBy identifier : {}",
+                    LocationStats.getSearchHits().stream().findFirst().get().getContent()
+            );
+            return Optional.of(LocationStats.getSearchHits().stream().findFirst().get().getContent());
         } else {
             return Optional.empty();
         }

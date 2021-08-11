@@ -42,15 +42,17 @@ public class CustomStatLocationIndexImpl implements CustomStatLocationIndex {
     @Override
     public Optional<LocationStat> findByIdentifier(LocationStat locationStat) {
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.matchQuery("id", locationStat.getId()))
+                .withQuery(QueryBuilders.matchQuery("id.keyword", locationStat.getId()))
                 .build();
         SearchHits<LocationStat> LocationStats = operations
                 .search(
                         searchQuery, LocationStat.class,
                         IndexCoordinates.of(getIndexCoordinates(locationStat).getIndexName())
                 );
-        if (LocationStats.iterator().hasNext()) {
-            return Optional.of(LocationStats.iterator().next().getContent());
+        log.info("Searchhits : {}", LocationStats);
+        if (!LocationStats.getSearchHits().isEmpty()) {
+            log.info("FindBy identifier : {}", LocationStats.getSearchHits().stream().findFirst().get().getContent());
+            return Optional.of(LocationStats.getSearchHits().stream().findFirst().get().getContent());
         } else {
             return Optional.empty();
         }
