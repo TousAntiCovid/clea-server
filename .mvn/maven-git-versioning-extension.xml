@@ -10,7 +10,7 @@
         <versionFormat>${1}-SNAPSHOT</versionFormat>
     </branch>
     <branch>
-        <pattern>(feat|hotfix)/(.+)</pattern>
+        <pattern>(feature|hotfix)/(.+)</pattern>
         <versionFormat>${2.slug}-SNAPSHOT</versionFormat>
     </branch>
     <branch>
