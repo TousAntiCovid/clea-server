@@ -9,3 +9,10 @@ clea:
 
 minio:
   url: http://localhost:9000
+
+spring:
+  elasticsearch:
+    rest:
+      username: elastic
+      password: password
+      uris: http://localhost:9200
