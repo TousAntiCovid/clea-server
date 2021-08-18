@@ -1,7 +1,7 @@
 package fr.gouv.clea.consumer.repository;
 
 import fr.gouv.clea.consumer.model.LocationStat;
-import fr.gouv.clea.consumer.repository.statistiques.LocationStatRepository;
+import fr.gouv.clea.consumer.repository.statistics.LocationStatRepository;
 import fr.gouv.clea.consumer.test.IntegrationTest;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.junit.jupiter.api.Test;

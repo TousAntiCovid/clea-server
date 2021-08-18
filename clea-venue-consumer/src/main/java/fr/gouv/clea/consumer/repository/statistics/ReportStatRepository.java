@@ -1,4 +1,4 @@
-package fr.gouv.clea.consumer.repository.statistiques;
+package fr.gouv.clea.consumer.repository.statistics;
 
 import fr.gouv.clea.consumer.model.ReportStatEntity;
 import lombok.RequiredArgsConstructor;
