@@ -10,7 +10,7 @@ import java.time.Instant;
 import static org.springframework.data.elasticsearch.annotations.FieldType.Date;
 
 @Value
-@Document(indexName = "health-clealocations")
+@Document(indexName = "health-clealocations-*", createIndex = false)
 public class LocationStat {
 
     @Id

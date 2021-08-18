@@ -5,7 +5,6 @@ import fr.gouv.clea.integrationtests.dto.PivotDateStringWreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportResponse;
 import fr.gouv.clea.integrationtests.feature.context.ScenarioContext;
-import fr.gouv.clea.integrationtests.model.LocationStat;
 import fr.gouv.clea.integrationtests.model.ReportStat;
 import fr.gouv.clea.integrationtests.repository.LocationStatIndex;
 import fr.gouv.clea.integrationtests.repository.ReportStatIndex;
@@ -29,8 +28,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -374,20 +371,21 @@ public class CleaClientStepDefinitions {
         // TODO: replace with kafka topics monitoring
         Thread.sleep(20000);
         expectedIndexContent.forEach(entry -> {
-            Instant periodStart = new PrettyTimeParser().parse(entry.get("period_start")).get(0).toInstant();
-            var stringStatPeriod = periodStart
-                    .atOffset(ZoneOffset.UTC)
-                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            var id = String.format(
-                    "%s-vt:%d-vc1:%d-vc2:%d",
-                    stringStatPeriod,
-                    parseInt(entry.get("venue_type")),
-                    parseInt(entry.get("venue_category1")),
-                    parseInt(entry.get("venue_category2"))
-            );
-            Optional<LocationStat> indexResponse = locationStatIndex.findById(id);
+            final var periodStart = new PrettyTimeParser().parse(entry.get("period_start")).get(0).toInstant();
+            final var locationStatistics = locationStatIndex
+                    .findByPeriodStartAndVenueTypeAndVenueCategory1AndVenueCategory2(
+                            periodStart,
+                            parseInt(entry.get("venue_type")),
+                            parseInt(entry.get("venue_category1")),
+                            parseInt(entry.get("venue_category2"))
+                    ).orElseThrow();
 
-            assertThat(indexResponse).isNotEmpty();
+            assertThat(locationStatistics.getBackwardVisits())
+                    .as("backward visits for period %s", entry.get("period_start"))
+                    .isEqualTo(parseInt(entry.get("backward_visits")));
+            assertThat(locationStatistics.getForwardVisits())
+                    .as("forward visits for period %s", entry.get("period_start"))
+                    .isEqualTo(parseInt(entry.get("forward_visits")));
         });
     }
 
@@ -399,7 +397,7 @@ public class CleaClientStepDefinitions {
             List<ReportStat> indexResponse = reportStatIndex.findByReportedAndRejectedAndCloseAndBackwardsAndForwards(
                     entry.get("reported"),
                     entry.get("rejected"),
-                    entry.get("is_closed"),
+                    entry.get("is_close"),
                     entry.get("backwards"),
                     entry.get("forwards")
             );
