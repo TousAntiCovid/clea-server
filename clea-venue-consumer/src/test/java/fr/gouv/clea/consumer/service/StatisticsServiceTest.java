@@ -63,7 +63,7 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void should_create_a_new_stat_in_DB_when_visit_has_no_existing_context() {
+    void should_create_a_new_stat_in_elastic_when_visit_has_no_existing_context() {
         final var visit = defaultVisit().toBuilder()
                 .qrCodeScanTime(TODAY_AT_8AM.plus(15, MINUTES))
                 .venueType(4)
@@ -88,7 +88,7 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void should_update_an_existing_stat_in_DB_when_visit_has_existing_context() {
+    void should_update_an_existing_stat_in_elastic_when_visit_has_existing_context() {
         // if:
         // periodStartTime = today at 00:00:00
         // qrCodeScanTime = today at 08:15:00
