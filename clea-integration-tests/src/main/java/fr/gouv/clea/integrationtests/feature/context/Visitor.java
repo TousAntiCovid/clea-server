@@ -57,7 +57,10 @@ public class Visitor {
             final String prefix) {
         try {
             return s3Service.getClusterFile(iteration, prefix).stream()
-                    .map(cluster -> localList.stream().map(qr -> getQrcodeRiskLevel(cluster, qr)));
+                    .map(
+                            cluster -> localList.stream()
+                                    .map(qr -> getQrcodeRiskLevel(cluster, qr))
+                    );
         } catch (IOException | ServerException | InsufficientDataException | ErrorResponseException
                 | NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException
                 | InternalException e) {
@@ -66,7 +69,8 @@ public class Visitor {
     }
 
     private Optional<Float> getQrcodeRiskLevel(final Cluster cluster, final Visit visit) {
-        if (QrCodeDecoder.getLocationTemporaryId(visit).toString().equals(cluster.getLocationTemporaryPublicID())) {
+        UUID locationTemporaryId = QrCodeDecoder.getLocationTemporaryId(visit);
+        if (locationTemporaryId.toString().equals(cluster.getLocationTemporaryPublicID())) {
             return cluster.getExpositions().stream()
                     .filter(exp -> exp.isInExposition(TimeUtils.instantFromTimestamp(visit.getScanTime())))
                     .map(ClusterExposition::getRisk)

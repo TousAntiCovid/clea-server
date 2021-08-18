@@ -1,11 +1,9 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
-import fr.gouv.clea.consumer.service.IStatService;
-import fr.gouv.clea.consumer.service.IVisitExpositionAggregatorService;
+import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
 import fr.inria.clea.lsp.utils.TimeUtils;
@@ -26,18 +24,17 @@ import java.util.stream.Stream;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class VisitExpositionAggregatorService implements IVisitExpositionAggregatorService {
+public class VisitExpositionAggregatorService {
 
-    private final IExposedVisitRepository repository;
+    private final ExposedVisitRepository repository;
 
     private final ExposureTimeConfiguration exposureTimeConfig;
 
     private final VenueConsumerProperties properties;
 
-    private final IStatService statService;
+    private final StatisticsService statisticsService;
 
     @Transactional
-    @Override
     public void updateExposureCount(Visit visit) {
         Instant periodStartAsInstant = this
                 .periodStartFromCompressedPeriodStartAsInstant(visit.getCompressedPeriodStartTime());
@@ -84,12 +81,13 @@ public class VisitExpositionAggregatorService implements IVisitExpositionAggrega
 
         List<ExposedVisitEntity> merged = Stream.concat(toUpdate.stream(), toPersist.stream())
                 .collect(Collectors.toList());
+
         if (!merged.isEmpty()) {
             repository.saveAll(merged);
+
             log.info("Persisting {} new visits!", toPersist.size());
             log.info("Updating {} existing visits!", toUpdate.size());
 
-            statService.logStats(visit);
         } else {
             log.info(
                     "LTId: {}, qrScanTime: {} - No visit to persist / update", visit.getLocationTemporaryPublicId(),

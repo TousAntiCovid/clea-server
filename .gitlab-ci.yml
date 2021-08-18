@@ -33,7 +33,6 @@ integration-tests:
   before_script:
     - export PATH="$PWD/docker-compose:$PATH"
     - export CLEA_ROOT_DIR=$CI_PROJECT_DIR
-    - export ENDPOINT_OUTSCALE="http://minio:9000"
   script:
     - currentContainer=$(basename $(cat /proc/1/cpuset))
     - docker-compose up -d

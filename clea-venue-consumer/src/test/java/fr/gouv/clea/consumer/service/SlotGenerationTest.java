@@ -1,10 +1,9 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.configuration.VenueConsumerProperties;
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
-import fr.gouv.clea.consumer.service.IStatService;
+import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.gouv.clea.scoring.configuration.ScoringRule;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
@@ -41,10 +40,10 @@ class SlotGenerationTest {
     private final ExposureTimeConfiguration exposureTimeConfig = new ExposureTimeConfiguration();
 
     @Mock
-    private IExposedVisitRepository repository;
+    private ExposedVisitRepository repository;
 
     @Mock
-    private IStatService statService;
+    private StatisticsService statisticsService;
 
     @Captor
     private ArgumentCaptor<List<ExposedVisitEntity>> exposedVisitEntitiesCaptor;
@@ -67,7 +66,7 @@ class SlotGenerationTest {
                 )
         );
         properties.setDurationUnitInSeconds(Duration.ofMinutes(30).toSeconds());
-        service = new VisitExpositionAggregatorService(repository, exposureTimeConfig, properties, statService);
+        service = new VisitExpositionAggregatorService(repository, exposureTimeConfig, properties, statisticsService);
     }
 
     @Test
@@ -81,10 +80,10 @@ class SlotGenerationTest {
 
         service.updateExposureCount(visit);
 
-        /*
-         * => scanTimeSlot = 8*2 = 16 => slots to generate = 3 before + scanTimeSlot + 3
-         * after = 7 => firstExposedSlot = 16-3 = 13 => lastExposedSlot = 16+3 = 19
-         */
+        // => scanTimeSlot = 8*2 = 16
+        // => slots to generate = 3 before + scanTimeSlot + 3 after = 7
+        // => firstExposedSlot = 16-3 = 13
+        // => lastExposedSlot = 16+3 = 19
         verify(repository).saveAll(exposedVisitEntitiesCaptor.capture());
         assertThat(exposedVisitEntitiesCaptor.getValue())
                 .extracting(ExposedVisitEntity::getTimeSlot)
@@ -102,10 +101,10 @@ class SlotGenerationTest {
 
         service.updateExposureCount(visit);
 
-        /*
-         * => scanTimeSlot = 0 => slots to generate = scanTimeSlot + 1 after = 2 =>
-         * firstExposedSlot = 0 => lastExposedSlot = 0+1 = 1
-         */
+        // => scanTimeSlot = 0
+        // => slots to generate = scanTimeSlot + 1 after = 2
+        // => firstExposedSlot = 0
+        // => lastExposedSlot = 0+1 = 1
         verify(repository).saveAll(exposedVisitEntitiesCaptor.capture());
         assertThat(exposedVisitEntitiesCaptor.getValue())
                 .extracting(ExposedVisitEntity::getTimeSlot)
@@ -123,10 +122,10 @@ class SlotGenerationTest {
 
         service.updateExposureCount(visit);
 
-        /*
-         * => scanTimeSlot = 0 => slots to generate = scanTimeSlot + 3 after = 4 =>
-         * firstExposedSlot = 0 => lastExposedSlot = 0+4-1 = 3
-         */
+        // => scanTimeSlot = 0
+        // => slots to generate = scanTimeSlot + 3 after = 4
+        // => firstExposedSlot = 0
+        // => lastExposedSlot = 0+4-1 = 3
         verify(repository).saveAll(exposedVisitEntitiesCaptor.capture());
         assertThat(exposedVisitEntitiesCaptor.getValue())
                 .extracting(ExposedVisitEntity::getTimeSlot)
@@ -161,10 +160,10 @@ class SlotGenerationTest {
 
         service.updateExposureCount(visit);
 
-        /*
-         * => scanTimeSlot = 8 => slots to generate = scanTimeSlot + 3 after + 3 before
-         * => firstExposedSlot = 11 => lastExposedSlot = 5
-         */
+        // => scanTimeSlot = 8
+        // => slots to generate = scanTimeSlot + 3 after + 3 before
+        // => firstExposedSlot = 11
+        // => lastExposedSlot = 5
         verify(repository).saveAll(exposedVisitEntitiesCaptor.capture());
         assertThat(exposedVisitEntitiesCaptor.getValue())
                 .extracting(ExposedVisitEntity::getTimeSlot)

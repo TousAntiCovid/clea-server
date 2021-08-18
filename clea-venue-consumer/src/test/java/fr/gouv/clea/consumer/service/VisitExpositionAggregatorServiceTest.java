@@ -1,9 +1,7 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
-import fr.gouv.clea.consumer.service.IStatService;
-import fr.gouv.clea.consumer.service.IVisitExpositionAggregatorService;
+import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
 import fr.inria.clea.lsp.utils.TimeUtils;
@@ -29,16 +27,16 @@ import static org.mockito.Mockito.*;
 class VisitExpositionAggregatorServiceTest {
 
     @Autowired
-    private IExposedVisitRepository repository;
+    private ExposedVisitRepository repository;
 
     @Autowired
-    private IVisitExpositionAggregatorService service;
+    private VisitExpositionAggregatorService service;
 
     @MockBean
     private ExposureTimeConfiguration exposureTimeConfiguration;
 
     @MockBean
-    private IStatService statService;
+    private StatisticsService statisticsService;
 
     private Instant todayAtMidnight;
 
@@ -67,7 +65,7 @@ class VisitExpositionAggregatorServiceTest {
                                 .build()
                 );
 
-        doNothing().when(statService).logStats(any(Visit.class));
+        doNothing().when(statisticsService).logStats(any(Visit.class));
     }
 
     @AfterEach

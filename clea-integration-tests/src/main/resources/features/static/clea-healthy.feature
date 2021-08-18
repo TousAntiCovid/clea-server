@@ -11,12 +11,12 @@ Feature: Several healthy visitors visit different places
     Given "Julie" registered on TAC
     Given "Mahe" registered on TAC
     Given "Yäel" registered on TAC
-    Given VType of "restauration", VCategory1 of "restaurant rapide" and VCategory2 of 1 has risk configuration of (Threshold , ExposureTime, Risklevel) for backward (3,30,3.0) and for forward (1,30,2.0)
-    Given VType of "etablissements sportifs", VCategory1 of "sport indoor" and VCategory2 of 2 has risk configuration of (Threshold , ExposureTime, Risklevel) for backward (3,120,3.0) and for forward (1,120,2.0)
-    Given VType of "etablissements sportifs", VCategory1 of "salle de sport" and VCategory2 of 2 has risk configuration of (Threshold , ExposureTime, Risklevel) for backward (3,60,3.0) and for forward (1,60,2.0)
-    Given "Chez McDonald's" created a static QRCode at 11:00, 13 days ago with VType as "restauration" and with VCategory1 as "restaurant rapide" and with VCategory2 as 1 and with a periodDuration of "24 hours"
-    Given "NRFight Club Olympiades" created a static QRCode at 11:00, 13 days ago with VType as "etablissements sportifs" and with VCategory1 as "sport indoor" and with VCategory2 as 2 and with a periodDuration of "24 hours"
-    Given "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as "etablissements sportifs" and with VCategory1 as "salle de sport" and with VCategory2 as 2 and with a periodDuration of "24 hours"
+    Given VType of 1, VCategory1 of 1 and VCategory2 of 1
+    Given VType of 4, VCategory1 of 2 and VCategory2 of 2
+    Given VType of 4, VCategory1 of 1 and VCategory2 of 2
+    Given "Chez McDonald's" created a static QRCode at 11:00, 13 days ago with VType as 1, with VCategory1 as 1, with VCategory2 as 1 and with a periodDuration of "24 hours"
+    Given "NRFight Club Olympiades" created a static QRCode at 11:00, 13 days ago with VType as 4, with VCategory1 as 2, with VCategory2 as 2 and with a periodDuration of "24 hours"
+    Given "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as 4, with VCategory1 as 1, with VCategory2 as 2 and with a periodDuration of "24 hours"
 
   Scenario: One location with duplicated visits - Exposure Time 30 min
    Given "Hugo" recorded a visit to "Chez McDonald's" at 12:30, 6 days ago

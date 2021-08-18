@@ -25,7 +25,8 @@ clea:
         enabled: "false"
   kafka:
     qrCodesTopic: cleaQrCodes
-    statsTopic: cleaStats
+    reportStatsTopic: cleaStats
+    errorLocationStatsTopic: cleaErrorStats
 
 management:
   endpoints:
@@ -38,12 +39,12 @@ server:
 
 spring:
   datasource:
-    url: jdbc:h2:mem:cleadb
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5432/cleadb
+    username: postgres
+    password: password
   h2:
     console:
-      enabled: true
+      enabled: false
       path: /h2
       settings:
         trace: false
@@ -56,3 +57,8 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: group1
+  elasticsearch:
+    rest:
+      password: password
+      username: elastic
+      uris: http://localhost:9200

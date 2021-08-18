@@ -1,12 +1,8 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.model.DecodedVisit;
 import fr.gouv.clea.consumer.model.ReportStat;
 import fr.gouv.clea.consumer.model.Visit;
-import fr.gouv.clea.consumer.service.IConsumerService;
-import fr.gouv.clea.consumer.service.IDecodedVisitService;
-import fr.gouv.clea.consumer.service.IStatService;
-import fr.gouv.clea.consumer.service.IVisitExpositionAggregatorService;
 import fr.gouv.clea.consumer.utils.MessageFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,15 +16,14 @@ import java.util.Optional;
 @RefreshScope
 @RequiredArgsConstructor
 @Slf4j
-public class ConsumerService implements IConsumerService {
+public class ConsumerService {
 
-    private final IDecodedVisitService decodedVisitService;
+    private final DecodedVisitService decodedVisitService;
 
-    private final IVisitExpositionAggregatorService visitExpositionAggregatorService;
+    private final VisitExpositionAggregatorService visitExpositionAggregatorService;
 
-    private final IStatService statService;
+    private final StatisticsService statisticsService;
 
-    @Override
     @KafkaListener(topics = "${clea.kafka.qrCodesTopic}", containerFactory = "visitContainerFactory")
     public void consumeVisit(DecodedVisit decodedVisit) {
         log.info(
@@ -41,15 +36,15 @@ public class ConsumerService implements IConsumerService {
                 visit -> {
                     log.debug("Consumer: visit after decrypt + validation: {}, ", visit);
                     visitExpositionAggregatorService.updateExposureCount(visit);
+                    statisticsService.logStats(visit);
                 },
                 () -> log.info("empty visit after decrypt + validation")
         );
     }
 
-    @Override
-    @KafkaListener(topics = "${clea.kafka.statsTopic}", containerFactory = "statContainerFactory")
+    @KafkaListener(topics = "${clea.kafka.reportStatsTopic}", containerFactory = "statContainerFactory")
     public void consumeStat(ReportStat reportStat) {
         log.info("stat {} retrieved from queue", reportStat);
-        statService.logStats(reportStat);
+        statisticsService.logStats(reportStat);
     }
 }

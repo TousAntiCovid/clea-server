@@ -1,7 +1,7 @@
-package fr.gouv.clea.consumer.service.impl;
+package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
-import fr.gouv.clea.consumer.repository.IExposedVisitRepository;
+import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -36,7 +36,7 @@ class ExposedVisitEntityServiceSchedulingTest {
     private String cronValue;
 
     @Autowired
-    private IExposedVisitRepository repository;
+    private ExposedVisitRepository repository;
 
     @Autowired
     private ScheduledTaskHolder scheduledTaskHolder;
@@ -73,7 +73,7 @@ class ExposedVisitEntityServiceSchedulingTest {
                 .containsExactly(
                         tuple(
                                 cronValue,
-                                "fr.gouv.clea.consumer.service.impl.ExposedVisitEntityService.deleteOutdatedExposedVisits"
+                                "fr.gouv.clea.consumer.service.ExposedVisitEntityService.deleteOutdatedExposedVisits"
                         )
                 );
     }
