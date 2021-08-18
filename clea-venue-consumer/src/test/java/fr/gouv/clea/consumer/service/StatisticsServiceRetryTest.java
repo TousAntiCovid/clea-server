@@ -36,6 +36,8 @@ class StatisticsServiceRetryTest {
 
         // then kafka contains the following record
         assertThatNextRecordInTopic("test.clea.fct.clea-error-visit")
+                .hasNoKey()
+                .hasNoHeader("__TypeId__")
                 .hasJsonValue("periodStart", "2019-07-22T08:00:00Z")
                 .hasJsonValue("venueType", 4)
                 .hasJsonValue("venueCategory1", 1)
@@ -62,6 +64,8 @@ class StatisticsServiceRetryTest {
 
         // then kafka contains the following record
         assertThatNextRecordInTopic("test.clea.fct.clea-error-visit")
+                .hasNoKey()
+                .hasNoHeader("__TypeId__")
                 .hasJsonValue("periodStart", "2019-07-22T08:00:00Z")
                 .hasJsonValue("venueType", 4)
                 .hasJsonValue("venueCategory1", 1)
