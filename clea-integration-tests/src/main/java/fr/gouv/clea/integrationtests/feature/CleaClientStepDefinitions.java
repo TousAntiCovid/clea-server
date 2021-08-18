@@ -385,7 +385,7 @@ public class CleaClientStepDefinitions {
                     parseInt(entry.get("venue_category1")),
                     parseInt(entry.get("venue_category2"))
             );
-            Optional<LocationStat> indexResponse = locationStatIndex.findByIdentifier(id, periodStart);
+            Optional<LocationStat> indexResponse = locationStatIndex.findById(id);
 
             assertThat(indexResponse).isNotEmpty();
         });
