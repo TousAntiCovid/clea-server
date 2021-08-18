@@ -1,6 +1,4 @@
-Feature: Several healthy visitors visit different places
-  Visits are simultaneous or not
-  The healthy visitors must not be warned being at risk
+Feature: Record health statistics
 
   Background:
     Given "Laure" registered on TAC
