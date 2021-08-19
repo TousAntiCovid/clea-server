@@ -29,21 +29,21 @@ Feature: Record health statistics
     When "Laure" declares herself sick with a 5 days ago pivot date
     Then "Laure" sends her visits
     And statistics by wreport are
-      | reported | rejected | is_close | backwards | forwards |
-      | 3        | 0        | 1        | 2         | 1        |
+      | reported | rejected | close | backwards | forwards |
+      | 3        | 0        | 1     | 2         | 1        |
     And statistics by location are
-      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start      |
+      | venue type | venue category1 | venue category2 | backward visits | forward visits | period start      |
       | 1          | 1               | 1               | 2               | 0              | 12:00, 6 days ago |
       | 1          | 1               | 1               | 0               | 1              | 12:00, 4 days ago |
     When "Henry" declares himself sick with a 3 days ago pivot date
 
     Then "Henry" sends his visits
     And statistics by wreport are
-      | reported | rejected | is_close | backwards | forwards |
-      | 3        | 0        | 1        | 2         | 1        |
-      | 4        | 1        | 0        | 2         | 1        |
+      | reported | rejected | close | backwards | forwards |
+      | 3        | 0        | 1     | 2         | 1        |
+      | 4        | 1        | 0     | 2         | 1        |
     And statistics by location are
-      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start      |
+      | venue type | venue category1 | venue category2 | backward visits | forward visits | period start      |
       | 2          | 0               | 2               | 1               | 0              | 11:00, 4 days ago |
       | 1          | 1               | 1               | 3               | 0              | 12:00, 6 days ago |
       | 1          | 1               | 1               | 0               | 1              | 12:00, 4 days ago |
@@ -52,12 +52,12 @@ Feature: Record health statistics
     When "Yaël" declares himself sick with a 5 days ago pivot date
     Then "Yaël" sends his visits
     And statistics by wreport are
-      | reported | rejected | is_close | backwards | forwards |
-      | 3        | 0        | 1        | 2         | 1        |
-      | 4        | 1        | 0        | 2         | 1        |
-      | 1        | 1        | 0        | 0         | 0        |
+      | reported | rejected | close | backwards | forwards |
+      | 3        | 0        | 1     | 2         | 1        |
+      | 4        | 1        | 0     | 2         | 1        |
+      | 1        | 1        | 0     | 0         | 0        |
     And statistics by location are
-      | venue_type | venue_category1 | venue_category2 | backward_visits | forward_visits | period_start      |
+      | venue type | venue category1 | venue category2 | backward visits | forward visits | period start      |
       | 2          | 0               | 2               | 1               | 0              | 11:00, 4 days ago |
       | 1          | 1               | 1               | 3               | 0              | 12:00, 6 days ago |
       | 1          | 1               | 1               | 0               | 1              | 12:00, 4 days ago |

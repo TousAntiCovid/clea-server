@@ -1,5 +1,6 @@
 package fr.gouv.clea.integrationtests.model;
 
+import lombok.Builder;
 import lombok.Value;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -10,15 +11,12 @@ import java.time.Instant;
 import static org.springframework.data.elasticsearch.annotations.FieldType.Date;
 
 @Value
+@Builder
 @Document(indexName = "health-clealocations-*", createIndex = false)
 public class LocationStat {
 
     @Id
     String id;
-
-    long backwardVisits;
-
-    long forwardVisits;
 
     @Field(name = "@timestamp", type = Date)
     Instant periodStart;
@@ -28,4 +26,8 @@ public class LocationStat {
     int venueCategory1;
 
     int venueCategory2;
+
+    long backwardVisits;
+
+    long forwardVisits;
 }

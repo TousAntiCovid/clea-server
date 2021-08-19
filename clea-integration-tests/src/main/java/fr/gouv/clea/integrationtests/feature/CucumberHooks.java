@@ -14,7 +14,7 @@ public class CucumberHooks {
     private final RestHighLevelClient esClient;
 
     @Before
-    public void emptyIndices() throws IOException {
+    public void clearElasticIndices() throws IOException {
         esClient.indices().delete(new DeleteIndexRequest("*"), RequestOptions.DEFAULT);
     }
 }
