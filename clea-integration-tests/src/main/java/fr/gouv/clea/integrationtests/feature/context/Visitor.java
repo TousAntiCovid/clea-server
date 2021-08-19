@@ -9,16 +9,12 @@ import fr.gouv.clea.integrationtests.service.CleaS3Service;
 import fr.gouv.clea.integrationtests.utils.QrCodeDecoder;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import io.minio.errors.*;
-import io.minio.errors.ServerException;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
@@ -41,10 +37,8 @@ public class Visitor {
     @Getter(AccessLevel.NONE)
     private WreportResponse lastReportResponse = null;
 
-    public float getStatus() throws IOException, ServerException, InsufficientDataException, ErrorResponseException,
-            NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
-            InternalException {
-        final var clusterIndex = s3Service.getClusterIndex().orElseThrow();
+    public float getStatus() {
+        final var clusterIndex = s3Service.getClusterIndex();
         return clusterIndex.getPrefixes().stream()
                 .filter(this::matchesVisitedPlacesIds)
                 .map(prefix -> getRiskLevelsFromQrCodesMatchingPrefix(clusterIndex.getIteration(), prefix))
@@ -57,17 +51,11 @@ public class Visitor {
 
     private Stream<Stream<Optional<Float>>> getRiskLevelsFromQrCodesMatchingPrefix(final int iteration,
             final String prefix) {
-        try {
-            return s3Service.getClusterFile(iteration, prefix).stream()
-                    .map(
-                            cluster -> localList.stream()
-                                    .map(qr -> getQrcodeRiskLevel(cluster, qr))
-                    );
-        } catch (IOException | ServerException | InsufficientDataException | ErrorResponseException
-                | NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException
-                | InternalException e) {
-            throw new RuntimeException(e);
-        }
+        return s3Service.getClusterFile(iteration, prefix).stream()
+                .map(
+                        cluster -> localList.stream()
+                                .map(qr -> getQrcodeRiskLevel(cluster, qr))
+                );
     }
 
     private Optional<Float> getQrcodeRiskLevel(final Cluster cluster, final Visit visit) {
