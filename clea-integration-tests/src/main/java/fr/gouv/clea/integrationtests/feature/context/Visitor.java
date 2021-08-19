@@ -8,7 +8,6 @@ import fr.gouv.clea.integrationtests.model.Visit;
 import fr.gouv.clea.integrationtests.service.CleaS3Service;
 import fr.gouv.clea.integrationtests.utils.QrCodeDecoder;
 import fr.inria.clea.lsp.utils.TimeUtils;
-import io.minio.errors.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;

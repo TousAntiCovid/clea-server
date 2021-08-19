@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WreportRequest implements Request {
+public class WreportRequest {
 
     private Long pivotDate;
 

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class PivotDateStringWreportRequest implements Request {
+public class PivotDateStringWreportRequest {
 
     private String pivotDate;
 
