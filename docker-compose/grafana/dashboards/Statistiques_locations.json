@@ -68,10 +68,7 @@
           "format": "time_series",
           "group": [
             {
-              "params": [
-                "$__interval",
-                "none"
-              ],
+              "params": ["$__interval", "none"],
               "type": "time"
             }
           ],
@@ -82,41 +79,29 @@
           "select": [
             [
               {
-                "params": [
-                  "backward_visits"
-                ],
+                "params": ["backward_visits"],
                 "type": "column"
               },
               {
-                "params": [
-                  "sum"
-                ],
+                "params": ["sum"],
                 "type": "aggregate"
               },
               {
-                "params": [
-                  "backward_visits"
-                ],
+                "params": ["backward_visits"],
                 "type": "alias"
               }
             ],
             [
               {
-                "params": [
-                  "forward_visits"
-                ],
+                "params": ["forward_visits"],
                 "type": "column"
               },
               {
-                "params": [
-                  "sum"
-                ],
+                "params": ["sum"],
                 "type": "aggregate"
               },
               {
-                "params": [
-                  "forward_visits"
-                ],
+                "params": ["forward_visits"],
                 "type": "alias"
               }
             ]
@@ -133,31 +118,19 @@
             {
               "datatype": "int4",
               "name": "",
-              "params": [
-                "venue_type",
-                "IN",
-                "($venueType)"
-              ],
+              "params": ["venue_type", "IN", "($venueType)"],
               "type": "expression"
             },
             {
               "datatype": "int4",
               "name": "",
-              "params": [
-                "venue_category1",
-                "IN",
-                "($venueCateg1)"
-              ],
+              "params": ["venue_category1", "IN", "($venueCateg1)"],
               "type": "expression"
             },
             {
               "datatype": "int4",
               "name": "",
-              "params": [
-                "venue_category2",
-                "IN",
-                "($venueCateg2)"
-              ],
+              "params": ["venue_category2", "IN", "($venueCateg2)"],
               "type": "expression"
             }
           ]

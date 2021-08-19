@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+
 import java.util.List;
 
 @Data
@@ -15,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Valid
 public class ReportRequest {
+
     @NotNull
     @NotEmpty
     private List<Visit> visits;

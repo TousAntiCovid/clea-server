@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
+
 import java.util.List;
 
 import static fr.gouv.clea.config.BatchConstants.SQL_SELECT_DISTINCT_FROM_CLUSTERPERIODS_ORDERBY_LTID;

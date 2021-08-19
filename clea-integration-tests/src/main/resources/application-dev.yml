@@ -1,0 +1,18 @@
+clea:
+  ws-rest:
+    base-url: http://localhost:8080
+  batch:
+    command:
+      - "docker-compose"
+      - "up"
+      - "clea-batch"
+
+minio:
+  url: http://localhost:9000
+
+spring:
+  elasticsearch:
+    rest:
+      username: elastic
+      password: password
+      uris: http://localhost:9200

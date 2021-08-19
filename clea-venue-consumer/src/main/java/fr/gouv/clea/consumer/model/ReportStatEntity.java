@@ -4,27 +4,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+
+import static java.time.ZoneOffset.UTC;
+import static org.springframework.data.elasticsearch.annotations.FieldType.Date;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "STAT_REPORTS")
+@Document(indexName = "health-cleareports-*", createIndex = false)
 public class ReportStatEntity {
 
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
+
+    @Field(name = "@timestamp", type = Date)
+    private Instant timestamp;
 
     private int reported;
 
@@ -34,9 +35,12 @@ public class ReportStatEntity {
 
     private int forwards;
 
-    @Column(name = "is_closed")
+    // même slot => closed (proximité de moins de 30min d'écart)
     private int close;
 
-    @Column(name = "dt_report")
-    private Instant timestamp;
+    public String buildIndexName() {
+        final var date = timestamp.atOffset(UTC)
+                .format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+        return String.format("health-cleareports-%s", date);
+    }
 }

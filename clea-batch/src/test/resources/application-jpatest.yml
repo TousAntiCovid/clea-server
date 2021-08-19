@@ -10,7 +10,7 @@ spring:
     validation-query: SELECT 1
 
   batch:
-    # Manage it's batch metadata tables 
+    # Manage it's batch metadata tables
     initialize-schema: never
     #prevent job to launch on startup
     job:

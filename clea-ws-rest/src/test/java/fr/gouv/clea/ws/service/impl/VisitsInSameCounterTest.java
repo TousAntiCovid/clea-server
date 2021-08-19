@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 class VisitsInSameCounterTest {
 
     private static final Duration exposureTimeUnitInSeconds = Duration.ofSeconds(1800);
+
     private final DecodedVisit decodedVisit = Mockito.mock(DecodedVisit.class);
 
     @Test

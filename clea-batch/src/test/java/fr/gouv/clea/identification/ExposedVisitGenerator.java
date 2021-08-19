@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.ParameterizedPreparedStatementSetter;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,59 +21,60 @@ import java.util.UUID;
 
 @Disabled("for local development purpose")
 @SpringBootTest
-//@ExtendWith(SpringExtension.class)
-//@RunWith(SpringRunner.class)
-//@ContextConfiguration(locationsForMirgation = {"/context/flywayContainerContext.xml" })
-//@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
-//                         FlywayTestExecutionListener.class })
-//@DataJpaTest
+// @ExtendWith(SpringExtension.class)
+// @RunWith(SpringRunner.class)
+// @ContextConfiguration(locationsForMirgation =
+// {"/context/flywayContainerContext.xml" })
+// @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
+// FlywayTestExecutionListener.class })
+// @DataJpaTest
 @ActiveProfiles("jpatest")
 @Slf4j
 public class ExposedVisitGenerator {
 
-	@Autowired
-	DataSource ds;
-//
-//	@Autowired
-//	protected Flyway flyway;
-//
-//	@BeforeAll
-//	public void init() {
-//		//flyway.configure().dataSource(ds);
-////	    /flyway.clean();
-////	    flyway.migrate();
-//	}
+    @Autowired
+    DataSource ds;
+    //
+    // @Autowired
+    // protected Flyway flyway;
+    //
+    // @BeforeAll
+    // public void init() {
+    // //flyway.configure().dataSource(ds);
+    //// /flyway.clean();
+    //// flyway.migrate();
+    // }
 
-	@Test
-	void fillRandomVisits() {
-		// hour of now : 3826008000
-		// hour of 21-01-01 : 3818448000
-		// diff: 7560000
+    @Test
+    void fillRandomVisits() {
+        // hour of now : 3826008000
+        // hour of 21-01-01 : 3818448000
+        // diff: 7560000
 
-		final int NB_LOCATIONS = 5000;
-		final int batchSize = 10;
+        final int NB_LOCATIONS = 5000;
+        final int batchSize = 10;
 
-		final Random r = new Random();
+        final Random r = new Random();
 
-		final long janv21 = 3818448000l;
+        final long janv21 = 3818448000l;
 
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
-		log.info("Starting to fill EXPOSED_VISITS...");
+        log.info("Starting to fill EXPOSED_VISITS...");
 
-		for (int l = 0; l < NB_LOCATIONS; l++) {
-			UUID lieu = UUID.randomUUID();
-			int venueType = r.nextInt(18)+1; 		// 1 to 18
-			int venueCategory1 = r.nextInt(4) + 1;  // 1 to 4
-			int venueCategory2 = r.nextInt(4) + 1;  // 1 to 4
+        for (int l = 0; l < NB_LOCATIONS; l++) {
+            UUID lieu = UUID.randomUUID();
+            int venueType = r.nextInt(18) + 1; // 1 to 18
+            int venueCategory1 = r.nextInt(4) + 1; // 1 to 4
+            int venueCategory2 = r.nextInt(4) + 1; // 1 to 4
 
-			List<ExposedVisit> batch = new ArrayList<>();
+            List<ExposedVisit> batch = new ArrayList<>();
 
-			long clusterStart = janv21 + (r.nextInt(65) * 1000l);
-			int visitsPerPlace = r.nextInt(80);
-			for (int slot = 0; slot <= visitsPerPlace; slot++) {
+            long clusterStart = janv21 + (r.nextInt(65) * 1000l);
+            int visitsPerPlace = r.nextInt(80);
+            for (int slot = 0; slot <= visitsPerPlace; slot++) {
 
-				//@formatter:off
+                //@formatter:off
 				ExposedVisit v=ExposedVisit.builder()
 						.locationTemporaryPublicId(lieu)
 						.venueType(venueType)
@@ -85,9 +87,9 @@ public class ExposedVisitGenerator {
 						.build();
 				//@formatter:on
 
-				batch.add(v);
-			}
-			//@formatter:off
+                batch.add(v);
+            }
+            //@formatter:off
 			jdbcTemplate.batchUpdate(
 					"insert into EXPOSED_VISITS (LTId, venue_type, venue_category1, venue_category2, period_start, timeslot,backward_Visits, forward_Visits)"+
 												"values (?,?,?,?,?,?,?,?)",
@@ -109,9 +111,12 @@ public class ExposedVisitGenerator {
 					});
 			//@formatter:on
 
-		}
-		log.info("Nb records in EXPOSED_VISITS: " + jdbcTemplate.queryForObject("select count(*) from EXPOSED_VISITS", Integer.class));
+        }
+        log.info(
+                "Nb records in EXPOSED_VISITS: "
+                        + jdbcTemplate.queryForObject("select count(*) from EXPOSED_VISITS", Integer.class)
+        );
 
-	}
+    }
 
 }

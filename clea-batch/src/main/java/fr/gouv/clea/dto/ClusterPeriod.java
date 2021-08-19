@@ -12,36 +12,37 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ClusterPeriod {
 
-	//variable matching ExposedVisit.periodStart (NTP in hour)
-	private long periodStart;
+    // variable matching ExposedVisit.periodStart (NTP in hour)
+    private long periodStart;
 
-	private int firstTimeSlot;
-	private int lastTimeSlot;
-	
-	private long clusterStart;
-	
-	private int clusterDurationInSeconds;
-	
-	private float riskLevel;
-	
-	public void adjustLimit(final ExposedVisit v) {
-		lastTimeSlot=Math.max(lastTimeSlot, v.getTimeSlot());
-	}
+    private int firstTimeSlot;
 
-	public boolean isInSameCluster(final ExposedVisit v) {
-		return periodStart == v.getPeriodStart() && firstTimeSlot < v.getTimeSlot() && v.getTimeSlot() <= lastTimeSlot + 1;
-	}
+    private int lastTimeSlot;
 
-	/**
-	 * Compute clusterStart and clusterDuration once, when all contiguous slots
-	 * are identified
-	 * 
-	 * @param unit
-	 */
-	public void computeClusterStartAndDuration(int unit) {
-		clusterStart= periodStart + (firstTimeSlot*unit);
-		clusterDurationInSeconds = (lastTimeSlot-firstTimeSlot+1) * unit;
-	}
+    private long clusterStart;
 
+    private int clusterDurationInSeconds;
+
+    private float riskLevel;
+
+    public void adjustLimit(final ExposedVisit v) {
+        lastTimeSlot = Math.max(lastTimeSlot, v.getTimeSlot());
+    }
+
+    public boolean isInSameCluster(final ExposedVisit v) {
+        return periodStart == v.getPeriodStart() && firstTimeSlot < v.getTimeSlot()
+                && v.getTimeSlot() <= lastTimeSlot + 1;
+    }
+
+    /**
+     * Compute clusterStart and clusterDuration once, when all contiguous slots are
+     * identified
+     * 
+     * @param unit
+     */
+    public void computeClusterStartAndDuration(int unit) {
+        clusterStart = periodStart + (firstTimeSlot * unit);
+        clusterDurationInSeconds = (lastTimeSlot - firstTimeSlot + 1) * unit;
+    }
 
 }

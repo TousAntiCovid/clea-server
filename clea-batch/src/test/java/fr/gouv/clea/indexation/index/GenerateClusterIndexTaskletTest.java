@@ -38,14 +38,15 @@ class GenerateClusterIndexTaskletTest {
     @Mock
     private PrefixesStorageService prefixesStorageService;
 
-
     @Test
     void generateClusterIndex_uses_objectMapper_to_create_clusterFileIndex_from_provided_prefixes() throws IOException {
 
         String outputPath = "outputPath";
         when(batchProperties.getFilesOutputPath()).thenReturn(outputPath);
 
-        final GenerateClusterIndexTasklet tasklet = new GenerateClusterIndexTasklet(batchProperties, prefixesStorageService, objectMapper);
+        final GenerateClusterIndexTasklet tasklet = new GenerateClusterIndexTasklet(
+                batchProperties, prefixesStorageService, objectMapper
+        );
         final Long jobId = 1L;
         Set<String> prefixes = Set.of("prefix1", "prefix2", "prefix3");
         File jsonIndex = Path.of(outputPath, CLUSTER_INDEX_FILENAME).toFile();

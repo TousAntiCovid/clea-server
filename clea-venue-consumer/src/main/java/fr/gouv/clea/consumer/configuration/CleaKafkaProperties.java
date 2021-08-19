@@ -1,6 +1,5 @@
 package fr.gouv.clea.consumer.configuration;
 
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +21,9 @@ public class CleaKafkaProperties {
     private String qrCodesTopic;
 
     @NotBlank
-    private String statsTopic;
+    private String reportStatsTopic;
+
+    @NotBlank
+    private String errorLocationStatsTopic;
 
 }

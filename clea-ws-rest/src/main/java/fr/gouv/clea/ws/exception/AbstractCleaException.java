@@ -10,7 +10,9 @@ import java.time.Instant;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public abstract class AbstractCleaException extends RuntimeException {
+
     protected String code;
+
     protected Instant timestamp;
 
     protected AbstractCleaException(String message, String code) {

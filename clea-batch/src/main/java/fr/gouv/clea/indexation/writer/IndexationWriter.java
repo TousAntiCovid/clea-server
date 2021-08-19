@@ -51,7 +51,8 @@ public class IndexationWriter implements ItemWriter<ClusterFile> {
 
     void generateClusterFile(final ClusterFile clusterFile, final Path directoryOutputPath) {
 
-        final Path jsonClusterPath = Path.of(directoryOutputPath.toString(), clusterFile.getName() + JSON_FILE_EXTENSION);
+        final Path jsonClusterPath = Path
+                .of(directoryOutputPath.toString(), clusterFile.getName() + JSON_FILE_EXTENSION);
         log.debug("Generating cluster file : {}", jsonClusterPath);
         File jsonClusterFile = jsonClusterPath.toFile();
         try {

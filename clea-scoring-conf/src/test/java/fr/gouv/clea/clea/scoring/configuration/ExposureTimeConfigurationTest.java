@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @EnableConfigurationProperties(value = ExposureTimeConfiguration.class)
-@ContextConfiguration(classes = {ExposureTimeConfigurationConverter.class})
+@ContextConfiguration(classes = { ExposureTimeConfigurationConverter.class })
 @ActiveProfiles("test")
 class ExposureTimeConfigurationTest {
 

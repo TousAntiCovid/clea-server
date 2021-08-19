@@ -19,7 +19,7 @@ build:
   image: maven:3.6.3-adoptopenjdk-11
   stage: build
   script:
-    - mvn -B -ntp -fae -DdeployAtEnd deploy
+    - mvn -B -s .mvn/settings-ci.xml -ntp -fae -DdeployAtEnd spotless:check deploy
   artifacts:
     paths:
       - "**/target/*.jar"
@@ -32,8 +32,17 @@ integration-tests:
   stage: integration-tests
   before_script:
     - export PATH="$PWD/docker-compose:$PATH"
+    - export CLEA_ROOT_DIR=$CI_PROJECT_DIR
   script:
-    - clea up -d
-    - "echo 'TODO: run integration tests here' && sleep 5s && docker ps"
-  after_script:
-    - clea down
+    - currentContainer=$(basename $(cat /proc/1/cpuset))
+    - docker-compose up -d
+    - docker network connect clea-server_default $currentContainer
+    - echo "Waiting for clea-ws-rest component to be up..."
+    - until curl -s http://clea-ws-rest:8080/actuator/health | grep -q UP; do sleep 0.5; done;
+    - java -jar -Dspring.profiles.active=docker clea-integration-tests/target/clea-integration-tests-*.jar
+    - docker network disconnect clea-server_default $currentContainer
+    - docker-compose down
+  artifacts:
+    paths:
+      - "$CI_PROJECT_DIR/cucumber-reports.html"
+    expire_in: 2 weeks

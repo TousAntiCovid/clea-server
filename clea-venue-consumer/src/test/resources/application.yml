@@ -17,12 +17,13 @@ clea:
       enabled: "true"
       rules: # FIXME: change with real values
         # venueType, venueCat1, venueCat2, exposureTimeBackward, exposureTimeForward, exposureTimeStaffBackward, exposureTimeStaffForward
-        - '*,*,*,3,3,3,3'
+        - "*,*,*,3,3,3,3"
       risk:
         enabled: "false"
   kafka:
     qrCodesTopic: test.clea.fct.qr-code-scan
-    statsTopic: test.clea.fct.report-stat
+    reportStatsTopic: test.clea.fct.report-stat
+    errorLocationStatsTopic: test.clea.fct.clea-error-visit
 
 logging:
   level:
@@ -51,4 +52,8 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      group-id: group1
+      group-id: group-clea
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

@@ -2,10 +2,11 @@
 
 [Flyway](https://flywaydb.org/) is a database migration tools that help to apply changes to different environments.
 
-this docker-compose  simulate the current situation in INT,PPROD and PROD platform where
+this docker-compose simulate the current situation in INT,PPROD and PROD platform where
 some scripts were already applied manually in database, and some will be proceeded by flyway.
 
 **demo** script contains some useful shortcut
+
 ```bash
 $ ./demo up    # launch in foreground the project (block the terminal)
 $ ./demo up -d # launch in background the project
@@ -13,7 +14,7 @@ $ ./demo down  # stop the project and remove volumes, network
 
 $./demo psql    # launch psql command line tool in postgres service
 $./demo flyway  # launch flyway command line tool in flyway service
- 
+
 ```
 
 ## Test scenario
@@ -22,6 +23,7 @@ V1 and v2 script are manually applied.
 We wants to start to use flyway to execute V3 and others scripts.
 
 ### In first terminal:
+
 ```bash
 $ ./demo up    # launch in foreground the project (block the terminal)
 Creating network "demo_default" with the default driver
@@ -45,10 +47,11 @@ postgres_1  | 2021-04-27 08:40:51.029 UTC [1] LOG:  listening on Unix socket "/v
 postgres_1  | 2021-04-27 08:40:51.037 UTC [84] LOG:  database system was shut down at 2021-04-27 08:40:50 UTC
 postgres_1  | 2021-04-27 08:40:51.043 UTC [1] LOG:  database system is ready to accept connections
 ```
+
 ### In second terminal:
 
 Manually apply scripts V1 and V2:
-(nota *"flyway/sql"* folder is mount in  *"/manual"* folder under postgres container)
+(nota _"flyway/sql"_ folder is mount in _"/manual"_ folder under postgres container)
 
 ```bash
 $ ./demo psql -f /manual/V1__spring-batch-postgres.sql
@@ -62,7 +65,7 @@ CREATE SEQUENCE
 CREATE SEQUENCE
 CREATE SEQUENCE
 $
-$ ./demo psql -f /manual/V2__initdb.sql 
+$ ./demo psql -f /manual/V2__initdb.sql
 CREATE TABLE
 CREATE INDEX
 $
@@ -90,6 +93,7 @@ $
 ```
 
 Flyway has to be informed that scripts V1 and V2 are already installed, and to start to execute V3 scripts.
+
 ```bash
 $ ./demo flyway migrate -baselineVersion=2 -baselineOnMigrate=true
 Flyway Community Edition 7.8.1 by Redgate
@@ -121,7 +125,7 @@ Schema version: 4
 | Versioned | 4       | baseline                      | SQL      | 2021-04-27 08:52:05 | Success        |
 +-----------+---------+-------------------------------+----------+---------------------+----------------+
 
-$ ./demo flyway migrate 
+$ ./demo flyway migrate
 Flyway Community Edition 7.8.1 by Redgate
 Database: jdbc:postgresql://postgres/cleadb (PostgreSQL 13.2)
 Successfully validated 4 migrations (execution time 00:00.019s)
@@ -140,7 +144,7 @@ Type "help" for help.
 
 cleadb=# \d
                       List of relations
- Schema |             Name             |   Type   |  Owner   
+ Schema |             Name             |   Type   |  Owner
 --------+------------------------------+----------+----------
  public | batch_job_execution          | table    | postgres
  public | batch_job_execution_context  | table    | postgres
@@ -159,18 +163,20 @@ cleadb=# \d
 
 cleadb=# \q
 $
-````
-V3 script create *cluster_periods* and *stat_location* tables.
+```
+
+V3 script create _cluster_periods_ and _stat_location_ tables.
 
 ```bash
 $ ./demo psql --command='SELECT version,type,script from flyway_schema_history'
- version |   type   |                script                 
+ version |   type   |                script
 ---------+----------+---------------------------------------
  2       | BASELINE | << Flyway Baseline >>
  3       | SQL      | V3__cluster_periods_stat_location.sql
  4       | SQL      | V4__baseline.sql
 (3 rows)
-````
+```
+
 V2 is set as baseline, scripts V1 and V2 are ignored (not managed).
 V3 script and upper versions are managed.
 

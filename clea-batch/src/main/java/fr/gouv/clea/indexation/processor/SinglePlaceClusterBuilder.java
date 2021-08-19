@@ -25,16 +25,16 @@ import static fr.gouv.clea.config.BatchConstants.SQL_SELECT_BY_LTID_IN_SINGLEPLA
 public class SinglePlaceClusterBuilder implements ItemProcessor<Map.Entry<String, List<String>>, ClusterFile> {
 
     private final JdbcTemplate jdbcTemplate;
-    private final ClusterPeriodModelsMapper mapper;
 
+    private final ClusterPeriodModelsMapper mapper;
 
     @Override
     public ClusterFile process(final Map.Entry<String, List<String>> prefixLtidsEntry) {
         log.debug("Processing prefix {} files...", prefixLtidsEntry.getKey());
-        
+
         ClusterFile clusterFile = new ClusterFile();
         clusterFile.setName(prefixLtidsEntry.getKey());
-        
+
         prefixLtidsEntry.getValue().forEach(createClusterFile(clusterFile));
         return clusterFile;
     }
@@ -51,17 +51,22 @@ public class SinglePlaceClusterBuilder implements ItemProcessor<Map.Entry<String
     }
 
     ClusterFileItem createClusterFileItem(SinglePlaceClusterPeriod firstPeriod, List<ClusterPeriod> clusterPeriods) {
-        return ClusterFileItem.ofCluster(SinglePlaceCluster.builder()
-                .locationTemporaryPublicId(firstPeriod.getLocationTemporaryPublicId())
-                .venueCategory1(firstPeriod.getVenueCategory1())
-                .venueCategory2(firstPeriod.getVenueCategory2())
-                .venueType(firstPeriod.getVenueType())
-                .periods(clusterPeriods)
-                .build());
+        return ClusterFileItem.ofCluster(
+                SinglePlaceCluster.builder()
+                        .locationTemporaryPublicId(firstPeriod.getLocationTemporaryPublicId())
+                        .venueCategory1(firstPeriod.getVenueCategory1())
+                        .venueCategory2(firstPeriod.getVenueCategory2())
+                        .venueType(firstPeriod.getVenueType())
+                        .periods(clusterPeriods)
+                        .build()
+        );
     }
 
     List<SinglePlaceClusterPeriod> getSinglePlaceClusterPeriods(final String ltid) {
-        return jdbcTemplate.query(SQL_SELECT_BY_LTID_IN_SINGLEPLACECLUSTERPERIOD, new SinglePlaceClusterPeriodRowMapper(), UUID.fromString(ltid));
+        return jdbcTemplate.query(
+                SQL_SELECT_BY_LTID_IN_SINGLEPLACECLUSTERPERIOD, new SinglePlaceClusterPeriodRowMapper(),
+                UUID.fromString(ltid)
+        );
     }
 
     private List<ClusterPeriod> buildClusterPeriods(final List<SinglePlaceClusterPeriod> clusterPeriodList) {

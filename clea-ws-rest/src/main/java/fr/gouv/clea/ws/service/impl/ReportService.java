@@ -40,7 +40,9 @@ public class ReportService implements IReportService {
     @Override
     public List<DecodedVisit> report(ReportRequest reportRequestVo) {
         final Instant now = Instant.now();
-        final VisitsInSameUnitCounter closeScanTimeVisits = new VisitsInSameUnitCounter(properties.getExposureTimeUnitInSeconds());
+        final VisitsInSameUnitCounter closeScanTimeVisits = new VisitsInSameUnitCounter(
+                properties.getExposureTimeUnitInSeconds()
+        );
         long validatedPivotDate = this.validatePivotDate(reportRequestVo.getPivotDateAsNtpTimestamp(), now);
         List<Visit> reportVisits = reportRequestVo.getVisits();
         List<DecodedVisit> verified = reportVisits.stream()
@@ -65,7 +67,10 @@ public class ReportService implements IReportService {
                 .timestamp(TimeUtils.currentNtpTime())
                 .build();
 
-        log.info("BATCH_REPORT {}#{}#{}#{}#{}", reportStat.getReported(), reportStat.getRejected(), reportStat.getBackwards(), reportStat.getForwards(), reportStat.getClose());
+        log.info(
+                "BATCH_REPORT {}#{}#{}#{}#{}", reportStat.getReported(), reportStat.getRejected(),
+                reportStat.getBackwards(), reportStat.getForwards(), reportStat.getClose()
+        );
 
         producerService.produceStat(reportStat);
         return pruned;
@@ -74,9 +79,12 @@ public class ReportService implements IReportService {
     private DecodedVisit decode(Visit visit, long pivotDate) {
         try {
             byte[] binaryLocationSpecificPart = Base64.getUrlDecoder().decode(visit.getQrCode());
-            EncryptedLocationSpecificPart encryptedLocationSpecificPart = decoder.decodeHeader(binaryLocationSpecificPart);
+            EncryptedLocationSpecificPart encryptedLocationSpecificPart = decoder
+                    .decodeHeader(binaryLocationSpecificPart);
             Instant qrCodeScanTime = TimeUtils.instantFromTimestamp(visit.getQrCodeScanTimeAsNtpTimestamp());
-            return new DecodedVisit(qrCodeScanTime, encryptedLocationSpecificPart, visit.getQrCodeScanTimeAsNtpTimestamp() < pivotDate);
+            return new DecodedVisit(
+                    qrCodeScanTime, encryptedLocationSpecificPart, visit.getQrCodeScanTimeAsNtpTimestamp() < pivotDate
+            );
         } catch (CleaEncodingException e) {
             log.warn("report: {} rejected: Invalid format", MessageFormatter.truncateQrCode(visit.getQrCode()));
             return null;
@@ -84,7 +92,9 @@ public class ReportService implements IReportService {
     }
 
     private boolean isOutdated(Visit visit, Instant now) {
-        boolean outdated = ChronoUnit.DAYS.between(TimeUtils.instantFromTimestamp(visit.getQrCodeScanTimeAsNtpTimestamp()), now) > properties.getRetentionDurationInDays();
+        boolean outdated = ChronoUnit.DAYS.between(
+                TimeUtils.instantFromTimestamp(visit.getQrCodeScanTimeAsNtpTimestamp()), now
+        ) > properties.getRetentionDurationInDays();
         if (outdated) {
             log.warn("report: {} rejected: Outdated", MessageFormatter.truncateQrCode(visit.getQrCode()));
         }
@@ -108,9 +118,13 @@ public class ReportService implements IReportService {
             return false;
         }
 
-        long secondsBetweenScans = Duration.between(one.getQrCodeScanTime(), other.getQrCodeScanTime()).abs().toSeconds();
+        long secondsBetweenScans = Duration.between(one.getQrCodeScanTime(), other.getQrCodeScanTime()).abs()
+                .toSeconds();
         if (secondsBetweenScans <= properties.getDuplicateScanThresholdInSeconds()) {
-            log.warn("report: {} {} rejected: Duplicate", MessageFormatter.truncateUUID(one.getStringLocationTemporaryPublicId()), one.getQrCodeScanTime());
+            log.warn(
+                    "report: {} {} rejected: Duplicate",
+                    MessageFormatter.truncateUUID(one.getStringLocationTemporaryPublicId()), one.getQrCodeScanTime()
+            );
             return true;
         }
         return false;
@@ -132,7 +146,10 @@ public class ReportService implements IReportService {
         Instant retentionDateLimit = nowWithoutMilis.minus(properties.getRetentionDurationInDays(), ChronoUnit.DAYS);
         if (pivotDateAsInstant.isAfter(now) || pivotDateAsInstant.isBefore(retentionDateLimit)) {
             long retentionDateLimitAsNtp = TimeUtils.ntpTimestampFromInstant(retentionDateLimit);
-            log.warn("pivotDate: {} not between retentionLimitDate: {} and now: {}", pivotDateAsInstant, retentionDateLimit, now);
+            log.warn(
+                    "pivotDate: {} not between retentionLimitDate: {} and now: {}", pivotDateAsInstant,
+                    retentionDateLimit, now
+            );
             return retentionDateLimitAsNtp;
         } else {
             return pivotDate;

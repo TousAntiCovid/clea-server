@@ -20,11 +20,15 @@ public class ClusterFileItem {
 
     public static ClusterFileItem ofCluster(SinglePlaceCluster cluster) {
         List<ExposureRow> exposureRows = new ArrayList<>();
-        cluster.getPeriods().forEach(periods -> exposureRows.add(ExposureRow.builder()
-                .startTimestamp(periods.getClusterStart())
-                .durationInSeconds(periods.getClusterDurationInSeconds())
-                .riskLevel(periods.getRiskLevel())
-                .build()));
+        cluster.getPeriods().forEach(
+                periods -> exposureRows.add(
+                        ExposureRow.builder()
+                                .startTimestamp(periods.getClusterStart())
+                                .durationInSeconds(periods.getClusterDurationInSeconds())
+                                .riskLevel(periods.getRiskLevel())
+                                .build()
+                )
+        );
 
         return ClusterFileItem.builder()
                 .temporaryLocationId(cluster.getLocationTemporaryPublicId().toString())

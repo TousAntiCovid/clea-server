@@ -4,9 +4,10 @@ Bats documentation : https://bats-core.readthedocs.io/en/latest/
 
 This script is suppose to be execute, by [bats](https://github.com/bats-core/bats-core), from the root level of "clea" project.
 
-Those tests check the batch itself, not the functionnality of the java batch, neither the command s3cmd. java and s3cmd can return 0 (success) or <>0 (fails) 
+Those tests check the batch itself, not the functionnality of the java batch, neither the command s3cmd. java and s3cmd can return 0 (success) or <>0 (fails)
 
 ## Dependencies
+
 This module needs bats-core, bats-support and bats-assert.
 
 From the root folder:
@@ -17,7 +18,8 @@ git clone https://github.com/ztombol/bats-support.git target/bats/support
 git clone https://github.com/ztombol/bats-assert.git target/bats/assert
 ```
 
-## usage 
+## usage
+
 Example of execution from "clea" root folder
 
 ```bash
@@ -35,7 +37,7 @@ ok 9 Succeeds to purge temporary files at end of batch
 $
 ```
 
-same result with 
+same result with
 
 ```bash
 $ target/bats/core/bin/bats src/test/bats

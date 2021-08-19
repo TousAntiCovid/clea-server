@@ -26,6 +26,8 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 WORKDIR /home/javaapp
 
 USER javaapp
+# Integration WebHook
+RUN pip3 install --user s3cmd
 
 FROM installer
 COPY ./target/clea*-exec.jar ./clea-batch.jar

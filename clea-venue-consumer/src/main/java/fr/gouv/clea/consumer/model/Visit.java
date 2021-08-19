@@ -15,6 +15,7 @@ import java.time.Instant;
 public class Visit extends LocationSpecificPart {
 
     protected Instant qrCodeScanTime;
+
     protected boolean isBackward;
 
     public static Visit from(LocationSpecificPart lsp, DecodedVisit decodedVisit) {
@@ -41,4 +42,3 @@ public class Visit extends LocationSpecificPart {
     }
 
 }
-

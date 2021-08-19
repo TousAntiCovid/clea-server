@@ -30,29 +30,41 @@ public class ProducerService implements IProducerService {
         serializableDecodedVisits.forEach(
                 it -> kafkaQrTemplate.send(cleaKafkaProperties.getQrCodesTopic(), it).addCallback(
                         new ListenableFutureCallback<>() {
+
                             @Override
                             public void onFailure(Throwable ex) {
                                 // TODO: Do we want a mechanism to do not loose the message (e.g. spring retry)?
-                                log.error("error sending [locationTemporaryPublicId: {}, qrCodeScanTime: {}] to queue. message: {}", MessageFormatter.truncateUUID(it.getStringLocationTemporaryPublicId()), it.getQrCodeScanTime(), ex.getLocalizedMessage());
+                                log.error(
+                                        "error sending [locationTemporaryPublicId: {}, qrCodeScanTime: {}] to queue. message: {}",
+                                        MessageFormatter.truncateUUID(it.getStringLocationTemporaryPublicId()),
+                                        it.getQrCodeScanTime(), ex.getLocalizedMessage()
+                                );
                             }
 
                             @Override
                             public void onSuccess(SendResult<String, DecodedVisit> result) {
-                                log.info("[locationTemporaryPublicId: {}, qrCodeScanTime: {}] sent to queue", MessageFormatter.truncateUUID(it.getStringLocationTemporaryPublicId()), it.getQrCodeScanTime());
+                                log.info(
+                                        "[locationTemporaryPublicId: {}, qrCodeScanTime: {}] sent to queue",
+                                        MessageFormatter.truncateUUID(it.getStringLocationTemporaryPublicId()),
+                                        it.getQrCodeScanTime()
+                                );
                             }
                         }
                 )
         );
     }
 
-
     @Override
     public void produceStat(ReportStat reportStat) {
         kafkaStatTemplate.send(cleaKafkaProperties.getStatsTopic(), reportStat).addCallback(
                 new ListenableFutureCallback<>() {
+
                     @Override
                     public void onFailure(Throwable ex) {
-                        log.error("error sending stat {} to queue. message: {}", reportStat.toString(), ex.getLocalizedMessage());
+                        log.error(
+                                "error sending stat {} to queue. message: {}", reportStat.toString(),
+                                ex.getLocalizedMessage()
+                        );
                     }
 
                     @Override

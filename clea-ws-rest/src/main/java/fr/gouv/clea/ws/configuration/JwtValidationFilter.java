@@ -14,6 +14,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.security.PublicKey;
 
 @RequiredArgsConstructor
@@ -35,7 +36,8 @@ public class JwtValidationFilter extends GenericFilterBean {
             }
             chain.doFilter(request, response);
         } catch (Exception e) {
-            handlerExceptionResolver.resolveException((HttpServletRequest) request, (HttpServletResponse) response, null, e);
+            handlerExceptionResolver
+                    .resolveException((HttpServletRequest) request, (HttpServletResponse) response, null, e);
         }
     }
 
