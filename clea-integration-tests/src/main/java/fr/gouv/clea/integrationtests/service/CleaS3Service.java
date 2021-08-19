@@ -1,7 +1,7 @@
 package fr.gouv.clea.integrationtests.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.gouv.clea.integrationtests.config.MinioProperties;
+import fr.gouv.clea.integrationtests.config.ApplicationProperties;
 import fr.gouv.clea.integrationtests.model.Cluster;
 import fr.gouv.clea.integrationtests.model.ClusterIndex;
 import io.minio.GetObjectArgs;
@@ -28,7 +28,7 @@ public class CleaS3Service {
 
     private final MinioClient minioClient;
 
-    private final MinioProperties minioProperties;
+    private final ApplicationProperties applicationProperties;
 
     public Optional<ClusterIndex> getClusterIndex() throws IOException, ServerException, InsufficientDataException,
             ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
@@ -50,8 +50,8 @@ public class CleaS3Service {
             XmlParserException, InternalException {
 
         GetObjectArgs args = GetObjectArgs.builder()
-                .bucket(minioProperties.getBucketName())
-                .object(minioProperties.getDefaultBaseFolder() + "/" + key)
+                .bucket(applicationProperties.getBucket().getBucketName())
+                .object("v1/" + key)
                 .build();
         InputStream minioObjectStream = minioClient.getObject(args);
 

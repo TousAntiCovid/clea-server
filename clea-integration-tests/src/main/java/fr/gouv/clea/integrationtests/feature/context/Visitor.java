@@ -9,24 +9,26 @@ import fr.gouv.clea.integrationtests.service.CleaS3Service;
 import fr.gouv.clea.integrationtests.utils.QrCodeDecoder;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import io.minio.errors.*;
-import lombok.*;
+import io.minio.errors.ServerException;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Data
 @Slf4j
 @RequiredArgsConstructor
 public class Visitor {
+
+    private static final String DEEPLINK_COUNTRY_PART = "https://tac.gouv.fr?v=0#";
 
     private final String name;
 
@@ -86,10 +88,10 @@ public class Visitor {
     public void registerDeepLink(final String deepLink, final Instant scanTime) {
 
         // check if prefix is present then removes it
-        if (!deepLink.startsWith(applicationProperties.getQrCodePrefix())) {
+        if (!deepLink.startsWith(DEEPLINK_COUNTRY_PART)) {
             throw new RuntimeException("Scanned deeplink has wrong prefix");
         }
-        final var encodedInformation = deepLink.substring(applicationProperties.getQrCodePrefix().length());
+        final var encodedInformation = deepLink.substring(DEEPLINK_COUNTRY_PART.length());
 
         localList.add(
                 Visit.builder()

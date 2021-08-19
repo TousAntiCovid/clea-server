@@ -1,18 +1,12 @@
-clea:
-  ws-rest:
-    base-url: http://clea-ws-rest:8080
-  batch:
-    command:
-      - "docker-compose"
-      - "up"
-      - "clea-batch"
+integration-tests:
+  ws-rest.base-url: http://clea-ws-rest:8080
+  batch.command: "docker-compose up clea-batch"
+  bucket:
+    url: http://minio:9000
+    access-key: AKIAIOSFODNN7EXAMPLE
+    secret-key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 
-minio:
-  url: http://minio:9000
-
-spring:
-  elasticsearch:
-    rest:
-      username: elastic
-      password: password
-      uris: http://elasticsearch:9200
+spring.elasticsearch.rest:
+  username: elastic
+  password: password
+  uris: http://elasticsearch:9200
