@@ -56,7 +56,7 @@ public class CleaReportSteps {
         visitor.setLastReportResponse(response);
     }
 
-    @When("{string} declares himself/herself sick with a {instant} pivot date")
+    @When("{string} declares himself/herself sick with a {naturalTime} pivot date")
     public void visitor_declares_sick(String visitorName, Instant pivotDate) {
         final var visitor = scenarioContext.getVisitor(visitorName);
         final var request = WreportRequest.builder()
@@ -77,7 +77,7 @@ public class CleaReportSteps {
         visitor.setLastReportResponse(response);
     }
 
-    @When("{string} declares himself/herself sick with a {instant} pivot date with no QRCode")
+    @When("{string} declares himself/herself sick with a {naturalTime} pivot date with no QRCode")
     public void visitor_declares_sick_with_pivot_date_and_no_deeplink(String visitorName, Instant pivotDate) {
         final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
         final var request = new WreportRequest(

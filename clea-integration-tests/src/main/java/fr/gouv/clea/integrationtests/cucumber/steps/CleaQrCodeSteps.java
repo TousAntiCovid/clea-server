@@ -15,7 +15,7 @@ public class CleaQrCodeSteps {
     private final ScenarioContext scenarioContext;
 
     // Dynamic Location
-    @Given("{string} created a dynamic QRCode at {instant} with VType as {int}, with VCategory1 as {int}, with VCategory2 as {int}, with a renewal time of \"{int} {word}\" and with a periodDuration of \"{int} hours\"")
+    @Given("{string} created a dynamic QRCode at {naturalTime} with VType as {int}, with VCategory1 as {int}, with VCategory2 as {int}, with a renewal time of \"{int} {word}\" and with a periodDuration of \"{int} hours\"")
     public void dynamic_location_with_a_periodDuration_and_renewalTime(String locationName, Instant periodStartTime,
             Integer venueType, Integer venueCategory1, Integer venueCategory2, Integer qrCodeRenewalInterval,
             String qrCodeRenewalIntervalUnit, Integer periodDuration) throws CleaCryptoException {
@@ -29,12 +29,10 @@ public class CleaQrCodeSteps {
         // TODO: add QR id
     }
 
-    @Given("{string} created a dynamic QRCode at {instant} with VType as {int} and with VCategory1 as {int} and with VCategory2 as {int} and with and with a renewal time of \"{int} {word}\"")
+    @Given("{string} created a dynamic QRCode at {naturalTime} with VType as {int} and with VCategory1 as {int} and with VCategory2 as {int} and with and with a renewal time of \"{duration}\"")
     public void dynamic_location_without_periodDuration_with_renewalTime(String locationName, Instant periodStartTime,
-            Integer venueType, Integer venueCategory1, Integer venueCategory2, Integer qrCodeRenewalInterval,
-            String qrCodeRenewalIntervalUnit) throws CleaCryptoException {
-        final var qrCodeRenewalIntervalDuration = Duration
-                .of(qrCodeRenewalInterval, ChronoUnit.valueOf(qrCodeRenewalIntervalUnit.toUpperCase()));
+            Integer venueType, Integer venueCategory1, Integer venueCategory2, Duration qrCodeRenewalIntervalDuration)
+            throws CleaCryptoException {
         this.scenarioContext.getOrCreateDynamicLocation(
                 locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
                 qrCodeRenewalIntervalDuration
@@ -42,7 +40,7 @@ public class CleaQrCodeSteps {
         // TODO: add QR id
     }
 
-    @Given("{string} created a static QRCode at {instant} with VType as {int}, with VCategory1 as {int}, with VCategory2 as {int} and with a periodDuration of \"{int} hours\"")
+    @Given("{string} created a static QRCode at {naturalTime} with VType as {int}, with VCategory1 as {int}, with VCategory2 as {int} and with a periodDuration of \"{duration} hours\"")
     public void static_location_without_renewalTime_with_periodDuration(String locationName, Instant periodStartTime,
             Integer venueType, Integer venueCategory1, Integer venueCategory2, Integer periodDuration)
             throws CleaCryptoException {
@@ -53,7 +51,7 @@ public class CleaQrCodeSteps {
         // TODO: add QR id
     }
 
-    @Given("{string} created a static QRCode at {instant} with VType as {string} and VCategory1 as {int} and with VCategory2 as {int}")
+    @Given("{string} created a static QRCode at {naturalTime} with VType as {string} and VCategory1 as {int} and with VCategory2 as {int}")
     public void static_location_with_default_periodDuration(String locationName, Instant periodStartTime,
             Integer venueType, Integer venueCategory1, Integer venueCategory2) throws CleaCryptoException {
         this.scenarioContext.getOrCreateStaticLocationWithUnlimitedDuration(

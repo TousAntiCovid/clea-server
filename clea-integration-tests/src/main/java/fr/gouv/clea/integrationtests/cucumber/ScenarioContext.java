@@ -30,8 +30,8 @@ public class ScenarioContext {
 
     private final ClusterExpositionService clusterExpositionService;
 
-    public ScenarioContext(final ApplicationProperties applicationProperties, final ClusterExpositionService clusterExpositionService)
-            throws Exception {
+    public ScenarioContext(final ApplicationProperties applicationProperties,
+            final ClusterExpositionService clusterExpositionService) {
         this.applicationProperties = applicationProperties;
         this.clusterExpositionService = clusterExpositionService;
     }
