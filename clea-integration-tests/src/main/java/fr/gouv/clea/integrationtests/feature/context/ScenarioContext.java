@@ -30,12 +30,13 @@ public class ScenarioContext {
 
     private final Map<String, LocationQrCodeGenerator> staffLocations = new HashMap<>(10);
 
-    private final ApplicationProperties appConfig;
+    private final ApplicationProperties applicationProperties;
 
     private final CleaS3Service s3service;
 
-    public ScenarioContext(final ApplicationProperties appConfig, final CleaS3Service s3service) throws Exception {
-        this.appConfig = appConfig;
+    public ScenarioContext(final ApplicationProperties applicationProperties, final CleaS3Service s3service)
+            throws Exception {
+        this.applicationProperties = applicationProperties;
         this.s3service = s3service;
     }
 
@@ -44,7 +45,7 @@ public class ScenarioContext {
     }
 
     private Visitor createVisitor(final String name) {
-        return new Visitor(name, s3service, appConfig);
+        return new Visitor(name, s3service, applicationProperties);
     }
 
     public Visitor getVisitor(final String visitorName) {
@@ -93,8 +94,10 @@ public class ScenarioContext {
                 .periodDuration(periodDuration)
                 .periodStartTime(periodStartTime)
                 .qrCodeRenewalIntervalExponentCompact(qrCodeRenewalIntervalExponentCompact)
-                .manualContactTracingAuthorityPublicKey(appConfig.getManualContactTracingAuthorityPublicKey())
-                .serverAuthorityPublicKey(appConfig.getServerAuthorityPublicKey())
+                .manualContactTracingAuthorityPublicKey(
+                        applicationProperties.getManualContactTracingAuthorityPublicKey()
+                )
+                .serverAuthorityPublicKey(applicationProperties.getServerAuthorityPublicKey())
                 .permanentLocationSecretKey(permanentLocationSecretKey)
                 .build();
         final var staffLocation = LocationQrCodeGenerator.builder()
@@ -106,8 +109,10 @@ public class ScenarioContext {
                 .periodDuration(periodDuration)
                 .periodStartTime(periodStartTime)
                 .qrCodeRenewalIntervalExponentCompact(qrCodeRenewalIntervalExponentCompact)
-                .manualContactTracingAuthorityPublicKey(appConfig.getManualContactTracingAuthorityPublicKey())
-                .serverAuthorityPublicKey(appConfig.getServerAuthorityPublicKey())
+                .manualContactTracingAuthorityPublicKey(
+                        applicationProperties.getManualContactTracingAuthorityPublicKey()
+                )
+                .serverAuthorityPublicKey(applicationProperties.getServerAuthorityPublicKey())
                 .permanentLocationSecretKey(permanentLocationSecretKey)
                 .build();
         staffLocations.put(locationName, staffLocation);

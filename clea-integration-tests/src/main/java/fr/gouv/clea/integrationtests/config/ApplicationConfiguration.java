@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class ApplicationConfiguration {
 
-    private final ApplicationProperties appProperties;
+    private final ApplicationProperties applicationProperties;
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -22,8 +22,11 @@ public class ApplicationConfiguration {
     @Bean
     public MinioClient dockerMinioClient() {
         return MinioClient.builder()
-                .endpoint(appProperties.getBucket().getUrl())
-                .credentials(appProperties.getBucket().getAccessKey(), appProperties.getBucket().getSecretKey())
+                .endpoint(applicationProperties.getBucket().getUrl())
+                .credentials(
+                        applicationProperties.getBucket().getAccessKey(),
+                        applicationProperties.getBucket().getSecretKey()
+                )
                 .build();
     }
 }
