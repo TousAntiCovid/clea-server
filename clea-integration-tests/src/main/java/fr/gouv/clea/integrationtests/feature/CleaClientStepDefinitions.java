@@ -5,9 +5,10 @@ import fr.gouv.clea.integrationtests.dto.PivotDateStringWreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportRequest;
 import fr.gouv.clea.integrationtests.dto.WreportResponse;
 import fr.gouv.clea.integrationtests.feature.context.ScenarioContext;
+import fr.gouv.clea.integrationtests.model.LocationStat;
 import fr.gouv.clea.integrationtests.model.ReportStat;
-import fr.gouv.clea.integrationtests.repository.LocationStatIndex;
-import fr.gouv.clea.integrationtests.repository.ReportStatIndex;
+import fr.gouv.clea.integrationtests.repository.LocationStatRepository;
+import fr.gouv.clea.integrationtests.repository.ReportStatRepository;
 import fr.gouv.clea.integrationtests.service.CleaBatchService;
 import fr.gouv.clea.integrationtests.utils.CleaApiResponseParser;
 import fr.inria.clea.lsp.exception.CleaCryptoException;
@@ -30,14 +31,14 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
-import static java.lang.Integer.parseInt;
-import static java.util.Collections.frequency;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.awaitility.pollinterval.FibonacciPollInterval.fibonacci;
 import static org.hamcrest.Matchers.equalTo;
 
 @Slf4j
@@ -49,19 +50,19 @@ public class CleaClientStepDefinitions {
 
     private final String wreportUrl;
 
-    private final ReportStatIndex reportStatIndex;
+    private final ReportStatRepository reportStatRepository;
 
-    private final LocationStatIndex locationStatIndex;
+    private final LocationStatRepository locationStatRepository;
 
     public CleaClientStepDefinitions(final ScenarioContext scenarioContext,
             final CleaBatchService cleaBatchService,
-            final ApplicationProperties applicationProperties, ReportStatIndex reportStatIndex,
-            LocationStatIndex locationStatIndex) {
+            final ApplicationProperties applicationProperties, ReportStatRepository reportStatRepository,
+            LocationStatRepository locationStatRepository) {
         this.scenarioContext = scenarioContext;
         this.cleaBatchService = cleaBatchService;
         this.wreportUrl = applicationProperties.getWsRest().getBaseUrl().toString().concat("/api/clea/v1/wreport");
-        this.reportStatIndex = reportStatIndex;
-        this.locationStatIndex = locationStatIndex;
+        this.reportStatRepository = reportStatRepository;
+        this.locationStatRepository = locationStatRepository;
     }
 
     // TODO Robert registration of the user -> integration tests perimeters to be
@@ -367,42 +368,26 @@ public class CleaClientStepDefinitions {
     }
 
     @And("statistics by location are")
-    public void statisticsByLocationAre(List<Map<String, String>> expectedIndexContent) throws InterruptedException {
-        // TODO: replace with kafka topics monitoring
-        Thread.sleep(20000);
-        expectedIndexContent.forEach(entry -> {
-            final var periodStart = new PrettyTimeParser().parse(entry.get("period_start")).get(0).toInstant();
-            final var locationStatistics = locationStatIndex
-                    .findByPeriodStartAndVenueTypeAndVenueCategory1AndVenueCategory2(
-                            periodStart,
-                            parseInt(entry.get("venue_type")),
-                            parseInt(entry.get("venue_category1")),
-                            parseInt(entry.get("venue_category2"))
-                    ).orElseThrow();
-
-            assertThat(locationStatistics.getBackwardVisits())
-                    .as("backward visits for period %s", entry.get("period_start"))
-                    .isEqualTo(parseInt(entry.get("backward_visits")));
-            assertThat(locationStatistics.getForwardVisits())
-                    .as("forward visits for period %s", entry.get("period_start"))
-                    .isEqualTo(parseInt(entry.get("forward_visits")));
-        });
+    public void statisticsByLocationAre(List<LocationStat> expectedLocationStatContent) {
+        await("location statistics records")
+                .atMost(10, SECONDS)
+                .pollInterval(fibonacci())
+                .untilAsserted(
+                        () -> assertThat(locationStatRepository.findAll())
+                                .usingElementComparatorIgnoringFields("id")
+                                .containsExactlyInAnyOrderElementsOf(expectedLocationStatContent)
+                );
     }
 
     @Then("statistics by wreport are")
-    public void statisticsByWreportAre(List<Map<String, Integer>> expectedIndexContent) throws InterruptedException {
-        // TODO: replace with kafka topics monitoring
-        Thread.sleep(20000);
-        expectedIndexContent.stream().distinct().forEach(entry -> {
-            List<ReportStat> indexResponse = reportStatIndex.findByReportedAndRejectedAndCloseAndBackwardsAndForwards(
-                    entry.get("reported"),
-                    entry.get("rejected"),
-                    entry.get("is_close"),
-                    entry.get("backwards"),
-                    entry.get("forwards")
-            );
-            assertThat(indexResponse).size().isEqualTo(frequency(expectedIndexContent, entry));
-        });
-        assertThat(reportStatIndex.count()).isEqualTo(expectedIndexContent.size());
+    public void statisticsByWreportAre(List<ReportStat> expectedReportStatContent) {
+        await("report statistics records")
+                .atMost(10, SECONDS)
+                .pollInterval(fibonacci())
+                .untilAsserted(
+                        () -> assertThat(reportStatRepository.findAll())
+                                .usingElementComparatorIgnoringFields("id", "timestamp")
+                                .containsExactlyInAnyOrderElementsOf(expectedReportStatContent)
+                );
     }
 }

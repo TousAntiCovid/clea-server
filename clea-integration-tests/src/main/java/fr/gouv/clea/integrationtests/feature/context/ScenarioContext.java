@@ -3,7 +3,6 @@ package fr.gouv.clea.integrationtests.feature.context;
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
 import fr.gouv.clea.integrationtests.service.CleaS3Service;
 import fr.gouv.clea.qr.LocationQrCodeGenerator;
-import fr.inria.clea.lsp.CleaEciesEncoder;
 import fr.inria.clea.lsp.exception.CleaCryptoException;
 import io.cucumber.spring.ScenarioScope;
 import lombok.extern.slf4j.Slf4j;
@@ -31,39 +30,14 @@ public class ScenarioContext {
 
     private final Map<String, LocationQrCodeGenerator> staffLocations = new HashMap<>(10);
 
-    private String serverAuthorityPublicKey;
-
-    private String manualContactTracingAuthorityPublicKey;
-
-    private final ApplicationProperties appConfig;
+    private final ApplicationProperties applicationProperties;
 
     private final CleaS3Service s3service;
 
-    public ScenarioContext(final ApplicationProperties appConfig, final CleaS3Service s3service) throws Exception {
-        this.appConfig = appConfig;
+    public ScenarioContext(final ApplicationProperties applicationProperties, final CleaS3Service s3service)
+            throws Exception {
+        this.applicationProperties = applicationProperties;
         this.s3service = s3service;
-        this.initializeKeys(appConfig);
-    }
-
-    public void initializeKeys(final ApplicationProperties appConfig) throws Exception {
-        this.serverAuthorityPublicKey = appConfig.getServerAuthorityPublicKey();
-        this.manualContactTracingAuthorityPublicKey = appConfig.getManualContactTracingAuthorityPublicKey();
-        if (Objects.isNull(serverAuthorityPublicKey) || serverAuthorityPublicKey.isBlank()) {
-            this.generateKeys();
-        }
-    }
-
-    public void generateKeys() throws Exception {
-        final var cleaEciesEncoder = new CleaEciesEncoder();
-        final String[] serverAuthorityKeyPair = cleaEciesEncoder.genKeysPair(true);
-        this.serverAuthorityPublicKey = serverAuthorityKeyPair[1];
-        log.info("Server Authority Private Key: {}", serverAuthorityKeyPair[0]);
-        log.info("Server Authority Public Key : {}", this.serverAuthorityPublicKey);
-
-        String[] manualContactTracingAuthorityKeyPair = cleaEciesEncoder.genKeysPair(true);
-        this.manualContactTracingAuthorityPublicKey = manualContactTracingAuthorityKeyPair[1];
-        log.info("Manual Contact Tracing Authority Private Key: {}", serverAuthorityKeyPair[0]);
-        log.info("Manual Contact Tracing Authority Public Key : {}", this.manualContactTracingAuthorityPublicKey);
     }
 
     public Visitor getOrCreateUser(final String name) {
@@ -71,7 +45,7 @@ public class ScenarioContext {
     }
 
     private Visitor createVisitor(final String name) {
-        return new Visitor(name, s3service, appConfig);
+        return new Visitor(name, s3service, applicationProperties);
     }
 
     public Visitor getVisitor(final String visitorName) {
@@ -120,8 +94,10 @@ public class ScenarioContext {
                 .periodDuration(periodDuration)
                 .periodStartTime(periodStartTime)
                 .qrCodeRenewalIntervalExponentCompact(qrCodeRenewalIntervalExponentCompact)
-                .manualContactTracingAuthorityPublicKey(manualContactTracingAuthorityPublicKey)
-                .serverAuthorityPublicKey(serverAuthorityPublicKey)
+                .manualContactTracingAuthorityPublicKey(
+                        applicationProperties.getManualContactTracingAuthorityPublicKey()
+                )
+                .serverAuthorityPublicKey(applicationProperties.getServerAuthorityPublicKey())
                 .permanentLocationSecretKey(permanentLocationSecretKey)
                 .build();
         final var staffLocation = LocationQrCodeGenerator.builder()
@@ -133,8 +109,10 @@ public class ScenarioContext {
                 .periodDuration(periodDuration)
                 .periodStartTime(periodStartTime)
                 .qrCodeRenewalIntervalExponentCompact(qrCodeRenewalIntervalExponentCompact)
-                .manualContactTracingAuthorityPublicKey(manualContactTracingAuthorityPublicKey)
-                .serverAuthorityPublicKey(serverAuthorityPublicKey)
+                .manualContactTracingAuthorityPublicKey(
+                        applicationProperties.getManualContactTracingAuthorityPublicKey()
+                )
+                .serverAuthorityPublicKey(applicationProperties.getServerAuthorityPublicKey())
                 .permanentLocationSecretKey(permanentLocationSecretKey)
                 .build();
         staffLocations.put(locationName, staffLocation);

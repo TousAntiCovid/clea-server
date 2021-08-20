@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -20,19 +19,21 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class CleaBatchService {
 
+    private static final long BATCH_EXECUTION_TIMEOUT_IN_SECONDS = 30;
+
     private final ApplicationProperties applicationProperties;
 
     /**
      * Trigger the Cluster detection batch of Clea Server.
      */
     public void triggerNewClusterIdenfication() throws IOException, InterruptedException {
-        final List<String> batchTriggerCommand = applicationProperties.getBatch().getCommand();
+        final var batchTriggerCommand = applicationProperties.getBatch().getCommand().split(" ");
         final var builder = new ProcessBuilder(batchTriggerCommand);
         builder.directory(Path.of(System.getenv("CLEA_ROOT_DIR")).toFile());
         var process = builder.start();
         var streamGobbler = new StreamGobbler(process.getInputStream(), log::debug);
         Executors.newSingleThreadExecutor().submit(streamGobbler);
-        boolean hasExited = process.waitFor(applicationProperties.getBatch().getTimeoutInSeconds(), TimeUnit.SECONDS);
+        boolean hasExited = process.waitFor(BATCH_EXECUTION_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
         if (!hasExited) {
             throw new RuntimeException("Cluster detection trigger timeout");
         }
