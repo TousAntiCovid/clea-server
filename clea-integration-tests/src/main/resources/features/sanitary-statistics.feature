@@ -4,8 +4,6 @@ Feature: Record health statistics
     Given "Laure" registered on TAC
     And "Henry" registered on TAC
     And "Yaël" registered on TAC
-    And VType of 1, VCategory1 of 1 and VCategory2 of 1
-    And VType of 2, VCategory1 of 0 and VCategory2 of 2
     And "Burger king" created a dynamic QRCode at 04:00, 10 days ago with VType as 1, with VCategory1 as 1, with VCategory2 as 1, with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
     And "Le Klub" created a dynamic QRCode at 04:00, 10 days ago with VType as 2, with VCategory1 as 0, with VCategory2 as 2, with a renewal time of "15 minutes" and with a periodDuration of "24 hours"
     And "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as 4, with VCategory1 as 4, with VCategory2 as 2 and with a periodDuration of "24 hours"

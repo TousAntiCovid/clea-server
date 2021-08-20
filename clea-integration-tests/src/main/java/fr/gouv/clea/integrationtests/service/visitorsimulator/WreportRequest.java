@@ -1,6 +1,5 @@
-package fr.gouv.clea.integrationtests.dto;
+package fr.gouv.clea.integrationtests.service.visitorsimulator;
 
-import fr.gouv.clea.integrationtests.model.Visit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

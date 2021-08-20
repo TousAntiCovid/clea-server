@@ -1,4 +1,4 @@
-package fr.gouv.clea.integrationtests.dto;
+package fr.gouv.clea.integrationtests.service.visitorsimulator;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

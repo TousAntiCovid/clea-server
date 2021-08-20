@@ -1,4 +1,4 @@
-package fr.gouv.clea.integrationtests.feature.context;
+package fr.gouv.clea.integrationtests.cucumber;
 
 import lombok.AllArgsConstructor;
 import lombok.Value;

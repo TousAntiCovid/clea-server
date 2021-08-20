@@ -2,8 +2,8 @@ package fr.gouv.clea.integrationtests.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
-import fr.gouv.clea.integrationtests.model.Cluster;
-import fr.gouv.clea.integrationtests.model.ClusterIndex;
+import fr.gouv.clea.integrationtests.service.model.Cluster;
+import fr.gouv.clea.integrationtests.service.model.ClusterIndex;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CleaS3Service {
+public class ClusterExpositionService {
 
     private final ObjectMapper objectMapper;
 
