@@ -6,7 +6,6 @@ import org.ocpsoft.prettytime.nlp.PrettyTimeParser;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Scanner;
 
 import static java.lang.String.format;
 
@@ -29,17 +28,10 @@ public class ParameterTypes {
                 .toInstant();
     }
 
-    @ParameterType(".*")
-    public Duration duration(final String durationExpression) {
-        try {
-            final var scanner = new Scanner(durationExpression);
-            final var amount = scanner.nextLong();
-            final var unitExpression = scanner.next();
-            final var unit = ChronoUnit.valueOf(unitExpression.toUpperCase());
-            return Duration.of(amount, unit);
-        } catch (Exception e) {
-            final var message = format("'%s' is not a valid duration expression", durationExpression);
-            throw new IllegalArgumentException(message, e);
-        }
+    @ParameterType("(\\d+) (days|hours|minutes)")
+    public Duration duration(final String amountExpression, final String unitExpression) {
+        final var amount = Integer.parseInt(amountExpression);
+        final var unit = ChronoUnit.valueOf(unitExpression.toUpperCase());
+        return Duration.of(amount, unit);
     }
 }

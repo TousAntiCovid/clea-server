@@ -35,7 +35,7 @@ public class CleaReportSteps {
         this.cleaReportUrl = new URL(applicationProperties.getWsRest().getBaseUrl(), "/api/clea/v1/wreport");
     }
 
-    @When("{string} declares himself/herself sick")
+    @When("{word} declares himself/herself sick")
     public void visitor_declares_himself_sick(String visitorName) {
         final var visitor = this.scenarioContext.getVisitor(visitorName);
         final var request = WreportRequest.builder()
@@ -56,7 +56,7 @@ public class CleaReportSteps {
         visitor.setLastReportResponse(response);
     }
 
-    @When("{string} declares himself/herself sick with a {naturalTime} pivot date")
+    @When("{word} declares himself/herself sick with a {naturalTime} pivot date")
     public void visitor_declares_sick(String visitorName, Instant pivotDate) {
         final var visitor = scenarioContext.getVisitor(visitorName);
         final var request = WreportRequest.builder()
@@ -77,7 +77,7 @@ public class CleaReportSteps {
         visitor.setLastReportResponse(response);
     }
 
-    @When("{string} declares himself/herself sick with a {naturalTime} pivot date with no QRCode")
+    @When("{word} declares himself/herself sick with a {naturalTime} pivot date with no QRCode")
     public void visitor_declares_sick_with_pivot_date_and_no_deeplink(String visitorName, Instant pivotDate) {
         final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
         final var request = new WreportRequest(
@@ -97,7 +97,7 @@ public class CleaReportSteps {
                 .body("message", equalTo("Invalid request"));
     }
 
-    @When("{string} declares himself/herself sick with malformed QrCode")
+    @When("{word} declares himself/herself sick with malformed QrCode")
     public void visitor_declares_sick_with_malformed_deeplink(String visitorName) {
         final Instant pivotDate = Instant.now().minus(Duration.ofDays(13));
         final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
@@ -118,7 +118,7 @@ public class CleaReportSteps {
                 .body("message", equalTo("Last unit does not have enough valid bits"));
     }
 
-    @When("{string} declares himself/herself sick with malformed scan time")
+    @When("{word} declares himself/herself sick with malformed scan time")
     public void visitor_declares_sick_with_malformed_scanTime(String visitorName) {
         final Instant pivotDate = Instant.now().minus(Duration.ofDays(14));
         final var visitor = scenarioContext.getVisitor(visitorName);
@@ -142,7 +142,7 @@ public class CleaReportSteps {
         visitor.setLastReportResponse(response);
     }
 
-    @When("{string} declares himself/herself sick with no scan time")
+    @When("{word} declares himself/herself sick with no scan time")
     public void visitor_declares_sick_with_no_scanTime(String visitorName) {
         final Instant pivotDate = Instant.now().minus(Duration.ofDays(14));
         final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
@@ -162,7 +162,7 @@ public class CleaReportSteps {
                 .body("message", equalTo("Invalid request"));
     }
 
-    @Then("{string} has {int} rejected visit(s)")
+    @Then("{word} has {int} rejected visit(s)")
     public void visitor_has_precise_rejected_visits(String visitorName, Integer rejectedVisits) {
         final var visitor = this.scenarioContext.getVisitor(visitorName);
         final Optional<WreportResponse> lastReportResponseOptional = visitor.getLastReportResponse();
@@ -174,7 +174,7 @@ public class CleaReportSteps {
         }
     }
 
-    @Then("{string} cannot send his/her visits")
+    @Then("{word} cannot send his/her visits")
     public void visitor_cannot_send_visits(String visitorName) {
         final var visitor = this.scenarioContext.getVisitor(visitorName);
         final Optional<WreportResponse> lastReportResponse = visitor.getLastReportResponse();
@@ -184,13 +184,13 @@ public class CleaReportSteps {
         );
     }
 
-    @Then("{string} sends his/her visits")
+    @Then("{word} sends his/her visits")
     public void visitor_sends_visits(String visitorName) {
         final var visitor = this.scenarioContext.getVisitor(visitorName);
         visitor.getLastReportResponse().ifPresent(response -> assertThat(response.getSuccess()).isTrue());
     }
 
-    @When("{string} declares himself/herself sick with malformed pivot date")
+    @When("{word} declares himself/herself sick with malformed pivot date")
     public void visitor_declares_sick_with_malformed_pivotDate(String visitorName) {
         final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
 
