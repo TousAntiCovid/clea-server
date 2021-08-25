@@ -1,7 +1,7 @@
-package fr.gouv.clea.integrationtests.feature;
+package fr.gouv.clea.integrationtests.cucumber;
 
-import fr.gouv.clea.integrationtests.model.LocationStat;
-import fr.gouv.clea.integrationtests.model.ReportStat;
+import fr.gouv.clea.integrationtests.repository.model.LocationStat;
+import fr.gouv.clea.integrationtests.repository.model.ReportStat;
 import io.cucumber.java.DataTableType;
 import org.ocpsoft.prettytime.nlp.PrettyTimeParser;
 

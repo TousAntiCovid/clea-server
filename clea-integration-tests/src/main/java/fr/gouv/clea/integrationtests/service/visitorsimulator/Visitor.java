@@ -1,14 +1,11 @@
-package fr.gouv.clea.integrationtests.feature.context;
+package fr.gouv.clea.integrationtests.service.visitorsimulator;
 
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
-import fr.gouv.clea.integrationtests.dto.WreportResponse;
-import fr.gouv.clea.integrationtests.model.Cluster;
-import fr.gouv.clea.integrationtests.model.ClusterExposition;
-import fr.gouv.clea.integrationtests.model.Visit;
-import fr.gouv.clea.integrationtests.service.CleaS3Service;
+import fr.gouv.clea.integrationtests.service.ClusterExpositionService;
+import fr.gouv.clea.integrationtests.service.model.Cluster;
+import fr.gouv.clea.integrationtests.service.model.ClusterExposition;
 import fr.gouv.clea.integrationtests.utils.QrCodeDecoder;
 import fr.inria.clea.lsp.utils.TimeUtils;
-import io.minio.errors.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -28,7 +25,7 @@ public class Visitor {
 
     private final String name;
 
-    private final CleaS3Service s3Service;
+    private final ClusterExpositionService s3Service;
 
     private final ApplicationProperties applicationProperties;
 

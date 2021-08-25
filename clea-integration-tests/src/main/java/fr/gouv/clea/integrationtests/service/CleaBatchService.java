@@ -29,7 +29,7 @@ public class CleaBatchService {
     public void triggerNewClusterIdenfication() throws IOException, InterruptedException {
         final var batchTriggerCommand = applicationProperties.getBatch().getCommand().split(" ");
         final var builder = new ProcessBuilder(batchTriggerCommand);
-        builder.directory(Path.of(System.getenv("CLEA_ROOT_DIR")).toFile());
+        builder.directory(Path.of(".").toFile());
         var process = builder.start();
         var streamGobbler = new StreamGobbler(process.getInputStream(), log::debug);
         Executors.newSingleThreadExecutor().submit(streamGobbler);

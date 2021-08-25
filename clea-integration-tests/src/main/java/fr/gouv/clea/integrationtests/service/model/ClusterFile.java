@@ -1,4 +1,4 @@
-package fr.gouv.clea.integrationtests.model;
+package fr.gouv.clea.integrationtests.service.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

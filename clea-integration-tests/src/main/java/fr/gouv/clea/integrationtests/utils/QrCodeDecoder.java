@@ -1,6 +1,6 @@
 package fr.gouv.clea.integrationtests.utils;
 
-import fr.gouv.clea.integrationtests.model.Visit;
+import fr.gouv.clea.integrationtests.service.visitorsimulator.Visit;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import fr.inria.clea.lsp.exception.CleaEncodingException;
 import lombok.experimental.UtilityClass;

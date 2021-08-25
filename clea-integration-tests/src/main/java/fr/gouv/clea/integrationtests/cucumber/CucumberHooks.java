@@ -1,4 +1,4 @@
-package fr.gouv.clea.integrationtests.feature;
+package fr.gouv.clea.integrationtests.cucumber;
 
 import io.cucumber.java.Before;
 import lombok.RequiredArgsConstructor;
