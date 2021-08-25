@@ -142,10 +142,46 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- GENERATED CODE DEPENDENCIES --><!-- GENERATED CODE DEPENDENCIES -->
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clea-server-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>
+                                ${project.basedir}/src/main/resources/api-clea-server.yml
+                            </inputSpec>
+                            <apiPackage>fr.gouv.clea.ws.api</apiPackage>
+                            <modelPackage>fr.gouv.clea.ws.model</modelPackage>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useTags>true</useTags>
+                                <additionalModelTypeAnnotations>
+                                    @lombok.Data; @lombok.AllArgsConstructor; @lombok.NoArgsConstructor
+                                </additionalModelTypeAnnotations>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

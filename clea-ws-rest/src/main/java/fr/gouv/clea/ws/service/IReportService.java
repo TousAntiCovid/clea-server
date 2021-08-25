@@ -1,7 +1,7 @@
 package fr.gouv.clea.ws.service;
 
 import fr.gouv.clea.ws.model.DecodedVisit;
-import fr.gouv.clea.ws.vo.ReportRequest;
+import fr.gouv.clea.ws.model.ReportRequest;
 
 import java.util.List;
 

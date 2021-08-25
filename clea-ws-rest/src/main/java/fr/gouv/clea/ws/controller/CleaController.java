@@ -1,20 +1,18 @@
 package fr.gouv.clea.ws.controller;
 
-import fr.gouv.clea.ws.api.CleaWsRestAPI;
-import fr.gouv.clea.ws.dto.ReportResponse;
+import fr.gouv.clea.ws.api.CleaApi;
 import fr.gouv.clea.ws.exception.CleaBadRequestException;
 import fr.gouv.clea.ws.model.DecodedVisit;
+import fr.gouv.clea.ws.model.ReportRequest;
+import fr.gouv.clea.ws.model.ReportResponse;
+import fr.gouv.clea.ws.model.Visit;
 import fr.gouv.clea.ws.service.IReportService;
 import fr.gouv.clea.ws.utils.BadArgumentsLoggerService;
-import fr.gouv.clea.ws.utils.UriConstants;
-import fr.gouv.clea.ws.vo.ReportRequest;
-import fr.gouv.clea.ws.vo.Visit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 
@@ -27,10 +25,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(path = "${controller.path.prefix}")
 @RequiredArgsConstructor
 @Slf4j
-public class CleaController implements CleaWsRestAPI {
+public class CleaController implements CleaApi {
 
     public static final String MALFORMED_VISIT_LOG_MESSAGE = "Filtered out %d malformed visits of %d while Exposure Status Request";
 
@@ -43,9 +40,8 @@ public class CleaController implements CleaWsRestAPI {
     private final Validator validator;
 
     @Override
-    @PostMapping(path = UriConstants.API_V1
-            + UriConstants.REPORT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ReportResponse report(@RequestBody ReportRequest reportRequestVo) {
+    public ResponseEntity<ReportResponse> reportUsingPOST(
+            @RequestBody fr.gouv.clea.ws.model.ReportRequest reportRequestVo) {
         ReportRequest filtered = this.filterReports(reportRequestVo, webRequest);
         List<DecodedVisit> reported = List.of();
         if (!filtered.getVisits().isEmpty()) {
@@ -56,11 +52,12 @@ public class CleaController implements CleaWsRestAPI {
                 reportRequestVo.getVisits().size() - reported.size()
         );
         log.info(message);
-        return new ReportResponse(true, message);
+        return new ResponseEntity<>(new ReportResponse(message, true), HttpStatus.CREATED);
     }
 
-    private ReportRequest filterReports(ReportRequest report, WebRequest webRequest) {
-        Set<ConstraintViolation<ReportRequest>> reportRequestViolations = validator.validate(report);
+    private ReportRequest filterReports(fr.gouv.clea.ws.model.ReportRequest report, WebRequest webRequest) {
+        Set<ConstraintViolation<fr.gouv.clea.ws.model.ReportRequest>> reportRequestViolations = validator
+                .validate(report);
         if (!reportRequestViolations.isEmpty()) {
             throw new CleaBadRequestException(reportRequestViolations, Set.of());
         } else {
@@ -86,7 +83,7 @@ public class CleaController implements CleaWsRestAPI {
             if (nbFilteredVisits > 0) {
                 log.warn(String.format(MALFORMED_VISIT_LOG_MESSAGE, nbFilteredVisits, nbVisits));
             }
-            return new ReportRequest(validVisits, report.getPivotDateAsNtpTimestamp());
+            return new ReportRequest(report.getPivotDate(), validVisits);
         }
     }
 }

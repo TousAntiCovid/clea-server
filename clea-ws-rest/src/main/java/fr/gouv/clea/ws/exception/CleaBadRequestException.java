@@ -1,7 +1,7 @@
 package fr.gouv.clea.ws.exception;
 
-import fr.gouv.clea.ws.vo.ReportRequest;
-import fr.gouv.clea.ws.vo.Visit;
+import fr.gouv.clea.ws.model.ReportRequest;
+import fr.gouv.clea.ws.model.Visit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.http.HttpStatus;
