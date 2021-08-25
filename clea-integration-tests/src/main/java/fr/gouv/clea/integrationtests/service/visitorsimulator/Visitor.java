@@ -1,69 +1,45 @@
 package fr.gouv.clea.integrationtests.service.visitorsimulator;
 
-import fr.gouv.clea.integrationtests.config.ApplicationProperties;
 import fr.gouv.clea.integrationtests.service.ClusterExpositionService;
-import fr.gouv.clea.integrationtests.service.model.Cluster;
-import fr.gouv.clea.integrationtests.service.model.ClusterExposition;
 import fr.gouv.clea.integrationtests.utils.QrCodeDecoder;
 import fr.inria.clea.lsp.utils.TimeUtils;
-import lombok.AccessLevel;
-import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Stream;
 
-@Data
-@Slf4j
 @RequiredArgsConstructor
 public class Visitor {
 
     private static final String DEEPLINK_COUNTRY_PART = "https://tac.gouv.fr?v=0#";
 
+    @Getter
     private final String name;
 
-    private final ClusterExpositionService s3Service;
+    private final ClusterExpositionService clusterExpositionService;
 
-    private final ApplicationProperties applicationProperties;
+    private final List<Visit> localVisitsList = new ArrayList<>();
 
-    private List<Visit> localList = new ArrayList<>();
-
-    @Getter(AccessLevel.NONE)
+    @Setter
     private WreportResponse lastReportResponse = null;
 
+    public List<Visit> getLocalVisitsList() {
+        return Collections.unmodifiableList(localVisitsList);
+    }
+
     public float getStatus() {
-        final var clusterIndex = s3Service.getClusterIndex();
-        return clusterIndex.getPrefixes().stream()
-                .filter(this::matchesVisitedPlacesIds)
-                .map(prefix -> getRiskLevelsFromQrCodesMatchingPrefix(clusterIndex.getIteration(), prefix))
-                .flatMap(Stream::distinct)
-                .flatMap(Stream::distinct)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .max(Comparator.naturalOrder()).orElse(0f);
+        return localVisitsList.stream()
+                .map(this::getRiskLevelForVisit)
+                .max(Comparator.naturalOrder())
+                .orElse(0f);
     }
 
-    private Stream<Stream<Optional<Float>>> getRiskLevelsFromQrCodesMatchingPrefix(final int iteration,
-            final String prefix) {
-        return s3Service.getClusterFile(iteration, prefix).stream()
-                .map(
-                        cluster -> localList.stream()
-                                .map(qr -> getQrcodeRiskLevel(cluster, qr))
-                );
-    }
-
-    private Optional<Float> getQrcodeRiskLevel(final Cluster cluster, final Visit visit) {
-        UUID locationTemporaryId = QrCodeDecoder.getLocationTemporaryId(visit);
-        if (locationTemporaryId.toString().equals(cluster.getLocationTemporaryPublicID())) {
-            return cluster.getExpositions().stream()
-                    .filter(exp -> exp.isInExposition(TimeUtils.instantFromTimestamp(visit.getScanTime())))
-                    .map(ClusterExposition::getRisk)
-                    .max(Float::compare);
-        }
-        return Optional.empty();
+    private float getRiskLevelForVisit(Visit visit) {
+        final var ltid = QrCodeDecoder.getLocationTemporaryPublicId(visit);
+        final var visitTime = TimeUtils.instantFromTimestamp(visit.getScanTime());
+        return clusterExpositionService.getRiskLevelForPlaceAtInstant(ltid.toString(), visitTime);
     }
 
     public Optional<WreportResponse> getLastReportResponse() {
@@ -78,17 +54,10 @@ public class Visitor {
         }
         final var encodedInformation = deepLink.substring(DEEPLINK_COUNTRY_PART.length());
 
-        localList.add(
+        localVisitsList.add(
                 Visit.builder()
                         .deepLinkLocationSpecificPart(encodedInformation)
                         .scanTime(TimeUtils.ntpTimestampFromInstant(scanTime)).build()
         );
-    }
-
-    private boolean matchesVisitedPlacesIds(final String prefix) {
-        return localList.stream()
-                .map(QrCodeDecoder::getLocationTemporaryId)
-                .map(UUID::toString)
-                .anyMatch(qrId -> qrId.startsWith(prefix));
     }
 }

@@ -11,7 +11,7 @@ import java.util.UUID;
 @UtilityClass
 public class QrCodeDecoder {
 
-    public static UUID getLocationTemporaryId(final Visit visit) {
+    public static UUID getLocationTemporaryPublicId(final Visit visit) {
         try {
             return new LocationSpecificPartDecoder()
                     .decodeHeader(Base64.getUrlDecoder().decode(visit.getDeepLinkLocationSpecificPart()))

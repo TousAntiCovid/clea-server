@@ -40,7 +40,7 @@ public class CleaReportSteps {
         final var visitor = this.scenarioContext.getVisitor(visitorName);
         final var request = WreportRequest.builder()
                 .pivotDate(TimeUtils.ntpTimestampFromInstant(Instant.now().minus(Duration.ofDays(14))))
-                .visits(visitor.getLocalList())
+                .visits(visitor.getLocalVisitsList())
                 .build();
 
         final var response = given()
@@ -61,7 +61,7 @@ public class CleaReportSteps {
         final var visitor = scenarioContext.getVisitor(visitorName);
         final var request = WreportRequest.builder()
                 .pivotDate(TimeUtils.ntpTimestampFromInstant(pivotDate))
-                .visits(visitor.getLocalList())
+                .visits(visitor.getLocalVisitsList())
                 .build();
 
         final var response = given()
@@ -79,7 +79,7 @@ public class CleaReportSteps {
 
     @When("{word} declares himself/herself sick with a {naturalTime} pivot date with no QRCode")
     public void visitor_declares_sick_with_pivot_date_and_no_deeplink(String visitorName, Instant pivotDate) {
-        final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
+        final var localList = this.scenarioContext.getVisitor(visitorName).getLocalVisitsList();
         final var request = new WreportRequest(
                 TimeUtils.ntpTimestampFromInstant(pivotDate), localList.stream()
                         .map(visit -> visit.withDeepLinkLocationSpecificPart(""))
@@ -100,7 +100,7 @@ public class CleaReportSteps {
     @When("{word} declares himself/herself sick with malformed QrCode")
     public void visitor_declares_sick_with_malformed_deeplink(String visitorName) {
         final Instant pivotDate = Instant.now().minus(Duration.ofDays(13));
-        final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
+        final var localList = this.scenarioContext.getVisitor(visitorName).getLocalVisitsList();
         final var request = new WreportRequest(
                 TimeUtils.ntpTimestampFromInstant(pivotDate),
                 localList.stream()
@@ -124,7 +124,7 @@ public class CleaReportSteps {
         final var visitor = scenarioContext.getVisitor(visitorName);
         final var request = new WreportRequest(
                 TimeUtils.ntpTimestampFromInstant(pivotDate),
-                visitor.getLocalList().stream()
+                visitor.getLocalVisitsList().stream()
                         .map(visit -> visit.withScanTime(-1L))
                         .collect(Collectors.toList())
         );
@@ -145,7 +145,7 @@ public class CleaReportSteps {
     @When("{word} declares himself/herself sick with no scan time")
     public void visitor_declares_sick_with_no_scanTime(String visitorName) {
         final Instant pivotDate = Instant.now().minus(Duration.ofDays(14));
-        final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
+        final var localList = this.scenarioContext.getVisitor(visitorName).getLocalVisitsList();
         final var request = new WreportRequest(
                 TimeUtils.ntpTimestampFromInstant(pivotDate), localList.stream()
                         .map(visit -> visit.withScanTime(null))
@@ -192,7 +192,7 @@ public class CleaReportSteps {
 
     @When("{word} declares himself/herself sick with malformed pivot date")
     public void visitor_declares_sick_with_malformed_pivotDate(String visitorName) {
-        final var localList = this.scenarioContext.getVisitor(visitorName).getLocalList();
+        final var localList = this.scenarioContext.getVisitor(visitorName).getLocalVisitsList();
 
         given()
                 .contentType(ContentType.JSON)

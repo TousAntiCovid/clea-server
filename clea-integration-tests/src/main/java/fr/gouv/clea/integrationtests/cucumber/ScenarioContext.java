@@ -6,25 +6,25 @@ import fr.gouv.clea.integrationtests.service.visitorsimulator.Visitor;
 import fr.gouv.clea.qr.LocationQrCodeGenerator;
 import fr.inria.clea.lsp.exception.CleaCryptoException;
 import io.cucumber.spring.ScenarioScope;
-import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Hex;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 
-@Slf4j
 @Component
 @ScenarioScope
 public class ScenarioContext {
 
-    private final Map<String, Visitor> visitors = new HashMap<>(10);
+    private final Map<String, Visitor> visitors = new HashMap<>();
 
-    private final Map<String, LocationQrCodeGenerator> locations = new HashMap<>(10);
+    private final Map<String, LocationQrCodeGenerator> locations = new HashMap<>();
 
-    private final Map<String, LocationQrCodeGenerator> staffLocations = new HashMap<>(10);
+    private final Map<String, LocationQrCodeGenerator> staffLocations = new HashMap<>();
 
     private final ApplicationProperties applicationProperties;
 
@@ -41,7 +41,7 @@ public class ScenarioContext {
     }
 
     private Visitor createVisitor(final String name) {
-        return new Visitor(name, clusterExpositionService, applicationProperties);
+        return new Visitor(name, clusterExpositionService);
     }
 
     public Visitor getVisitor(final String visitorName) {

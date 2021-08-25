@@ -1,4 +1,4 @@
-package fr.gouv.clea.integrationtests.service.model;
+package fr.gouv.clea.integrationtests.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

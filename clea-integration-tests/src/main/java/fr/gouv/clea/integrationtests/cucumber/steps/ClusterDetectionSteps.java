@@ -43,6 +43,6 @@ public class ClusterDetectionSteps {
     public void visitor_should_include_only_expected_visits(String visitorName, Integer nbVisits, String locationName,
             String qrScanTime) {
         final var visitor = this.scenarioContext.getVisitor(visitorName);
-        assertThat(visitor.getLocalList().size()).isEqualTo(nbVisits);
+        assertThat(visitor.getLocalVisitsList().size()).isEqualTo(nbVisits);
     }
 }
