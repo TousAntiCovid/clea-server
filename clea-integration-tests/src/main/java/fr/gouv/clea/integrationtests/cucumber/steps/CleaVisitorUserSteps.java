@@ -21,29 +21,31 @@ public class CleaVisitorUserSteps {
 
     // Visitor scan a QR code at given instant
     @Given("{word} recorded a visit to {string} at {naturalTime}")
-    public void visitor_scans_qrcode_at_given_instant(String visitorName, String locationName, Instant qrCodeScanTime)
-            throws CleaCryptoException {
-        final var location = this.scenarioContext.getLocation(locationName);
-        final var deepLink = location.getQrCodeAt(qrCodeScanTime);
-        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(deepLink.getQrCode(), qrCodeScanTime);
+    public void visitor_scans_qrcode_at_given_instant(String visitorName, String locationName, Instant qrCodeScanTime) {
+        final var deepLink = scenarioContext.getLocation(locationName)
+                .getDeepLink(qrCodeScanTime);
+        scenarioContext.getVisitor(visitorName)
+                .registerDeepLink(deepLink, qrCodeScanTime);
     }
 
     // Visitor scan a staff QR code at given instant
     @Given("{word} recorded a visit as a STAFF to {string} at {naturalTime}")
     public void visitor_scans_staff_qrcode_at_given_instant(String visitorName, String locationName,
-            Instant qrCodeScanTime) throws CleaCryptoException {
-        final var location = this.scenarioContext.getStaffLocation(locationName);
-        final var qr = location.getQrCodeAt(qrCodeScanTime);
-        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qr.getQrCode(), qrCodeScanTime);
+            Instant qrCodeScanTime) {
+        final var deepLink = this.scenarioContext.getLocation(locationName + " [staff]")
+                .getDeepLink(qrCodeScanTime);
+        this.scenarioContext.getOrCreateUser(visitorName)
+                .registerDeepLink(deepLink, qrCodeScanTime);
     }
 
     // Visitor scan a QR code at a given Instant, but the scanned QR code is valid
     // for another Instant
     @Given("{word} recorded a visit to {string} at {naturalTime} with a QR code valid for {string}")
     public void visitor_scans_qrcode_at_given_instant_but_qr_code_valid_for_another_instant(String visitorName,
-            String locationName, Instant qrCodeScanTime, Instant qrCodeValidTime) throws CleaCryptoException {
-        final var location = this.scenarioContext.getLocation(locationName);
-        final var qr = location.getQrCodeAt(qrCodeValidTime);
-        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qr.getQrCode(), qrCodeScanTime);
+            String locationName, Instant qrCodeScanTime, Instant qrCodeValidTime) {
+        final var deepLink = this.scenarioContext.getLocation(locationName)
+                .getDeepLink(qrCodeValidTime);
+        this.scenarioContext.getOrCreateUser(visitorName)
+                .registerDeepLink(deepLink, qrCodeScanTime);
     }
 }

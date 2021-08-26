@@ -26,7 +26,6 @@ public class LocationQrCodeGeneratorTest {
     @BeforeEach
     public void setUp() throws Exception {
         staticGenerator = LocationQrCodeGenerator.builder()
-                .countryCode(250)
                 .staff(false)
                 .periodStartTime(now)
                 .periodDuration(8)
@@ -41,7 +40,6 @@ public class LocationQrCodeGeneratorTest {
                 .locationPin("123456")
                 .build();
         dynamicGenerator = LocationQrCodeGenerator.builder()
-                .countryCode(250)
                 .staff(false)
                 .periodStartTime(now)
                 .periodDuration(8)
