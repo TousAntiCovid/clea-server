@@ -40,16 +40,12 @@ public class CleaController implements CleaApi {
         final var message = String.format("%d/%d accepted visits", acceptedVisits, reportRequest.getVisits().size());
         log.info(message);
 
-        if (acceptedVisits > 0) {
-            return ResponseEntity.ok(
-                    ReportResponse.builder()
-                            .success(true)
-                            .message(message)
-                            .build()
-            );
-        } else {
-            throw new CleaBadRequestException(message);
-        }
+        return ResponseEntity.ok(
+                ReportResponse.builder()
+                        .success(true)
+                        .message(message)
+                        .build()
+        );
     }
 
     private Visit toVisitNullSafe(fr.gouv.clea.ws.api.model.Visit visit) {
