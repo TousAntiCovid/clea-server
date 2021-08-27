@@ -4,7 +4,7 @@ services:
     image: clea-ws-rest
     build: clea-ws-rest
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: dev,docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       CLEA_CONF_AUTHORIZATION_CHECK_ACTIVE: "false"
       CLEA_WS_REST_LOG_FILE_PATH: /logs
@@ -18,7 +18,7 @@ services:
     image: clea-venue-consumer
     build: clea-venue-consumer
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: dev,docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       CLEA_VENUE_CONSUMER_LOG_FILE_PATH: /logs
       CLEA_VENUE_CONSUMER_LOG_FILE_NAME: clea-venue-consumer
