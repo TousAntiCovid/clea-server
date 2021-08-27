@@ -3,7 +3,6 @@ package fr.gouv.clea.integrationtests.service;
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
