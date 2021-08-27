@@ -13,7 +13,8 @@ public class CleaApiResponseParser {
         final var matcher = REPORT_MESSAGE_RESPONSE_PATTERN.matcher(message);
         if (!matcher.find()) {
             throw new IllegalArgumentException(
-                    String.format("message '%s' doesn't match pattern %s", message, REPORT_MESSAGE_RESPONSE_PATTERN));
+                    String.format("message '%s' doesn't match pattern %s", message, REPORT_MESSAGE_RESPONSE_PATTERN)
+            );
         }
         final var accepted = Integer.parseInt(matcher.group(1));
         final var total = Integer.parseInt(matcher.group(2));
