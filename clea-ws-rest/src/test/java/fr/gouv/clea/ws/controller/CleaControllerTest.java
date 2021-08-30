@@ -114,6 +114,7 @@ class CleaControllerTest {
                 .body(
                         Map.of(
                                 "pivotDate", 0,
+
                                 "visits", List.of(
                                         Map.of(
                                                 "qrCode", RandomStringUtils.randomAlphanumeric(20),
@@ -372,7 +373,7 @@ class CleaControllerTest {
     }
 
     @Test
-    void a_report_with_no_valid_visit_causes_400_bad_request() {
+    void a_report_with_no_valid_visit_returns_200_and_visits_are_ignored() {
         final var request = ReportRequest.builder()
                 .pivotDate(2L)
                 .visits(
@@ -388,9 +389,7 @@ class CleaControllerTest {
                 .post("/api/clea/v1/wreport")
 
                 .then()
-                .statusCode(BAD_REQUEST.value())
-                .body("httpStatus", equalTo(BAD_REQUEST.value()))
-                .body("timestamp", isStringDateBetweenNowAndTenSecondsAgo())
+                .statusCode(OK.value())
                 .body("message", equalTo("0/1 accepted visits"));
     }
 }
