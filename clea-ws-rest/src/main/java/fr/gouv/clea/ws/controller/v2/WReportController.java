@@ -1,13 +1,12 @@
-package fr.gouv.clea.ws.controller;
+package fr.gouv.clea.ws.controller.v2;
 
-import fr.gouv.clea.ws.api.CleaApi;
-import fr.gouv.clea.ws.api.model.ReportRequest;
-import fr.gouv.clea.ws.api.model.ReportResponse;
-import fr.gouv.clea.ws.api.model.ValidationError;
-import fr.gouv.clea.ws.exception.CleaBadRequestException;
+import fr.gouv.clea.ws.api.v2.WithoutValidationApi;
+import fr.gouv.clea.ws.api.v2.model.ReportRequest;
+import fr.gouv.clea.ws.api.v2.model.ReportResponse;
+import fr.gouv.clea.ws.api.v2.model.ValidationError;
+import fr.gouv.clea.ws.controller.v2.exception.CleaBadRequestException;
 import fr.gouv.clea.ws.service.ReportService;
 import fr.gouv.clea.ws.service.model.Visit;
-import fr.inria.clea.lsp.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,38 +17,37 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @RestController
-@RequestMapping(path = "/api/clea/v1")
+@RequestMapping(path = "/api/clea/v2")
 @RequiredArgsConstructor
 @Slf4j
-public class CleaController implements CleaApi {
+public class WReportController implements WithoutValidationApi {
 
     private final ReportService reportService;
 
     @Override
-    public ResponseEntity<ReportResponse> reportUsingPOST(ReportRequest reportRequest) {
+    public ResponseEntity<ReportResponse> wreport(ReportRequest reportRequest) {
         nonNullPivotDateOrThrowBadRequest(reportRequest);
         nonEmptyVisitsOrThrowBadRequest(reportRequest);
 
-        final var pivotDate = TimeUtils.instantFromTimestamp(reportRequest.getPivotDate());
+        final var pivotDate = reportRequest.getPivotDate().toInstant();
         final var visits = reportRequest.getVisits()
                 .stream()
                 .map(this::toVisitNullSafe)
                 .collect(toList());
 
         final var acceptedVisits = reportService.report(pivotDate, visits);
-        final var message = String.format("%d/%d accepted visits", acceptedVisits, reportRequest.getVisits().size());
-        log.info(message);
 
         return ResponseEntity.ok(
                 ReportResponse.builder()
-                        .success(true)
-                        .message(message)
+                        .accepted(Integer.toUnsignedLong(acceptedVisits))
+                        .rejected(Integer.toUnsignedLong(reportRequest.getVisits().size() - acceptedVisits))
                         .build()
         );
     }
 
-    private Visit toVisitNullSafe(fr.gouv.clea.ws.api.model.Visit visit) {
-        return visit == null ? null : new Visit(visit.getQrCode(), visit.getQrCodeScanTime());
+    private Visit toVisitNullSafe(fr.gouv.clea.ws.api.v2.model.Visit visit) {
+        return visit == null ? null
+                : new Visit(visit.getEncryptedLocationSpecificPart(), visit.getScanTime().toInstant());
     }
 
     private void nonNullPivotDateOrThrowBadRequest(ReportRequest reportRequest) {

@@ -1,11 +1,13 @@
 package fr.gouv.clea.ws.service.model;
 
 import fr.inria.clea.lsp.utils.TimeUtils;
+import lombok.AllArgsConstructor;
 import lombok.Value;
 
 import java.time.Instant;
 
 @Value
+@AllArgsConstructor
 public class Visit {
 
     /**

@@ -1,0 +1,75 @@
+components:
+  schemas:
+    ReportRequest:
+      required:
+        - visits
+        - pivotDate
+      type: object
+      properties:
+        pivotDate:
+          type: string
+          format: date-time
+          description: An estimate date of contamination
+        visits:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Visit"
+    ManualReportRequest:
+      required:
+        - visits
+      type: object
+      properties:
+        visits:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Visit"
+    ReportResponse:
+      type: object
+      properties:
+        accepted:
+          type: integer
+          format: int64
+        rejected:
+          type: integer
+          format: int64
+      required:
+        - accepted
+        - rejected
+    ErrorResponse:
+      title: ErrorResponse
+      type: object
+      properties:
+        message:
+          type: string
+        validationErrors:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ValidationError"
+      required:
+        - message
+        - validationErrors
+    Visit:
+      type: object
+      properties:
+        encryptedLocationSpecificPart:
+          type: string
+          description: Encrypted location specific part encoded in Base64
+        scanTime:
+          type: string
+          format: date-time
+          description: ISO 8601 date when a user terminal scans a given QR code
+      required:
+        - encryptedLocationSpecificPart
+        - scanTime
+    ValidationError:
+      title: Validation error
+      type: object
+      properties:
+        object:
+          type: string
+        field:
+          type: string
+        rejectedValue:
+          type: object
+        message:
+          type: string

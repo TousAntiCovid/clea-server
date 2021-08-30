@@ -1,7 +1,7 @@
-package fr.gouv.clea.ws.controller;
+package fr.gouv.clea.ws.controller.v1;
 
-import fr.gouv.clea.ws.api.model.ReportRequest;
-import fr.gouv.clea.ws.api.model.Visit;
+import fr.gouv.clea.ws.api.v1.model.ReportRequest;
+import fr.gouv.clea.ws.api.v1.model.Visit;
 import fr.gouv.clea.ws.test.IntegrationTest;
 import fr.gouv.clea.ws.test.QrCode;
 import fr.inria.clea.lsp.utils.TimeUtils;
@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.http.HttpStatus.*;
 
 @IntegrationTest
-class CleaControllerTest {
+class WReportControllerTest {
 
     @Test
     void infected_user_can_report_himself_as_infected() {

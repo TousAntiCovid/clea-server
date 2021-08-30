@@ -1,0 +1,49 @@
+openapi: 3.0.3
+info:
+  title: Tous AntiCovid Cluster Exposure Verification (Cléa)
+  description: "#TOUSANTICOVID, Cléa API"
+  contact:
+    email: stopcovid@inria.fr
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 2.0.0
+tags:
+  - name: clea
+    description: Clea API
+paths:
+  "/api/v2/manual-report":
+    post:
+      summary: Manually upload locations history
+      description: Pivot date for the whole list is automatically set to 1 hour before oldest visit of the list
+      operationId: manualReport
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "components.yml#/components/schemas/ManualReportRequest"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                "$ref": "components.yml#/components/schemas/ReportResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                "$ref": "components.yml#/components/schemas/ErrorResponse"
+        "401":
+          description: Invalid authentication
+          content:
+            application/json:
+              schema:
+                "$ref": "components.yml#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                "$ref": "components.yml#/components/schemas/ErrorResponse"

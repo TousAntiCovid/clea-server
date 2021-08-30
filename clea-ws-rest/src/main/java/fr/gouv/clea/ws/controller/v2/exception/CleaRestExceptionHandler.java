@@ -1,7 +1,7 @@
-package fr.gouv.clea.ws.exception;
+package fr.gouv.clea.ws.controller.v2.exception;
 
-import fr.gouv.clea.ws.api.model.ErrorResponse;
-import fr.gouv.clea.ws.api.model.ValidationError;
+import fr.gouv.clea.ws.api.v2.model.ErrorResponse;
+import fr.gouv.clea.ws.api.v2.model.ValidationError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,14 +14,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @ControllerAdvice
 @Slf4j
@@ -36,8 +32,6 @@ public class CleaRestExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest()
                 .body(
                         new ErrorResponse(
-                                BAD_REQUEST.value(),
-                                Instant.now().atOffset(UTC),
                                 ex.getLocalizedMessage(),
                                 ex.getValidationErrors()
                         )
@@ -49,8 +43,6 @@ public class CleaRestExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers, HttpStatus status, WebRequest request) {
         log.error(String.format(ERROR_MESSAGE_TEMPLATE, ex.getLocalizedMessage(), request.getDescription(false)));
         ErrorResponse error = new ErrorResponse(
-                status.value(),
-                OffsetDateTime.now(),
                 ex.getLocalizedMessage().split(":")[0],
                 List.of()
         );
@@ -64,8 +56,6 @@ public class CleaRestExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest()
                 .body(
                         new ErrorResponse(
-                                status.value(),
-                                OffsetDateTime.now(),
                                 "Invalid request",
                                 Stream.concat(
                                         ex.getFieldErrors().stream()
@@ -107,8 +97,6 @@ public class CleaRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     private ErrorResponse exceptionToApiError(Exception ex, HttpStatus status) {
         return new ErrorResponse(
-                status.value(),
-                OffsetDateTime.now(),
                 ex.getLocalizedMessage(),
                 List.of()
         );

@@ -135,27 +135,61 @@
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <version>5.1.1</version>
+                <configuration>
+                    <generatorName>spring</generatorName>
+                    <configOptions>
+                        <interfaceOnly>true</interfaceOnly>
+                        <useTags>true</useTags>
+                        <additionalModelTypeAnnotations>
+                            @lombok.Builder
+                            @lombok.AllArgsConstructor
+                            @lombok.NoArgsConstructor
+                        </additionalModelTypeAnnotations>
+                    </configOptions>
+                </configuration>
                 <executions>
                     <execution>
+                        <id>v1</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/src/main/resources/api-report-v1.yml
+                                ${project.basedir}/src/main/resources/api-clea-server-specs/v1/api-clea-server-v1.yml
                             </inputSpec>
-                            <generatorName>spring</generatorName>
-                            <apiPackage>fr.gouv.clea.ws.api</apiPackage>
-                            <modelPackage>fr.gouv.clea.ws.api.model</modelPackage>
+                            <apiPackage>fr.gouv.clea.ws.api.v1</apiPackage>
+                            <modelPackage
+              >fr.gouv.clea.ws.api.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>v2-with-validation</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/src/main/resources/api-clea-server-specs/v2/with-validation.yml
+                            </inputSpec>
+                            <apiPackage>fr.gouv.clea.ws.api.v2</apiPackage>
+                            <modelPackage
+              >fr.gouv.clea.ws.api.v2.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>v2-without-validation</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/src/main/resources/api-clea-server-specs/v2/without-validation.yml
+                            </inputSpec>
+                            <apiPackage>fr.gouv.clea.ws.api.v2</apiPackage>
+                            <modelPackage
+              >fr.gouv.clea.ws.api.v2.model</modelPackage>
                             <configOptions>
-                                <interfaceOnly>true</interfaceOnly>
                                 <useBeanValidation>false</useBeanValidation>
-                                <useTags>true</useTags>
-                                <additionalModelTypeAnnotations>
-                                    @lombok.Builder
-                                    @lombok.AllArgsConstructor
-                                    @lombok.NoArgsConstructor
-                                </additionalModelTypeAnnotations>
                             </configOptions>
                         </configuration>
                     </execution>

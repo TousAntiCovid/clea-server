@@ -1,6 +1,6 @@
-package fr.gouv.clea.ws.exception;
+package fr.gouv.clea.ws.controller.v1.exception;
 
-import fr.gouv.clea.ws.api.model.ValidationError;
+import fr.gouv.clea.ws.api.v1.model.ValidationError;
 import lombok.Getter;
 
 import java.util.Collections;
