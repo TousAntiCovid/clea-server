@@ -17,7 +17,7 @@ PROFILE_SCALEWAY=${PROFILE_SCALEWAY:-s3scaleway}
 ENDPOINT_OUTSCALE=${ENDPOINT_OUTSCALE:-} # use https://oos.eu-west-2.outscale.com/ https://oos.cloudgouv-eu-west-1.outscale.com
 ENDPOINT_SCALEWAY=${ENDPOINT_SCALEWAY:-} # https://s3.fr-par.scw.cloud
 
-
+BUCKET_FILES_RETENTION_IN_DAYS=${BUCKET_FILES_RETENTION_IN_DAYS:-15}
 
 set -o pipefail  # trace ERR through pipes
 set -o errtrace  # trace ERR through 'time command' and other functions
@@ -67,6 +67,14 @@ aws $AWS_OPTS s3 sync --acl public-read --exclude=clusterIndex.json $WORKDIR s3:
 # only indexCluster.json at the root of "v1"
 aws $AWS_OPTS s3 cp   --acl public-read $(find $WORKDIR -type f -name clusterIndex.json) s3://${BUCKET}/v1/ || die "AWS s3 fails to copy clusterIndex file to bucket"
 
+# purge bucket files older than x days
+TODAY_MINUS_RETENTION_DAYS=$(date --date="${BUCKET_FILES_RETENTION_IN_DAYS} days ago" +%Y-%m-%d)
+info "Purging bucket files older than ${TODAY_MINUS_RETENTION_DAYS}"
+aws --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE s3 ls --recursive s3://${BUCKET}/v1 | awk -v date=$TODAY_MINUS_RETENTION_DAYS '$1 < date {print $4}' | xargs -n1 -t -I {} aws s3 --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE rm s3://${BUCKET}/{}
+
+# dryrun for local testing purpose
+#aws --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE s3 ls --recursive s3://${BUCKET}/v1 | awk -v date=$TODAY_MINUS_RETENTION_DAYS '$1 < date {print $4}' | xargs -n1 -t -I {} aws s3 --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE --dryrun rm s3://${BUCKET}/{}
+
 # COPY TO SCALEWAY (optional)
 # --------------------
 if [ -n "$BUCKET_SCALEWAY" ] &&  [ -n "$PROFILE_SCALEWAY" ]  &&  [ -n "$ENDPOINT_SCALEWAY" ] ; then
@@ -79,10 +87,13 @@ if [ -n "$BUCKET_SCALEWAY" ] &&  [ -n "$PROFILE_SCALEWAY" ]  &&  [ -n "$ENDPOINT
 
   # only indexCluster.json at the root of "v1"
   aws $AWS_OPTS s3 cp --acl public-read $(find $WORKDIR -type f -name clusterIndex.json) s3://${BUCKET}/v1/ || die "AWS s3 fails to copy clusterIndex file to bucket"
+
 fi
 
 # purge batch temporary files
 info "Purging working files"
 rm -rf $WORKDIR
+
 info "End of clea-batch"
+
 
