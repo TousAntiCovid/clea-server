@@ -68,12 +68,10 @@ aws $AWS_OPTS s3 sync --acl public-read --exclude=clusterIndex.json $WORKDIR s3:
 aws $AWS_OPTS s3 cp   --acl public-read $(find $WORKDIR -type f -name clusterIndex.json) s3://${BUCKET}/v1/ || die "AWS s3 fails to copy clusterIndex file to bucket"
 
 # purge bucket files older than x days
+# add --dryrun for testing purpose
 TODAY_MINUS_RETENTION_DAYS=$(date --date="${BUCKET_FILES_RETENTION_IN_DAYS} days ago" +%Y-%m-%d)
 info "Purging bucket files older than ${TODAY_MINUS_RETENTION_DAYS}"
 aws --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE s3 ls --recursive s3://${BUCKET}/v1 | awk -v date=$TODAY_MINUS_RETENTION_DAYS '$1 < date {print $4}' | xargs -n1 -t -I {} aws s3 --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE rm s3://${BUCKET}/{}
-
-# dryrun for local testing purpose
-#aws --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE s3 ls --recursive s3://${BUCKET}/v1 | awk -v date=$TODAY_MINUS_RETENTION_DAYS '$1 < date {print $4}' | xargs -n1 -t -I {} aws s3 --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE --dryrun rm s3://${BUCKET}/{}
 
 # COPY TO SCALEWAY (optional)
 # --------------------
