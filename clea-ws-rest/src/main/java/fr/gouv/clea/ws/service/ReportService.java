@@ -10,16 +10,20 @@ import fr.inria.clea.lsp.exception.CleaEncodingException;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
+import static fr.gouv.clea.ws.utils.MessageFormatter.truncateQrCode;
+import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.util.Base64.getUrlDecoder;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +36,8 @@ public class ReportService {
 
     private final ProducerService producerService;
 
-    public int report(Instant pivotDate, List<Visit> visits) {
-        final var now = Instant.now();
+    public int report(final Instant pivotDate, final List<Visit> visits) {
+        final var now = now();
         final var validatedPivotDate = this.validatePivotDate(pivotDate, now);
 
         final var verifiedAndDecodedVisits = visits.stream()
@@ -44,7 +48,7 @@ public class ReportService {
                 .filter(visit -> !isFuture(visit, now))
                 .map(it -> decode(it, validatedPivotDate))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(toList());
         final var uniqueDecodedVisits = this.pruneDuplicates(verifiedAndDecodedVisits);
         producerService.produceVisits(uniqueDecodedVisits);
 
@@ -52,7 +56,7 @@ public class ReportService {
         final var closeScanTimeVisits = new VisitsInSameUnitCounter(
                 properties.getExposureTimeUnitInSeconds()
         );
-        uniqueDecodedVisits.stream().sorted(Comparator.comparing((DecodedVisit::getQrCodeScanTime)))
+        uniqueDecodedVisits.stream().sorted(comparing((DecodedVisit::getQrCodeScanTime)))
                 .forEach(closeScanTimeVisits::incrementIfScannedInSameTimeUnitThanLastScanTime);
 
         producerService.produceStat(
@@ -68,55 +72,55 @@ public class ReportService {
         return uniqueDecodedVisits.size();
     }
 
-    private boolean nonBlankBase64urlLocationSpecificPart(Visit visit) {
-        return StringUtils.isNotBlank(visit.getLocationSpecificPart());
+    private boolean nonBlankBase64urlLocationSpecificPart(final Visit visit) {
+        return isNotBlank(visit.getLocationSpecificPart());
     }
 
-    private boolean nonNullScanTime(Visit visit) {
-        return visit.getQrCodeScanTime() != null;
+    private boolean nonNullScanTime(final Visit visit) {
+        return visit.getScanTime() != null;
     }
 
-    private DecodedVisit decode(Visit visit, Instant pivotDate) {
+    private DecodedVisit decode(final Visit visit, final Instant pivotDate) {
         try {
-            final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(visit.getLocationSpecificPart());
+            final var binaryLocationSpecificPart = getUrlDecoder().decode(visit.getLocationSpecificPart());
             return DecodedVisit.builder()
                     .encryptedLocationSpecificPart(decoder.decodeHeader(binaryLocationSpecificPart))
-                    .qrCodeScanTime(visit.getQrCodeScanTime())
-                    .isBackward(visit.getQrCodeScanTime().isBefore(pivotDate))
+                    .qrCodeScanTime(visit.getScanTime())
+                    .isBackward(visit.getScanTime().isBefore(pivotDate))
                     .build();
         } catch (CleaEncodingException e) {
             log.warn(
                     "report: {} rejected: Invalid format",
-                    MessageFormatter.truncateQrCode(visit.getLocationSpecificPart())
+                    truncateQrCode(visit.getLocationSpecificPart())
             );
             return null;
         }
     }
 
-    private boolean isOutdated(Visit visit, Instant now) {
-        final var daysBetweenScanTimeAndNow = DAYS.between(visit.getQrCodeScanTime(), now);
+    private boolean isOutdated(final Visit visit, final Instant now) {
+        final var daysBetweenScanTimeAndNow = DAYS.between(visit.getScanTime(), now);
         if (daysBetweenScanTimeAndNow > properties.getRetentionDurationInDays()) {
-            log.warn("report: {} rejected: Outdated", MessageFormatter.truncateQrCode(visit.getLocationSpecificPart()));
+            log.warn("report: {} rejected: Outdated", truncateQrCode(visit.getLocationSpecificPart()));
             return true;
         }
         return false;
     }
 
-    private boolean isFuture(Visit visit, Instant now) {
-        boolean future = visit.getQrCodeScanTime().isAfter(now);
+    private boolean isFuture(final Visit visit, final Instant now) {
+        boolean future = visit.getScanTime().isAfter(now);
         if (future) {
             log.warn(
-                    "report: {} rejected: In future", MessageFormatter.truncateQrCode(visit.getLocationSpecificPart())
+                    "report: {} rejected: In future", truncateQrCode(visit.getLocationSpecificPart())
             );
         }
         return future;
     }
 
-    private boolean isDuplicatedScan(DecodedVisit lsp, List<DecodedVisit> cleaned) {
+    private boolean isDuplicatedScan(final DecodedVisit lsp, final List<DecodedVisit> cleaned) {
         return cleaned.stream().anyMatch(cleanedLsp -> this.isDuplicatedScan(lsp, cleanedLsp));
     }
 
-    private boolean isDuplicatedScan(DecodedVisit one, DecodedVisit other) {
+    private boolean isDuplicatedScan(final DecodedVisit one, final DecodedVisit other) {
         if (!one.getLocationTemporaryPublicId().equals(other.getLocationTemporaryPublicId())) {
             return false;
         }
@@ -134,7 +138,7 @@ public class ReportService {
         return false;
     }
 
-    private List<DecodedVisit> pruneDuplicates(List<DecodedVisit> locationSpecificParts) {
+    private List<DecodedVisit> pruneDuplicates(final List<DecodedVisit> locationSpecificParts) {
         List<DecodedVisit> cleaned = new ArrayList<>();
         locationSpecificParts.forEach(it -> {
             if (!this.isDuplicatedScan(it, cleaned)) {
@@ -144,7 +148,7 @@ public class ReportService {
         return cleaned;
     }
 
-    private Instant validatePivotDate(Instant pivotDate, Instant now) {
+    private Instant validatePivotDate(final Instant pivotDate, final Instant now) {
         Instant nowWithoutMilis = now.truncatedTo(ChronoUnit.SECONDS);
         Instant retentionDateLimit = nowWithoutMilis.minus(properties.getRetentionDurationInDays(), DAYS);
         if (pivotDate.isAfter(now) || pivotDate.isBefore(retentionDateLimit)) {

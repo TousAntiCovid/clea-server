@@ -15,11 +15,11 @@ public class Visit {
      */
     String locationSpecificPart;
 
-    Instant qrCodeScanTime;
+    Instant scanTime;
 
-    public Visit(String locationSpecificPart, Long qrCodeScanTimeAsNtpTimestamp) {
+    public Visit(String locationSpecificPart, Long scanTimeAsNtpTimestamp) {
         this.locationSpecificPart = locationSpecificPart;
-        this.qrCodeScanTime = qrCodeScanTimeAsNtpTimestamp == null ? null
-                : TimeUtils.instantFromTimestamp(qrCodeScanTimeAsNtpTimestamp);
+        this.scanTime = scanTimeAsNtpTimestamp == null ? null
+                : TimeUtils.instantFromTimestamp(scanTimeAsNtpTimestamp);
     }
 }
