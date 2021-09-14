@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import static fr.gouv.clea.ws.utils.MessageFormatter.truncateQrCode;
 import static java.time.Instant.now;
@@ -36,10 +38,20 @@ public class ReportService {
 
     private final ProducerService producerService;
 
-    public int report(final Instant pivotDate, final List<Visit> visits) {
+    public int reportWithPivotDate(final Instant pivotDate, final List<Visit> visits) {
         final var now = now();
-        final var validatedPivotDate = this.validatePivotDate(pivotDate, now);
 
+        return report(pivotDate, visits, now);
+    }
+
+    public int reportWithoutPivotDate(final List<Visit> visits) {
+        final var now = now();
+
+        return report(now.minus(14, DAYS), visits, now);
+    }
+
+    private int report(final Instant pivotDate, final List<Visit> visits, final Instant now) {
+        final var validatedPivotDate = this.validatePivotDate(pivotDate, now);
         final var verifiedAndDecodedVisits = visits.stream()
                 .filter(Objects::nonNull)
                 .filter(this::nonBlankBase64urlLocationSpecificPart)

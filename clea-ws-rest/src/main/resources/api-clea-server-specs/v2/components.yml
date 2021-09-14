@@ -9,7 +9,7 @@ components:
         pivotDate:
           type: string
           format: date-time
-          description: An estimate date of contamination
+          description: Estimated ISO 8601 instant of contamination
         visits:
           type: array
           items:

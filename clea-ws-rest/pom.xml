@@ -155,11 +155,14 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/src/main/resources/api-clea-server-specs/v1/api-clea-server-v1.yml
+                                ${project.basedir}/src/main/resources/api-clea-server-specs/v1/openapi-clea-server-v1.yml
                             </inputSpec>
                             <apiPackage>fr.gouv.clea.ws.api.v1</apiPackage>
-                            <modelPackage
-              >fr.gouv.clea.ws.api.v1.model</modelPackage>
+                            <modelPackage>fr.gouv.clea.ws.api.v1.model
+                            </modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -169,11 +172,19 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/src/main/resources/api-clea-server-specs/v2/with-validation.yml
+                                ${project.basedir}/src/main/resources/api-clea-server-specs/v2/openapi-with-validation-clea-server-v2.yml
                             </inputSpec>
                             <apiPackage>fr.gouv.clea.ws.api.v2</apiPackage>
-                            <modelPackage
-              >fr.gouv.clea.ws.api.v2.model</modelPackage>
+                            <modelPackage>fr.gouv.clea.ws.api.v2.model
+                            </modelPackage>
+                            <typeMappings>
+                                <typeMapping
+                >OffsetDateTime=Instant</typeMapping>
+                            </typeMappings>
+                            <importMappings>
+                                <importMapping
+                >java.time.OffsetDateTime=java.time.Instant</importMapping>
+                            </importMappings>
                         </configuration>
                     </execution>
                     <execution>
@@ -183,14 +194,22 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/src/main/resources/api-clea-server-specs/v2/without-validation.yml
+                                ${project.basedir}/src/main/resources/api-clea-server-specs/v2/openapi-without-validation-clea-server-v2.yml
                             </inputSpec>
                             <apiPackage>fr.gouv.clea.ws.api.v2</apiPackage>
-                            <modelPackage
-              >fr.gouv.clea.ws.api.v2.model</modelPackage>
+                            <modelPackage>fr.gouv.clea.ws.api.v2.model
+                            </modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
+                            <typeMappings>
+                                <typeMapping
+                >OffsetDateTime=Instant</typeMapping>
+                            </typeMappings>
+                            <importMappings>
+                                <importMapping
+                >java.time.OffsetDateTime=java.time.Instant</importMapping>
+                            </importMappings>
                         </configuration>
                     </execution>
                 </executions>

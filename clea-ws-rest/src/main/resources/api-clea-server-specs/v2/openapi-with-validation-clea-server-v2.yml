@@ -47,3 +47,39 @@ paths:
             application/json:
               schema:
                 "$ref": "components.yml#/components/schemas/ErrorResponse"
+  "/api/v2/wreport":
+    post:
+      tags:
+        - withoutValidation
+      summary: Upload locations history
+      operationId: wreport
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "components.yml#/components/schemas/ReportRequest"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                "$ref": "components.yml#/components/schemas/ReportResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                "$ref": "components.yml#/components/schemas/ErrorResponse"
+        "401":
+          description: Invalid authentication
+          content:
+            application/json:
+              schema:
+                "$ref": "components.yml#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                "$ref": "components.yml#/components/schemas/ErrorResponse"

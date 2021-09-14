@@ -36,7 +36,7 @@ public class CleaController implements CleaApi {
                 .map(this::toVisitNullSafe)
                 .collect(toList());
 
-        final var acceptedVisits = reportService.report(pivotDate, visits);
+        final var acceptedVisits = reportService.reportWithPivotDate(pivotDate, visits);
         final var message = String.format("%d/%d accepted visits", acceptedVisits, reportRequest.getVisits().size());
         log.info(message);
 

@@ -64,7 +64,7 @@ class ReportServiceTest {
                 newVisit("33333333-3333-3333-3333-333333333333", now) // pass
         );
 
-        final var acceptedCount = reportService.report(now.minus(5, DAYS), visits);
+        final var acceptedCount = reportService.reportWithPivotDate(now.minus(5, DAYS), visits);
 
         verify(producerService).produceVisits(acceptedVisits.capture());
         assertThat(acceptedVisits.getValue())
@@ -87,7 +87,7 @@ class ReportServiceTest {
                 newVisit("33333333-3333-3333-3333-333333333333", now.plus(1, DAYS)) // don't pass
         );
 
-        final var acceptedCount = reportService.report(now.minus(5, DAYS), visits);
+        final var acceptedCount = reportService.reportWithPivotDate(now.minus(5, DAYS), visits);
 
         verify(producerService).produceVisits(acceptedVisits.capture());
         assertThat(acceptedVisits.getValue())
@@ -111,7 +111,7 @@ class ReportServiceTest {
                 newVisit("44444444-4444-4444-4444-444444444444", now) // pass
         );
 
-        final var acceptedCount = reportService.report(now.minus(5, DAYS), visits);
+        final var acceptedCount = reportService.reportWithPivotDate(now.minus(5, DAYS), visits);
 
         verify(producerService).produceVisits(acceptedVisits.capture());
         assertThat(acceptedVisits.getValue())
@@ -134,7 +134,7 @@ class ReportServiceTest {
                 newVisit("22222222-2222-2222-2222-222222222222", now.plus(2, SECONDS)) // don't pass
         );
 
-        final var acceptedCount = reportService.report(now.minus(5, DAYS), visits);
+        final var acceptedCount = reportService.reportWithPivotDate(now.minus(5, DAYS), visits);
 
         verify(producerService).produceVisits(acceptedVisits.capture());
         assertThat(acceptedVisits.getValue())
@@ -165,7 +165,7 @@ class ReportServiceTest {
                 newVisit("33333333-3333-3333-3333-333333333333", now) // don't pass (duplicate)
         );
 
-        final var acceptedCount = reportService.report(now.minus(5, DAYS), visits);
+        final var acceptedCount = reportService.reportWithPivotDate(now.minus(5, DAYS), visits);
 
         verify(producerService).produceVisits(acceptedVisits.capture());
         assertThat(acceptedVisits.getValue())

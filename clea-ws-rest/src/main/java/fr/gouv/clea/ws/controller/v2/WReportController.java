@@ -10,14 +10,13 @@ import fr.gouv.clea.ws.service.model.Visit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static java.lang.Integer.toUnsignedLong;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @RestController
-@RequestMapping(path = "/api/clea/v2")
 @RequiredArgsConstructor
 @Slf4j
 public class WReportController implements WithoutValidationApi {
@@ -25,32 +24,31 @@ public class WReportController implements WithoutValidationApi {
     private final ReportService reportService;
 
     @Override
-    public ResponseEntity<ReportResponse> wreport(ReportRequest reportRequest) {
+    public ResponseEntity<ReportResponse> wreport(final ReportRequest reportRequest) {
         nonNullPivotDateOrThrowBadRequest(reportRequest);
         nonEmptyVisitsOrThrowBadRequest(reportRequest);
 
-        final var pivotDate = reportRequest.getPivotDate().toInstant();
         final var visits = reportRequest.getVisits()
                 .stream()
                 .map(this::toVisitNullSafe)
                 .collect(toList());
 
-        final var acceptedVisits = reportService.report(pivotDate, visits);
+        final var acceptedVisits = reportService.reportWithPivotDate(reportRequest.getPivotDate(), visits);
 
         return ResponseEntity.ok(
                 ReportResponse.builder()
-                        .accepted(Integer.toUnsignedLong(acceptedVisits))
-                        .rejected(Integer.toUnsignedLong(reportRequest.getVisits().size() - acceptedVisits))
+                        .accepted(toUnsignedLong(acceptedVisits))
+                        .rejected(toUnsignedLong(reportRequest.getVisits().size() - acceptedVisits))
                         .build()
         );
     }
 
-    private Visit toVisitNullSafe(fr.gouv.clea.ws.api.v2.model.Visit visit) {
+    private Visit toVisitNullSafe(final fr.gouv.clea.ws.api.v2.model.Visit visit) {
         return visit == null ? null
-                : new Visit(visit.getEncryptedLocationSpecificPart(), visit.getScanTime().toInstant());
+                : new Visit(visit.getEncryptedLocationSpecificPart(), visit.getScanTime());
     }
 
-    private void nonNullPivotDateOrThrowBadRequest(ReportRequest reportRequest) {
+    private void nonNullPivotDateOrThrowBadRequest(final ReportRequest reportRequest) {
         if (reportRequest.getPivotDate() == null) {
             throw new CleaBadRequestException(
                     ValidationError.builder()
@@ -63,7 +61,7 @@ public class WReportController implements WithoutValidationApi {
         }
     }
 
-    private void nonEmptyVisitsOrThrowBadRequest(ReportRequest reportRequest) {
+    private void nonEmptyVisitsOrThrowBadRequest(final ReportRequest reportRequest) {
         if (isEmpty(reportRequest.getVisits())) {
             throw new CleaBadRequestException(
                     ValidationError.builder()
