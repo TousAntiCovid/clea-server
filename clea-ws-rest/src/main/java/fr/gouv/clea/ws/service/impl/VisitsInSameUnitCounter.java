@@ -21,11 +21,10 @@ public class VisitsInSameUnitCounter {
 
     DecodedVisit incrementIfScannedInSameTimeUnitThanLastScanTime(final DecodedVisit decodedVisit) {
         final Instant qrCodeScanTime = decodedVisit.getQrCodeScanTime();
-        if (this.getLastScanTime() == null) {
-            this.setLastScanTime(qrCodeScanTime);
-        } else if (visitIsScannedAfterLessThanExposureTime(qrCodeScanTime)) {
+        if ((this.getLastScanTime() != null) && (visitIsScannedAfterLessThanExposureTime(qrCodeScanTime))) {
             this.incrementScanInSameUnitCount();
         }
+        this.setLastScanTime(qrCodeScanTime);
         return decodedVisit;
     }
 

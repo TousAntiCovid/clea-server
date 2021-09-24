@@ -35,6 +35,7 @@ class VisitsInSameCounterTest {
         counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisit);
 
         assertThat(counter.getCount()).isEqualTo(initialCount + 1);
+        assertThat(counter.getLastScanTime()).isEqualTo(currentVisitScanTime);
     }
 
     @Test
@@ -51,6 +52,7 @@ class VisitsInSameCounterTest {
         counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisit);
 
         assertThat(counter.getCount()).isEqualTo(initialCount);
+        assertThat(counter.getLastScanTime()).isEqualTo(currentVisitScanTime);
     }
 
     @Test
