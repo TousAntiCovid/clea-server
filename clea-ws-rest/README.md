@@ -39,7 +39,8 @@ the mobile application determines a pivot date of contagiousness.
 
 The structure received by this module is:
 
-- pivotDateAsNtpTimestamp : pivotDate as NTP Timestamp
+- pivotDateAsNtpTimestamp : pivotDate as NTP Timestamp. It pivot date is less than now - property clea.conf.retentionDurationInDays days, then
+  the pivot date used to detect backward or forward visits will be (now - property clea.conf.retentionDurationInDays days)
 - An array of visits composed of:
 
   . qrCodeScanTime : date of scan as NTP Timestamp
@@ -65,9 +66,19 @@ The data model pushed to Kafka is:
 
 ### Statistiques
 
-Duplicate : Same LocationId in less than 30''
-isClosed: 2 scan for 2 locations.
-isClosed Après duplicated qui a la même durée que exposureTimePeriod.
+This module a row of statistics for each report to a dedicated Kafka topic.
+
+the data model used for each report is:
+
+- timestamp (long): time the report was received as an NTP Timestamp.
+- reported (int): number of visits reported in the report
+- rejected (int): the causes of the rejections are:
+  - outdate : number of days between now and visit.qrCodeScanTime > property clea.conf.retentionDurationInDays (14 days by default)
+  - future: visit.qrCodeScanTime > now.
+  - duplicated scan: For the same LocationId, a second scan take place before property clea.conf.duplicateScanThresholdInSeconds (1800 sec/ 30 minutes)
+- backwards (int): visit.qrCodeScanTime < pivotDate
+- forwards (int): visit.qrCodeScanTime >= pivotDate
+- close (int): count of non-rejected visits, those with a different locationTemporaryPublicId and a scan date interval less than the duration of a slot (property clea.conf.exposureTimeUnitInSeconds 1800sec/30 min by default)
 
 ### Security
 
@@ -86,20 +97,22 @@ Build clea-server project to build all the modules.
 This module is an uber-jar. You can use this command to execute it:
 
 ```bash
-java -jar target/clea-ws-rest*-exec.jar --spring.profiles.active=dev
+java -jar target/clea-ws-rest*-exec.jar
 ```
 
 This module can be executed by maven:
 
 ```bash
-mvn spring-boot:run -Dspring-boot.run.arguments=--spring.profiles.active=dev
-```
-
-This application can be packaged as Container image then executed :
-
-```bash
 $ docker build -t tac/clea-ws-rest:latest .
 $ docker run -it --rm --name clea-ws-rest -p 8080:8080 clea-ws-rest:latest  --spring.profiles.active=dev,docker
+```
+
+the docker-compose.yml at the root of clea-server execute this service
+
+```bash
+$ docker-compose up
+#or
+$ docker-compose up clea-ws-rest
 ```
 
 Display the Clea API and use it: http://localhost:8080/swagger-ui/

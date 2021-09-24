@@ -67,12 +67,13 @@ If the transfert fails (ElasticSearch not available), clea-ws constantly tries t
 Each valid decrypted visit is recorded in ElasticSearch (without locationTemporaryPublicId).
 Document sent to ElasticSearch is:
 
-- qrCodeScanTime : TODO / Trunc by ExposureTimeE property.
-- venueType
-- venueCategory1
-- venueCategory2
-- backward: 0/1
-- forward: 0/1
+- qrCodeScanTime : scan date truncated per statistic slot duration (property clea.conf.statSlotDurationInSeconds)
+  A statistic Slot can be different from a cluster slot.
+- venueType (int): a location type (ex restaurant)
+- venueCategory1: a caracteristic for the location (ex number of client)
+- venueCategory2: a caracteristic for the location (ex surface)
+- backward: Number of backward visits received for the same period and location type (type,categ1/categ2)
+- forward: Number of forward visits received for the same period and location type
 
 After 14 days (retention date), we save an aggregate sum of backward and forward visits per period (1/2 hours),
 and the detailed documents are removed from Elasticsearch.
