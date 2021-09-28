@@ -11,6 +11,7 @@ import fr.inria.clea.lsp.utils.TimeUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
@@ -116,9 +117,9 @@ public class LocationQrCodeGenerator {
      */
     public QRCode getQrCodeAt(Instant instant) throws CleaCryptoException {
         Period period = this.findOrCreatePeriod(instant);
-        QRCode qr = this.findOrCreateQrCode(period, instant);
-        log.debug("QR Code At {} : {}", instant.toString(), qr.getQrCode());
-        return qr;
+        QRCode qrCode = this.findOrCreateQrCode(period, instant);
+        log.debug("QR Code At {} : {}", instant.toString(), qrCode.getDeepLink());
+        return qrCode;
     }
 
     private Period findOrCreatePeriod(Instant instant) {
@@ -164,22 +165,23 @@ public class LocationQrCodeGenerator {
         return Optional.empty();
     }
 
+    @SneakyThrows
     private QRCode createQrCode(Period period, Instant instant) throws CleaCryptoException {
-        QRCode qr;
+        final QRCode qrCode;
         if (this.qrCodeRenewalInterval == 0) {
             String deepLink = this.location.newDeepLink(period.getStartTime());
-            qr = new QRCode(deepLink, period.getStartTime(), this.qrCodeRenewalInterval);
+            qrCode = new QRCode(deepLink, period.getStartTime(), this.qrCodeRenewalInterval);
         } else {
             Instant qrCodeValidityStartTime = instant.minus(
                     Duration.between(instant, period.getStartTime()).abs().getSeconds() % this.qrCodeRenewalInterval,
                     ChronoUnit.SECONDS
             );
             String deepLink = this.location.newDeepLink(period.startTime, qrCodeValidityStartTime);
-            qr = new QRCode(deepLink, qrCodeValidityStartTime, this.qrCodeRenewalInterval);
+            qrCode = new QRCode(deepLink, qrCodeValidityStartTime, this.qrCodeRenewalInterval);
         }
-        this.generatedQRs.get(period).add(qr);
+        this.generatedQRs.get(period).add(qrCode);
         log.debug("new QR created");
-        return qr;
+        return qrCode;
     }
 
     public static class InvalidInstantException extends IllegalArgumentException {
