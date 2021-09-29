@@ -265,7 +265,7 @@ class ReportServiceTest {
                     newVisit(uuidA, TimeUtils.ntpTimestampFromInstant(now)), // pass
                     newVisit(uuidB, TimeUtils.ntpTimestampFromInstant(now.minus(3, ChronoUnit.HOURS))), // pass
                     newVisit(uuidB, TimeUtils.ntpTimestampFromInstant(now)), // don't pass
-                    newVisit(uuidC, TimeUtils.ntpTimestampFromInstant(now)), // pass
+                    newVisit(uuidC, TimeUtils.ntpTimestampFromInstant(now)), // pass as a closed with uuidA at same time
                     newVisit(uuidC, TimeUtils.ntpTimestampFromInstant(now)) /* don't pass */
             );
 
@@ -274,7 +274,7 @@ class ReportServiceTest {
             List<ILoggingEvent> logsList = loggingEventListAppender.list;
 
             assertThat(logsList).extracting("formattedMessage")
-                    .contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 2, 0, 4, 0));
+                    .contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 2, 0, 4, 1));
         }
 
         @Test
@@ -344,6 +344,68 @@ class ReportServiceTest {
             List<ILoggingEvent> logsList = loggingEventListAppender.list;
             assertThat(logsList).extracting("formattedMessage")
                     .contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 1, 0, 1, 0));
+        }
+
+        @Test
+        void test_that_closed_visits_increments_closed_visits_count() {
+            long pivotDate = TimeUtils.ntpTimestampFromInstant(now);
+            UUID uuid1 = UUID.randomUUID();
+            UUID uuid2 = UUID.randomUUID();
+            UUID uuid3 = UUID.randomUUID();
+            List<Visit> visits = List.of(
+                    newVisit(uuid1, TimeUtils.ntpTimestampFromInstant(now.minus(4, ChronoUnit.DAYS))), // pass
+                    newVisit(uuid2, TimeUtils.ntpTimestampFromInstant(now.minus(2, ChronoUnit.DAYS))), // closed
+                    newVisit(
+                            uuid3,
+                            TimeUtils.ntpTimestampFromInstant(
+                                    now.minus(2, ChronoUnit.DAYS).minus(29, ChronoUnit.MINUTES)
+                            )
+                    ) /* closed */
+            );
+
+            reportService.report(new ReportRequest(visits, pivotDate));
+
+            List<ILoggingEvent> logsList = loggingEventListAppender.list;
+            assertThat(logsList).extracting("formattedMessage")
+                    .contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 0, 3, 0, 1));
+        }
+
+        @Test
+        void test_that_many_closed_visits_increments_closed_visits_count() {
+            long pivotDate = TimeUtils.ntpTimestampFromInstant(now);
+            UUID uuid1 = UUID.randomUUID();
+            UUID uuid2 = UUID.randomUUID();
+            UUID uuid3 = UUID.randomUUID();
+            UUID uuid4 = UUID.randomUUID();
+            UUID uuid5 = UUID.randomUUID();
+            UUID uuid6 = UUID.randomUUID();
+            List<Visit> visits = List.of(
+                    newVisit(uuid2, TimeUtils.ntpTimestampFromInstant(now.minus(2, ChronoUnit.DAYS))), // closed
+                    newVisit(
+                            uuid3,
+                            TimeUtils.ntpTimestampFromInstant(
+                                    now.minus(2, ChronoUnit.DAYS).minus(29, ChronoUnit.MINUTES)
+                            )
+                    ), /* closed to UUID2 */
+                    newVisit(
+                            uuid4,
+                            TimeUtils
+                                    .ntpTimestampFromInstant(now.minus(2, ChronoUnit.DAYS).plus(29, ChronoUnit.MINUTES))
+                    ), /* closed to UUID2 */
+                    newVisit(uuid5, TimeUtils.ntpTimestampFromInstant(now.minus(1, ChronoUnit.DAYS))), /* closed */
+                    newVisit(
+                            uuid6,
+                            TimeUtils
+                                    .ntpTimestampFromInstant(now.minus(1, ChronoUnit.DAYS).plus(29, ChronoUnit.MINUTES))
+                    ), /* closed to UUID5 */
+                    newVisit(uuid1, TimeUtils.ntpTimestampFromInstant(now.minus(4, ChronoUnit.DAYS))) // pass
+            );
+
+            reportService.report(new ReportRequest(visits, pivotDate));
+
+            List<ILoggingEvent> logsList = loggingEventListAppender.list;
+            assertThat(logsList).extracting("formattedMessage")
+                    .contains(String.format("BATCH_REPORT %s#%s#%s#%s#%s", visits.size(), 0, 6, 0, 3));
         }
     }
 }
