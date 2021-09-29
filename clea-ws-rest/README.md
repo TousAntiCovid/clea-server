@@ -1,6 +1,6 @@
 ## Clea Ws Rest
 
-Exposed [REST APIs]("src/main/resources/api-report-v1.yml") for reporting 1..\* visits.
+Exposed [REST APIs]("src/main/resources/openapi-clea-server-v1.yml") for reporting 1..\* visits.
 
 ### Validity verifications:
 

@@ -142,11 +142,12 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/src/main/resources/api-report-v1.yml
+                                ${project.basedir}/src/main/resources/openapi-clea-server-v1.yml
                             </inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>fr.gouv.clea.ws.api</apiPackage>
-                            <modelPackage>fr.gouv.clea.ws.api.model</modelPackage>
+                            <modelPackage
+              >fr.gouv.clea.ws.api.model</modelPackage>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
                                 <useBeanValidation>false</useBeanValidation>
