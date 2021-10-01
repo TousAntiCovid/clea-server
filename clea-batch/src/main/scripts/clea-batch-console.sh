@@ -78,17 +78,10 @@ if [ $NB_INDEX -gt 1 ] ; then
 fi
 
 copy_files_to_bucket $BUCKET_OUTSCALE $PROFILE_OUTSCALE $ENDPOINT_OUTSCALE
+copy_files_to_bucket $BUCKET_SCALEWAY $PROFILE_SCALEWAY $ENDPOINT_SCALEWAY
 
 purge_old_bucket_iterations $BUCKET_OUTSCALE $PROFILE_OUTSCALE $ENDPOINT_OUTSCALE
-
-# COPY TO SCALEWAY (optional)
-# --------------------
-if [ -n "$BUCKET_SCALEWAY" ] &&  [ -n "$PROFILE_SCALEWAY" ]  &&  [ -n "$ENDPOINT_SCALEWAY" ] ; then
-
-  copy_files_to_bucket $BUCKET_SCALEWAY $PROFILE_SCALEWAY $ENDPOINT_SCALEWAY
-
-  purge_old_bucket_iterations $BUCKET_SCALEWAY $PROFILE_SCALEWAY $ENDPOINT_SCALEWAY
-fi
+purge_old_bucket_iterations $BUCKET_SCALEWAY $PROFILE_SCALEWAY $ENDPOINT_SCALEWAY
 
 # purge batch temporary files
 info "Purging working files"
