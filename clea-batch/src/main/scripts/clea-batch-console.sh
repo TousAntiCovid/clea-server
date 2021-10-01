@@ -7,14 +7,14 @@ info() { echo "`date "+%Y-%m-%d %T.999"`  INFO 0 --- [     clea-batch] clea-batc
 
 WORKDIR=${CLEA_BATCH_CLUSTER_OUTPUT_PATH:-/tmp/v1}
 
-BUCKET_OUTSCALE=${BUCKET_OUTSCALE:-}
-BUCKET_SCALEWAY=${BUCKET_SCALEWAY:-}
+[ -n "${BUCKET_OUTSCALE}" ] || die "Environment variable BUCKET_OUTSCALE required"
+[ -n "${BUCKET_SCALEWAY}" ] || die "Environment variable BUCKET_SCALEWAY required"
 
-PROFILE_OUTSCALE=${PROFILE_OUTSCALE:-s3outscale} 
+PROFILE_OUTSCALE=${PROFILE_OUTSCALE:-s3outscale}
 PROFILE_SCALEWAY=${PROFILE_SCALEWAY:-s3scaleway}
 
-ENDPOINT_OUTSCALE=${ENDPOINT_OUTSCALE:-} # use https://oos.eu-west-2.outscale.com/ https://oos.cloudgouv-eu-west-1.outscale.com
-ENDPOINT_SCALEWAY=${ENDPOINT_SCALEWAY:-} # https://s3.fr-par.scw.cloud
+[ -n "${ENDPOINT_OUTSCALE}" ] || die "Environment variable ENDPOINT_OUTSCALE required"
+[ -n "${ENDPOINT_SCALEWAY}" ] || die "Environment variable ENDPOINT_OUTSCALE required"
 
 BUCKET_FILES_RETENTION_IN_DAYS=${BUCKET_FILES_RETENTION_IN_DAYS:-15}
 
@@ -55,8 +55,6 @@ purge_old_bucket_iterations() {
       | xargs -n1 -t -I {} aws s3 --profile=$PROFILE --endpoint-url=$ENDPOINT rm s3://${BUCKET}/{}
 
 }
-
-[ -n "${BUCKET_OUTSCALE}" ] || die "Environment variable BUCKET_OUTSCALE required"
 
 if ! java -jar clea-batch.jar $@ ; then
     die "Java batch fails"
