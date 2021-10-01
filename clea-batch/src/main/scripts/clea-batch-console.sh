@@ -6,10 +6,9 @@ die()  { echo "`date "+%Y-%m-%d %T.999"` ERROR 0 --- [     clea-batch] clea-batc
 info() { echo "`date "+%Y-%m-%d %T.999"`  INFO 0 --- [     clea-batch] clea-batch.sh                            : $*"; }
 
 WORKDIR=${CLEA_BATCH_CLUSTER_OUTPUT_PATH:-/tmp/v1}
-BUCKET=${BUCKET:-}
 
-BUCKET_OUTSCALE=${BUCKET_OUTSCALE:-$BUCKET}
-BUCKET_SCALEWAY=${BUCKET_SCALEWAY:-$BUCKET}
+BUCKET_OUTSCALE=${BUCKET_OUTSCALE:-}
+BUCKET_SCALEWAY=${BUCKET_SCALEWAY:-}
 
 PROFILE_OUTSCALE=${PROFILE_OUTSCALE:-s3outscale} 
 PROFILE_SCALEWAY=${PROFILE_SCALEWAY:-s3scaleway}
@@ -24,6 +23,22 @@ set -o errtrace  # trace ERR through 'time command' and other functions
 set -o nounset   ## set -u : exit the script if you try to use an uninitialised variable
 #set -o errexit   ## set -e : exit the script if any statement returns a non-true return value
 set +e
+
+copy_files_to_bucket() {
+
+  local PROFILE=$1
+  local BUCKET=$2
+  local ENDPOINT=$3
+
+  info "Copying to $ENDPOINT ...."
+  AWS_OPTS="--profile=$PROFILE --endpoint-url=$ENDPOINT --no-progress"
+
+  # All files except indexCluster.json
+  aws $AWS_OPTS s3 sync --acl public-read --exclude=clusterIndex.json $WORKDIR s3://${BUCKET}/v1 || die "AWS s3 fails to copy cluster files to bucket"
+  # only indexCluster.json at the root of "v1"
+  aws $AWS_OPTS s3 cp   --acl public-read $(find $WORKDIR -type f -name clusterIndex.json) s3://${BUCKET}/v1/ || die "AWS s3 fails to copy clusterIndex file to bucket"
+
+}
 
 
 [ -n "${BUCKET_OUTSCALE}" ] || die "Environment variable BUCKET_OUTSCALE required"
@@ -54,18 +69,7 @@ if [ $NB_INDEX -gt 1 ] ; then
   die "Many clusterIndex.json found ($NB_INDEX), possible partial or failed batch already present"
 fi
 
-# Copy clusterfiles to s3
-# =======================
-
-
-info "Copying to OUTSCALE ...."
-AWS_OPTS="--profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE --no-progress"
-BUCKET="$BUCKET_OUTSCALE"
-
-# All files except indexCluster.json
-aws $AWS_OPTS s3 sync --acl public-read --exclude=clusterIndex.json $WORKDIR s3://${BUCKET}/v1 || die "AWS s3 fails to copy cluster files to bucket"
-# only indexCluster.json at the root of "v1"
-aws $AWS_OPTS s3 cp   --acl public-read $(find $WORKDIR -type f -name clusterIndex.json) s3://${BUCKET}/v1/ || die "AWS s3 fails to copy clusterIndex file to bucket"
+copy_files_to_bucket $BUCKET_OUTSCALE $PROFILE_OUTSCALE $ENDPOINT_OUTSCALE
 
 # purge bucket files older than x days
 # add --dryrun for testing purpose
@@ -76,16 +80,7 @@ aws --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE s3 ls --recurs
 # COPY TO SCALEWAY (optional)
 # --------------------
 if [ -n "$BUCKET_SCALEWAY" ] &&  [ -n "$PROFILE_SCALEWAY" ]  &&  [ -n "$ENDPOINT_SCALEWAY" ] ; then
-  info "Copying to SCALEWAY ...."
-  AWS_OPTS="--profile=$PROFILE_SCALEWAY --endpoint-url=$ENDPOINT_SCALEWAY --no-progress"
-  BUCKET=$BUCKET_SCALEWAY
-
-  # All files except indexCluster.json
-  aws $AWS_OPTS s3 sync --acl public-read --exclude=clusterIndex.json $WORKDIR s3://${BUCKET}/v1 || die "AWS s3 fails to copy cluster files to bucket"
-
-  # only indexCluster.json at the root of "v1"
-  aws $AWS_OPTS s3 cp --acl public-read $(find $WORKDIR -type f -name clusterIndex.json) s3://${BUCKET}/v1/ || die "AWS s3 fails to copy clusterIndex file to bucket"
-
+  copy_files_to_bucket $BUCKET_SCALEWAY $PROFILE_SCALEWAY $ENDPOINT_SCALEWAY
 fi
 
 # purge batch temporary files
