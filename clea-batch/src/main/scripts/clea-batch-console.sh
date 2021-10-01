@@ -77,8 +77,8 @@ if [ $NB_INDEX -gt 1 ] ; then
   die "Many clusterIndex.json found ($NB_INDEX), possible partial or failed batch already present"
 fi
 
-copy_files_to_bucket $BUCKET_OUTSCALE $PROFILE_OUTSCALE $ENDPOINT_OUTSCALE
-copy_files_to_bucket $BUCKET_SCALEWAY $PROFILE_SCALEWAY $ENDPOINT_SCALEWAY
+copy_files_to_bucket $PROFILE_OUTSCALE $BUCKET_OUTSCALE  $ENDPOINT_OUTSCALE
+copy_files_to_bucket $PROFILE_SCALEWAY $BUCKET_SCALEWAY  $ENDPOINT_SCALEWAY
 
 purge_old_bucket_iterations $BUCKET_OUTSCALE $PROFILE_OUTSCALE $ENDPOINT_OUTSCALE
 purge_old_bucket_iterations $BUCKET_SCALEWAY $PROFILE_SCALEWAY $ENDPOINT_SCALEWAY
