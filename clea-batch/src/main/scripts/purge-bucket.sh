@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+info() { echo "`date "+%Y-%m-%d %T.999"`  INFO 0 --- [     purge-bucket] purge-bucket.sh                            : $*"; }
+
 WORKDIR=${CLEA_BATCH_CLUSTER_OUTPUT_PATH:-/tmp/v1}
 BUCKET=${BUCKET:-}
 
