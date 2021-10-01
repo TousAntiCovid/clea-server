@@ -40,6 +40,21 @@ copy_files_to_bucket() {
 
 }
 
+purge_old_bucket_iterations() {
+  # purge bucket files older than x days
+  # add --dryrun for testing purpose
+
+  local PROFILE=$1
+  local BUCKET=$2
+  local ENDPOINT=$3
+
+  TODAY_MINUS_RETENTION_DAYS=$(date --date="${BUCKET_FILES_RETENTION_IN_DAYS} days ago" +%Y-%m-%d)
+  info "Purging bucket files older than ${TODAY_MINUS_RETENTION_DAYS}"
+  aws --profile=$PROFILE --endpoint-url=$ENDPOINT s3 ls --recursive s3://${BUCKET}/v1 \
+      | awk -v date=$TODAY_MINUS_RETENTION_DAYS '$1 < date {print $4}' \
+      | xargs -n1 -t -I {} aws s3 --profile=$PROFILE --endpoint-url=$ENDPOINT rm s3://${BUCKET}/{}
+
+}
 
 [ -n "${BUCKET_OUTSCALE}" ] || die "Environment variable BUCKET_OUTSCALE required"
 
@@ -47,13 +62,8 @@ if ! java -jar clea-batch.jar $@ ; then
     die "Java batch fails"
 fi
 
-
-info "Copying files...."
-
-
 # Test that output folder exists, computing NBFILES fails if folder doesn't exist
 [ -d $WORKDIR ] || die "Working directory $WORKDIR not exists" 
-
 
 # count that there is at least "n" cluster files (to not push empty list)
 MIN_FILES=1
@@ -71,16 +81,15 @@ fi
 
 copy_files_to_bucket $BUCKET_OUTSCALE $PROFILE_OUTSCALE $ENDPOINT_OUTSCALE
 
-# purge bucket files older than x days
-# add --dryrun for testing purpose
-TODAY_MINUS_RETENTION_DAYS=$(date --date="${BUCKET_FILES_RETENTION_IN_DAYS} days ago" +%Y-%m-%d)
-info "Purging bucket files older than ${TODAY_MINUS_RETENTION_DAYS}"
-aws --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE s3 ls --recursive s3://${BUCKET}/v1 | awk -v date=$TODAY_MINUS_RETENTION_DAYS '$1 < date {print $4}' | xargs -n1 -t -I {} aws s3 --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE rm s3://${BUCKET}/{}
+purge_old_bucket_iterations $BUCKET_OUTSCALE $PROFILE_OUTSCALE $ENDPOINT_OUTSCALE
 
 # COPY TO SCALEWAY (optional)
 # --------------------
 if [ -n "$BUCKET_SCALEWAY" ] &&  [ -n "$PROFILE_SCALEWAY" ]  &&  [ -n "$ENDPOINT_SCALEWAY" ] ; then
+
   copy_files_to_bucket $BUCKET_SCALEWAY $PROFILE_SCALEWAY $ENDPOINT_SCALEWAY
+
+  purge_old_bucket_iterations $BUCKET_SCALEWAY $PROFILE_SCALEWAY $ENDPOINT_SCALEWAY
 fi
 
 # purge batch temporary files
