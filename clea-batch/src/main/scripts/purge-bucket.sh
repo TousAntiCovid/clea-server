@@ -2,19 +2,15 @@
 
 info() { echo "`date "+%Y-%m-%d %T.999"`  INFO 0 --- [     purge-bucket] purge-bucket.sh                            : $*"; }
 
-WORKDIR=${CLEA_BATCH_CLUSTER_OUTPUT_PATH:-/tmp/v1}
-BUCKET=${BUCKET:-}
-
-BUCKET_OUTSCALE=${BUCKET_OUTSCALE:-$BUCKET}
+BUCKET_OUTSCALE=${BUCKET_OUTSCALE:-}
 PROFILE_OUTSCALE=${PROFILE_OUTSCALE:-s3outscale} 
 ENDPOINT_OUTSCALE=${ENDPOINT_OUTSCALE:-}
 
 BUCKET_FILES_RETENTION_IN_DAYS=${BUCKET_FILES_RETENTION_IN_DAYS:-15}
-
 TODAY_MINUS_RETENTION_DAYS=$(date --date="${BUCKET_FILES_RETENTION_IN_DAYS} days ago" +%Y-%m-%d)
 
 info "Listing bucket files..."
-BUCKET_FILES=${aws --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE s3 ls --recursive s3://${BUCKET}/v1}
+BUCKET_FILES=${aws --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE s3 ls --recursive s3://${BUCKET_OUTSCALE}/v1}
 
 info "Filtering to keep files older than ${TODAY_MINUS_RETENTION_DAYS}..."
 BUCKET_FILES_TO_REMOVE=${${BUCKET_FILES} | awk -v date=$TODAY_MINUS_RETENTION_DAYS '$1 < date {print $4}'}
@@ -40,5 +36,5 @@ done
 info "Purging bucket iterations..."
 for ((i="$START"; i<="$END"; i++))
 do
-    aws s3 rm aws s3 --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE rm s3://${BUCKET}/"$i" --recursive
+    aws s3 rm aws s3 --profile=$PROFILE_OUTSCALE --endpoint-url=$ENDPOINT_OUTSCALE rm s3://${BUCKET_OUTSCALE}/"$i" --recursive
 done
