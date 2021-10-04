@@ -34,8 +34,10 @@ services:
     build: clea-batch
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      BUCKET: clea-batch
+      BUCKET_OUTSCALE: clea-batch
       ENDPOINT_OUTSCALE: http://minio:9000
+      BUCKET_SCALEWAY: clea-batch-scaleway
+      ENDPOINT_SCALEWAY: http://minio:9000
       CLEA_BATCH_LOG_FILE_PATH: /logs
       CLEA_BATCH_LOG_FILE_NAME: clea-batch
     depends_on:
@@ -79,7 +81,7 @@ services:
       MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
       MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     entrypoint: sh
-    command: -c 'mkdir -p /data/clea-batch && /usr/bin/minio server /data'
+    command: -c 'mkdir -p /data/clea-batch /data/clea-batch-scaleway && /usr/bin/minio server /data'
     ports:
       - "9000:9000"
     healthcheck:
