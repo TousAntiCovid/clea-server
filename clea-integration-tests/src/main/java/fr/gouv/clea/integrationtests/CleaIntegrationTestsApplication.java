@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
-@ConfigurationPropertiesScan("fr.gouv.clea.integrationtests.config")
+@ConfigurationPropertiesScan
 public class CleaIntegrationTestsApplication {
 
     public static void main(String[] args) {

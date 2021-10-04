@@ -9,8 +9,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.connect.json.JsonDeserializer;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.ListAssert;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -40,8 +38,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * <p>
  * It starts / closes a consumer before / after each test method.
  * <p>
- * Static methods {@link KafkaManager#assertThatNextRecordsInTopic(int, String)}
- * can be used to verify messages from Kafka.
+ * Static methods {@link KafkaManager#assertThatNextRecordInTopic(String)} can
+ * be used to verify messages from Kafka.
  */
 public class KafkaManager implements TestExecutionListener {
 
@@ -90,11 +88,6 @@ public class KafkaManager implements TestExecutionListener {
     public void afterTestMethod(TestContext testContext) {
         TOPICS.values()
                 .forEach(KafkaTopicListener::stop);
-    }
-
-    public static ListAssert<ConsumerRecord<String, JsonNode>> assertThatNextRecordsInTopic(int expectedRecords,
-            String topicName) {
-        return Assertions.assertThat(TOPICS.get(topicName).getRecords(expectedRecords));
     }
 
     public static KafkaRecordAssert assertThatNextRecordInTopic(String topicName) {

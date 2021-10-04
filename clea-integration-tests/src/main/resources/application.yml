@@ -1,25 +1,6 @@
-clea:
-  ws-rest:
-    base-url: https://signal-api-int.tousanticovid.gouv.fr
-  batch:
-    cluster-file-index-name: clusterIndex.json
-    command:
-      - "sudo"
-      - "systemctl"
-      - "start"
-      - "clea-batch"
-    timeout-in-seconds: 30
-
-  dup-scan-threshold: 10800
-  qr-code-prefix: https://tac.gouv.fr?v=0#
-
+integration-tests:
   server-authority-public-key: 02c3a58bf668fa3fe2fc206152abd6d8d55102adfee68c8b227676d1fe763f5a06
   manual-contact-tracing-authority-public-key: 0280ea16894c9f3b363693666fa88282b25971984f7a4f88e7697fa213e4caff0b
 
-minio:
-  bucket-name: clea-batch
-  default-base-folder: v1
-  access:
-    name: AKIAIOSFODNN7EXAMPLE
-    secret: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-  url: https://clea-batch-int.s3.fr-par.scw.cloud/v1/
+  bucket:
+    bucket-name: clea-batch

@@ -332,7 +332,7 @@ class StatisticsServiceTest {
                 .forEach(pool::submit);
 
         pool.shutdown();
-        assertThat(pool.awaitTermination(30, TimeUnit.SECONDS))
+        assertThat(pool.awaitTermination(60, TimeUnit.SECONDS))
                 .as("pool tasks are all finished")
                 .isTrue();
 

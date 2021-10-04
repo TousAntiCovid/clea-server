@@ -1,70 +1,69 @@
 package fr.gouv.clea.ws.service.impl;
 
 import fr.gouv.clea.ws.model.DecodedVisit;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class VisitsInSameCounterTest {
 
-    private static final Duration exposureTimeUnitInSeconds = Duration.ofSeconds(1800);
+    private static final Duration EXPOSURE_TIME_UNIT = Duration.ofSeconds(1800);
 
-    private final DecodedVisit decodedVisit = Mockito.mock(DecodedVisit.class);
+    private static final Instant NOW = Instant.now();
 
-    @Test
-    void incrementIfScannedInSameTimeUnitThanLastScanTime_increments_counter_when_difference_between_scan_time_is_lower_than_exposureTimeUnit() {
-        final VisitsInSameUnitCounter counter = new VisitsInSameUnitCounter(exposureTimeUnitInSeconds.getSeconds());
-        final int initialCount = 0;
-        counter.setCount(initialCount);
+    private VisitsInSameUnitCounter counter;
 
-        final Instant lastScanTime = Instant.now().minus(exposureTimeUnitInSeconds.minus(1, ChronoUnit.SECONDS));
-        // 1s after
-        final Instant currentVisitScanTime = Instant.now();
-        counter.setLastScanTime(lastScanTime);
-        when(decodedVisit.getQrCodeScanTime()).thenReturn(currentVisitScanTime);
-
-        counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisit);
-
-        assertThat(counter.getCount()).isEqualTo(initialCount + 1);
+    @BeforeEach
+    void setupCounter() {
+        counter = new VisitsInSameUnitCounter(EXPOSURE_TIME_UNIT.getSeconds());
     }
 
     @Test
-    void incrementIfScannedInSameTimeUnitThanLastScanTime_does_not_increment_counter_when_difference_between_scan_time_is_greater_than_exposureTimeUnit() {
-        final VisitsInSameUnitCounter counter = new VisitsInSameUnitCounter(exposureTimeUnitInSeconds.getSeconds());
-        final int initialCount = 0;
-        counter.setCount(initialCount);
+    void one_single_visit_always_generates_a_zero_count() {
+        // given no visit occurred before
 
-        final Instant lastScanTime = Instant.now().minus(exposureTimeUnitInSeconds.plus(1, ChronoUnit.SECONDS));
-        final Instant currentVisitScanTime = Instant.now();
-        counter.setLastScanTime(lastScanTime);
-        when(decodedVisit.getQrCodeScanTime()).thenReturn(currentVisitScanTime);
+        // when a visit occurs now
+        counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisitWithScanTime(NOW));
 
-        counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisit);
-
-        assertThat(counter.getCount()).isEqualTo(initialCount);
+        // then the count of visits in same time unit is 0
+        assertThat(counter.getCount()).isEqualTo(0);
     }
 
     @Test
-    void incrementIfScannedInSameTimeUnitThanLastScanTime_does_not_increment_counter_when_no_lastScanTime_has_already_been_registered() {
-        final VisitsInSameUnitCounter counter = new VisitsInSameUnitCounter(exposureTimeUnitInSeconds.getSeconds());
-        final int initialCount = 0;
-        counter.setCount(initialCount);
+    void can_count_two_successive_visits_in_less_than_exposure_time() {
+        // given a visit occurred 1799 seconds ago
+        final var lastScanTime = NOW.minus(EXPOSURE_TIME_UNIT.minus(1, SECONDS));
+        counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisitWithScanTime(lastScanTime));
 
-        final Instant currentVisitScanTime = Instant.now();
-        when(decodedVisit.getQrCodeScanTime()).thenReturn(currentVisitScanTime);
+        // when another visit occurs now
+        counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisitWithScanTime(NOW));
 
-        counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisit);
+        // then the count of visits in same time unit is 1
+        assertThat(counter.getCount()).isEqualTo(1);
+    }
 
-        assertThat(counter.getLastScanTime()).isEqualTo(currentVisitScanTime);
-        assertThat(counter.getCount()).isEqualTo(initialCount);
+    @Test
+    void ignore_visits_in_future_even_if_scan_times_occured_in_less_than_exposure_time_unit() {
+        // given a visit occurred 1799 seconds in the future
+        final Instant lastScanTime = Instant.now().minus(EXPOSURE_TIME_UNIT.plus(1, SECONDS));
+        counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisitWithScanTime(lastScanTime));
+
+        // when another visit occurs now
+        counter.incrementIfScannedInSameTimeUnitThanLastScanTime(decodedVisitWithScanTime(NOW));
+
+        // then the count of visits in same time unit is 0
+        assertThat(counter.getCount()).isEqualTo(0);
+    }
+
+    private DecodedVisit decodedVisitWithScanTime(Instant scanTime) {
+        return new DecodedVisit(scanTime, null, true);
     }
 }
