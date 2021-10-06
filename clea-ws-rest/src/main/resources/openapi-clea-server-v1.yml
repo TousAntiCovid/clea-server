@@ -42,7 +42,7 @@ paths:
                   value: |-
                     {
                       "success": "true",
-                      "message": "2 qr processed, 0 rejected"
+                      "message": "5/6 accepted visits"
                     }
         "400":
           description: Bad Request

@@ -32,7 +32,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .sessionManagement().sessionCreationPolicy(STATELESS)
                 .and()
-                .csrf().disable();
+                .csrf().disable()
+                .cors();
 
         if (cleaWsProperties.isAuthorizationCheckActive()) {
             http.oauth2ResourceServer()

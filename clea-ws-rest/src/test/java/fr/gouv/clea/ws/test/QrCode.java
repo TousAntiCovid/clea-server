@@ -23,17 +23,17 @@ public class QrCode {
     // manual contact tracing authority public key
     private static final String PK_MCTA = "02c3a58bf668fa3fe2fc206152abd6d8d55102adfee68c8b227676d1fe763f5a06";
 
-    public static Location LOCATION_1;
+    public static final Location LOCATION_1;
 
-    public static URL LOCATION_1_URL;
+    public static final URL LOCATION_1_URL;
 
-    public static String LOCATION_1_LOCATION_SPECIFIC_PART_DECODED_BASE64;
+    public static final String LOCATION_1_LOCATION_SPECIFIC_PART_DECODED_BASE64;
 
-    public static UUID LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID;
+    public static final UUID LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID;
 
-    public static Location LOCATION_2;
+    public static final Location LOCATION_2;
 
-    public static URL LOCATION_2_URL;
+    public static final URL LOCATION_2_URL;
 
     static {
         final var instant = Instant.now()
