@@ -1,5 +1,6 @@
 package fr.gouv.clea.scoring.configuration.exposure;
 
+import fr.gouv.clea.scoring.configuration.ScoringRule;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class ExposureTimeConfigurationConverter implements Converter<String, Exp
     }
 
     public int stringToInt(String s) {
-        return s.equals(WILDCARD) ? ExposureTimeRule.WILDCARD_VALUE : Integer.parseInt(s);
+        return s.equals(WILDCARD) ? ScoringRule.WILDCARD_VALUE : Integer.parseInt(s);
     }
 
 }

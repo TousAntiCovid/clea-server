@@ -21,7 +21,7 @@ import javax.validation.constraints.Min;
 @NoDuplicates
 public class ScoringRule {
 
-    public final static int WILDCARD_VALUE = -1;
+    public static final int WILDCARD_VALUE = -1;
 
     @Min(value = -1)
     private int venueType;

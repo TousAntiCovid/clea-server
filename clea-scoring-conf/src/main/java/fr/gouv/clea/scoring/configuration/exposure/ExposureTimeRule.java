@@ -26,14 +26,4 @@ public class ExposureTimeRule extends ScoringRule {
     @Positive
     private int exposureTimeStaffForward;
 
-    public ExposureTimeRule(int venueType, int venueCategory1, int venueCategory2,
-            int exposureTimeBackward, int exposureTimeForward,
-            int exposureTimeStaffBackward, int exposureTimeStaffForward) {
-        super(venueType, venueCategory1, venueCategory2);
-        this.exposureTimeBackward = exposureTimeBackward;
-        this.exposureTimeForward = exposureTimeForward;
-        this.exposureTimeStaffBackward = exposureTimeStaffBackward;
-        this.exposureTimeStaffForward = exposureTimeStaffForward;
-    }
-
 }

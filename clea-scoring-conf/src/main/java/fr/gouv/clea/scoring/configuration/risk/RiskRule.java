@@ -26,14 +26,4 @@ public class RiskRule extends ScoringRule {
     @Positive
     private float riskLevelForward;
 
-    public RiskRule(int venueType, int venueCategory1, int venueCategory2,
-            int clusterThresholdBackward, int clusterThresholdForward,
-            float riskLevelBackward, float riskLevelForward) {
-        super(venueType, venueCategory1, venueCategory2);
-        this.clusterThresholdBackward = clusterThresholdBackward;
-        this.clusterThresholdForward = clusterThresholdForward;
-        this.riskLevelBackward = riskLevelBackward;
-        this.riskLevelForward = riskLevelForward;
-    }
-
 }

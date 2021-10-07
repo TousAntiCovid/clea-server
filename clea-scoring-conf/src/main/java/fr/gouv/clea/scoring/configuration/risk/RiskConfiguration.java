@@ -13,7 +13,6 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotEmpty;
-
 import java.util.List;
 
 @Validated
@@ -38,6 +37,7 @@ public class RiskConfiguration extends ScoringConfiguration {
         return rules;
     }
 
+    @Override
     public RiskRule getConfigurationFor(int venueType, int venueCategory1, int venueCategory2) {
         return (RiskRule) super.getConfigurationFor(venueType, venueCategory1, venueCategory2);
     }

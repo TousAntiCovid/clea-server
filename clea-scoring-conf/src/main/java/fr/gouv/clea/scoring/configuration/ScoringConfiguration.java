@@ -13,8 +13,10 @@ public abstract class ScoringConfiguration {
 
     public ScoringRule getConfigurationFor(int venueType, int venueCategory1, int venueCategory2) {
         log.debug(
-                "Fetching rules candidates for venueType : {}, venueCategory1 : {}, venuCategory2: {}", venueType,
-                venueCategory1, venueCategory2
+                "Fetching rules candidates for venueType : {}, venueCategory1 : {}, venuCategory2: {}",
+                venueType,
+                venueCategory1,
+                venueCategory2
         );
         Optional<? extends ScoringRule> matchingRule = this.getScorings().stream()
                 .filter(scoring -> scoring.isCompatibleWith(venueType, venueCategory1, venueCategory2))
@@ -22,7 +24,9 @@ public abstract class ScoringConfiguration {
         if (matchingRule.isPresent()) {
             log.debug(
                     "Found matching rule for venueType : {}, venueCategory1 : {}, venuCategory2: {}",
-                    matchingRule.get(), venueType, venueCategory1, venueCategory2
+                    venueType,
+                    venueCategory1,
+                    venueCategory2
             );
             return matchingRule.get();
         } else {
