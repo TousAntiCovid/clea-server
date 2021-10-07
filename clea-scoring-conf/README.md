@@ -86,7 +86,7 @@ VenueType must be specified if it is not the default rule (**validators/Validate
 
 A third validator ensure that there is no duplicates in the rules list (**validators/NoDuplicates**).
 
-If at least one of those are not satisfied, the Spring Boot fail to load.
+If at least one of those are not satisfied, the Spring Boot app fails to start.
 
 TODO:
 
