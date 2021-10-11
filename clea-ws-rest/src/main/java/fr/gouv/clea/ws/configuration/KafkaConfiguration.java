@@ -22,7 +22,7 @@ public class KafkaConfiguration {
 
     @Bean
     public ProducerFactory<String, DecodedVisit> cleaQrCodesTopicFactory() {
-        final var configProps = kafkaProperties.buildConsumerProperties();
+        final var configProps = kafkaProperties.buildProducerProperties();
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaVisitSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
@@ -35,7 +35,7 @@ public class KafkaConfiguration {
 
     @Bean
     public ProducerFactory<String, ReportStat> cleaStatsTopicFactory() {
-        final var configProps = kafkaProperties.buildConsumerProperties();
+        final var configProps = kafkaProperties.buildProducerProperties();
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         configProps.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);

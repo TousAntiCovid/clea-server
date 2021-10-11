@@ -1,13 +1,14 @@
 package fr.gouv.clea.qr.model;
 
 import fr.inria.clea.lsp.EncryptedLocationSpecificPart;
-import fr.inria.clea.lsp.Location;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import fr.inria.clea.lsp.exception.CleaEncodingException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
@@ -18,11 +19,16 @@ import java.util.UUID;
 @NoArgsConstructor
 public class QRCode {
 
-    private String qrCode;
+    private URL deepLink;
 
     private Instant qrCodeValidityStartTime;
 
     private long qrCodeRenewalInterval;
+
+    public QRCode(String deepLink, Instant qrCodeValidityStartTime, long qrCodeRenewalInterval)
+            throws MalformedURLException {
+        this(new URL(deepLink), qrCodeValidityStartTime, qrCodeRenewalInterval);
+    }
 
     public boolean isValidScanTime(Instant instant) {
         if (this.qrCodeRenewalInterval > 0) {
@@ -38,7 +44,7 @@ public class QRCode {
         EncryptedLocationSpecificPart encryptedLsp;
         try {
             encryptedLsp = new LocationSpecificPartDecoder().decodeHeader(
-                    Base64.getUrlDecoder().decode(qrCode.substring(Location.COUNTRY_SPECIFIC_PREFIX.length()))
+                    Base64.getUrlDecoder().decode(deepLink.getRef())
             );
         } catch (CleaEncodingException e) {
             throw new RuntimeException(e);

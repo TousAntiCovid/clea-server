@@ -1,4 +1,4 @@
-package fr.gouv.clea.ws.service.impl;
+package fr.gouv.clea.ws.service;
 
 import fr.gouv.clea.ws.model.DecodedVisit;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,6 +64,9 @@ class VisitsInSameCounterTest {
     }
 
     private DecodedVisit decodedVisitWithScanTime(Instant scanTime) {
-        return new DecodedVisit(scanTime, null, true);
+        return DecodedVisit.builder()
+                .qrCodeScanTime(scanTime)
+                .isBackward(true)
+                .build();
     }
 }

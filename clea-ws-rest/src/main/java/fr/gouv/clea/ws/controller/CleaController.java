@@ -1,92 +1,80 @@
 package fr.gouv.clea.ws.controller;
 
-import fr.gouv.clea.ws.api.CleaWsRestAPI;
-import fr.gouv.clea.ws.dto.ReportResponse;
+import fr.gouv.clea.ws.api.CleaApi;
+import fr.gouv.clea.ws.api.model.ReportRequest;
+import fr.gouv.clea.ws.api.model.ReportResponse;
+import fr.gouv.clea.ws.api.model.ValidationError;
 import fr.gouv.clea.ws.exception.CleaBadRequestException;
-import fr.gouv.clea.ws.model.DecodedVisit;
-import fr.gouv.clea.ws.service.IReportService;
-import fr.gouv.clea.ws.utils.BadArgumentsLoggerService;
-import fr.gouv.clea.ws.utils.UriConstants;
-import fr.gouv.clea.ws.vo.ReportRequest;
-import fr.gouv.clea.ws.vo.Visit;
+import fr.gouv.clea.ws.service.ReportService;
+import fr.gouv.clea.ws.service.model.Visit;
+import fr.inria.clea.lsp.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.WebRequest;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toList;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @RestController
-@RequestMapping(path = "${controller.path.prefix}")
+@RequestMapping(path = "/api/clea/v1")
 @RequiredArgsConstructor
 @Slf4j
-public class CleaController implements CleaWsRestAPI {
+public class CleaController implements CleaApi {
 
-    public static final String MALFORMED_VISIT_LOG_MESSAGE = "Filtered out %d malformed visits of %d while Exposure Status Request";
-
-    private final IReportService reportService;
-
-    private final BadArgumentsLoggerService badArgumentsLoggerService;
-
-    private final WebRequest webRequest;
-
-    private final Validator validator;
+    private final ReportService reportService;
 
     @Override
-    @PostMapping(path = UriConstants.API_V1
-            + UriConstants.REPORT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ReportResponse report(@RequestBody ReportRequest reportRequestVo) {
-        ReportRequest filtered = this.filterReports(reportRequestVo, webRequest);
-        List<DecodedVisit> reported = List.of();
-        if (!filtered.getVisits().isEmpty()) {
-            reported = reportService.report(filtered);
-        }
-        String message = String.format(
-                "%s reports processed, %s rejected", reported.size(),
-                reportRequestVo.getVisits().size() - reported.size()
-        );
+    public ResponseEntity<ReportResponse> reportUsingPOST(ReportRequest reportRequest) {
+        nonNullPivotDateOrThrowBadRequest(reportRequest);
+        nonEmptyVisitsOrThrowBadRequest(reportRequest);
+
+        final var pivotDate = TimeUtils.instantFromTimestamp(reportRequest.getPivotDate());
+        final var visits = reportRequest.getVisits()
+                .stream()
+                .map(this::toVisitNullSafe)
+                .collect(toList());
+
+        final var acceptedVisits = reportService.report(pivotDate, visits);
+        final var message = String.format("%d/%d accepted visits", acceptedVisits, reportRequest.getVisits().size());
         log.info(message);
-        return new ReportResponse(true, message);
+
+        return ResponseEntity.ok(
+                ReportResponse.builder()
+                        .success(true)
+                        .message(message)
+                        .build()
+        );
     }
 
-    private ReportRequest filterReports(ReportRequest report, WebRequest webRequest) {
-        Set<ConstraintViolation<ReportRequest>> reportRequestViolations = validator.validate(report);
-        if (!reportRequestViolations.isEmpty()) {
-            throw new CleaBadRequestException(reportRequestViolations, Set.of());
-        } else {
-            Set<ConstraintViolation<Visit>> visitViolations = new HashSet<>();
-            List<Visit> validVisits = report.getVisits().stream()
-                    .filter(
-                            visit -> {
-                                visitViolations.addAll(validator.validate(visit));
-                                if (!visitViolations.isEmpty()) {
-                                    this.badArgumentsLoggerService
-                                            .logValidationErrorMessage(visitViolations, webRequest);
-                                    return false;
-                                } else {
-                                    return true;
-                                }
-                            }
-                    ).collect(Collectors.toList());
-            if (validVisits.isEmpty()) {
-                throw new CleaBadRequestException(Set.of(), visitViolations);
-            }
-            int nbVisits = report.getVisits().size();
-            int nbFilteredVisits = nbVisits - validVisits.size();
-            if (nbFilteredVisits > 0) {
-                log.warn(String.format(MALFORMED_VISIT_LOG_MESSAGE, nbFilteredVisits, nbVisits));
-            }
-            return new ReportRequest(validVisits, report.getPivotDateAsNtpTimestamp());
+    private Visit toVisitNullSafe(fr.gouv.clea.ws.api.model.Visit visit) {
+        return visit == null ? null : new Visit(visit.getQrCode(), visit.getQrCodeScanTime());
+    }
+
+    private void nonNullPivotDateOrThrowBadRequest(ReportRequest reportRequest) {
+        if (reportRequest.getPivotDate() == null) {
+            throw new CleaBadRequestException(
+                    ValidationError.builder()
+                            .rejectedValue(null)
+                            ._object("ReportRequest")
+                            .message("must not be null")
+                            .field("pivotDate")
+                            .build()
+            );
+        }
+    }
+
+    private void nonEmptyVisitsOrThrowBadRequest(ReportRequest reportRequest) {
+        if (isEmpty(reportRequest.getVisits())) {
+            throw new CleaBadRequestException(
+                    ValidationError.builder()
+                            .rejectedValue(reportRequest.getVisits())
+                            ._object("ReportRequest")
+                            .message("must not be empty")
+                            .field("visits")
+                            .build()
+            );
         }
     }
 }

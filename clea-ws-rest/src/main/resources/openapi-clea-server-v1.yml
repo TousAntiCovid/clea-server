@@ -15,7 +15,7 @@ tags:
   - name: clea
     description: Clea API
 paths:
-  "/api/clea/v1/wreport":
+  "/wreport":
     post:
       tags:
         - clea
@@ -42,7 +42,7 @@ paths:
                   value: |-
                     {
                       "success": "true",
-                      "message": "2 qr processed, 0 rejected"
+                      "message": "5/6 accepted visits"
                     }
         "400":
           description: Bad Request
@@ -80,6 +80,7 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Visit"
+          minItems: 1
     ReportResponse:
       title: ReportResponse
       type: object
@@ -93,9 +94,10 @@ components:
       type: object
       properties:
         httpStatus:
-          type: string
+          type: integer
         timestamp:
           type: string
+          format: date-time
         message:
           type: string
         validationErrors:

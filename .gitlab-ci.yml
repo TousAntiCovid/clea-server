@@ -55,5 +55,5 @@ deploy-int:
     project: stemcovid19/infrastructure/functional-zone/services/clea/clea-ansible
     branch: master
     strategy: depend
-  only:
-    - develop
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'

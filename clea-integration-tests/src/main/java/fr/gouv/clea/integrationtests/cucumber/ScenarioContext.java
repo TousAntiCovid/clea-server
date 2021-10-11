@@ -20,11 +20,11 @@ import java.util.function.Predicate;
 @ScenarioScope
 public class ScenarioContext {
 
-    private final Map<String, Visitor> visitors = new HashMap<>(10);
+    private final Map<String, Visitor> visitors = new HashMap<>();
 
-    private final Map<String, LocationQrCodeGenerator> locations = new HashMap<>(10);
+    private final Map<String, LocationQrCodeGenerator> locations = new HashMap<>();
 
-    private final Map<String, LocationQrCodeGenerator> staffLocations = new HashMap<>(10);
+    private final Map<String, LocationQrCodeGenerator> staffLocations = new HashMap<>();
 
     private final ApplicationProperties applicationProperties;
 

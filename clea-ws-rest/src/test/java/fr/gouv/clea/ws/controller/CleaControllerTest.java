@@ -1,312 +1,395 @@
 package fr.gouv.clea.ws.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import fr.gouv.clea.ws.dto.ApiError;
-import fr.gouv.clea.ws.service.impl.ReportService;
-import fr.gouv.clea.ws.utils.UriConstants;
-import fr.gouv.clea.ws.vo.ReportRequest;
-import fr.gouv.clea.ws.vo.Visit;
+import fr.gouv.clea.ws.api.model.ReportRequest;
+import fr.gouv.clea.ws.api.model.Visit;
+import fr.gouv.clea.ws.test.IntegrationTest;
+import fr.gouv.clea.ws.test.QrCode;
+import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static fr.gouv.clea.ws.test.KafkaManager.*;
+import static fr.gouv.clea.ws.test.RestAssuredManager.givenAuthenticated;
+import static fr.gouv.clea.ws.test.TemporalMatchers.isStringDateBetweenNowAndTenSecondsAgo;
+import static io.restassured.http.ContentType.JSON;
+import static io.restassured.http.ContentType.TEXT;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.http.HttpStatus.*;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@IntegrationTest
 class CleaControllerTest {
 
-    @Captor
-    private ArgumentCaptor<ReportRequest> reportRequestArgumentCaptor;
+    @Test
+    void infected_user_can_report_himself_as_infected() {
+        final var now = Instant.now();
+        final var nowEpochMs = now.getEpochSecond() * 1000;
+        final var nowNtpTimestamp = TimeUtils.ntpTimestampFromInstant(now);
+        final var request = ReportRequest.builder()
+                .pivotDate(0L)
+                .visits(
+                        List.of(
+                                new Visit(QrCode.LOCATION_1_URL.getRef(), nowNtpTimestamp)
+                        )
+                )
+                .build();
 
-    @Value("${controller.path.prefix}" + UriConstants.API_V1)
-    private String pathPrefix;
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(request)
+                .post("/api/clea/v1/wreport")
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+                .then()
+                .statusCode(OK.value())
+                .body("success", is(true))
+                .body("message", is("1/1 accepted visits"));
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
-    private ReportService reportService;
-
-    static HttpHeaders newJsonHeader() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
-    }
-
-    @BeforeEach
-    void init() {
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        assertThatNextRecordInTopic("dev.clea.fct.visit-scans")
+                .hasNoKey()
+                .hasNoHeader("__TypeId__")
+                .hasJsonValue("encryptedLocationMessage", QrCode.LOCATION_1_LOCATION_SPECIFIC_PART_DECODED_BASE64)
+                .hasJsonValue("isBackward", false)
+                .hasJsonValue("qrCodeScanTime", nowEpochMs)
+                .hasJsonValue("type", 0)
+                .hasJsonValue("version", 0);
     }
 
     @Test
-    void testInfectedUserCanReportHimselfAsInfected() {
-        List<Visit> visits = List.of(new Visit("qrCode", 0L));
-        HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(visits, 0L), newJsonHeader());
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+    void invalid_content_type_body_causes_415_unsupported_media_type() {
+        givenAuthenticated()
+                .contentType(TEXT)
+                .body("foo")
+                .post("/api/clea/v1/wreport")
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+                .then()
+                .statusCode(UNSUPPORTED_MEDIA_TYPE.value());
     }
 
     @Test
-    void testWhenReportRequestWithInvalidMediaTypeThenGetUnsupportedMediaType() {
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, "foo", String.class);
+    void a_report_with_malformed_body_causes_400_bad_request() {
+        givenAuthenticated()
+                .contentType(JSON)
+                .body("{ \"id\": 1 }")
+                .post("/api/clea/v1/wreport")
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-        verifyNoMoreInteractions(reportService);
+                .then()
+                .statusCode(BAD_REQUEST.value());
     }
 
     @Test
-    void testWhenReportRequestWithNullVisitListThenGetBadRequest() {
-        HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(null, 0L), newJsonHeader());
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
+    void a_null_pivot_date_causes_400_bad_request() {
+        final var request = ReportRequest.builder()
+                .pivotDate(null)
+                .visits(
+                        List.of(
+                                new Visit(RandomStringUtils.randomAlphanumeric(20), RandomUtils.nextLong())
+                        )
+                )
+                .build();
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(request)
+                .post("/api/clea/v1/wreport")
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        verifyNoMoreInteractions(reportService);
+                .then()
+                .statusCode(BAD_REQUEST.value())
+                .body("httpStatus", equalTo(BAD_REQUEST.value()))
+                .body("timestamp", isStringDateBetweenNowAndTenSecondsAgo())
+                .body("message", equalTo("Invalid request"))
+                .body("validationErrors[0].object", equalTo("ReportRequest"))
+                .body("validationErrors[0].field", equalTo("pivotDate"))
+                .body("validationErrors[0].rejectedValue", equalTo(null))
+                .body("validationErrors[0].message", containsString("null"))
+                .body("validationErrors", hasSize(1));
     }
 
     @Test
-    void testWhenReportRequestWithInvalidJsonDataThenGetBadRequest() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", 1);
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                pathPrefix + UriConstants.REPORT,
-                new HttpEntity<>(jsonObject.toString(), newJsonHeader()),
-                String.class
-        );
+    void invalid_pivot_date_format_causes_400_bad_request() {
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(
+                        Map.of(
+                                "pivotDate", 0,
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        verifyNoMoreInteractions(reportService);
+                                "visits", List.of(
+                                        Map.of(
+                                                "qrCode", RandomStringUtils.randomAlphanumeric(20),
+                                                "qrCodeScanTime", "a"
+                                        )
+                                )
+                        )
+                )
+                .post("/api/clea/v1/wreport")
+
+                .then()
+                .statusCode(BAD_REQUEST.value())
+                .body("httpStatus", equalTo(BAD_REQUEST.value()))
+                .body("timestamp", isStringDateBetweenNowAndTenSecondsAgo())
+                .body("message", equalTo("JSON parse error"))
+                .body("validationErrors", hasSize(0));
     }
 
     @Test
-    @DisplayName("when pivotDate is null, reject everything")
-    void nullPivotDate() throws JsonProcessingException {
-        List<Visit> visits = List.of(new Visit(RandomStringUtils.randomAlphanumeric(20), RandomUtils.nextLong()));
-        HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(visits, null), newJsonHeader());
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        verifyNoMoreInteractions(reportService);
-        ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
-        assertThat(apiError.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        assertThat(apiError.getTimestamp()).isBefore(Instant.now());
-        assertThat(apiError.getMessage()).isEqualTo("Invalid request");
-        assertThat(apiError.getValidationErrors().size()).isEqualTo(1);
-        assertThat(apiError.getValidationErrors().stream().findFirst()).isPresent();
-        assertThat(apiError.getValidationErrors().stream().findFirst().get().getObject()).isEqualTo("ReportRequest");
-        assertThat(apiError.getValidationErrors().stream().findFirst().get().getField())
-                .isEqualTo("pivotDateAsNtpTimestamp");
-        assertThat(apiError.getValidationErrors().stream().findFirst().get().getRejectedValue()).isNull();
-        assertThat(apiError.getValidationErrors().stream().findFirst().get().getMessage()).contains("nul");
+    void a_report_with_a_null_visits_list_causes_400_bad_request() {
+        final var request = ReportRequest.builder()
+                .pivotDate(0L)
+                .visits(null)
+                .build();
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(request)
+                .post("/api/clea/v1/wreport")
+
+                .then()
+                .statusCode(BAD_REQUEST.value())
+                .body("httpStatus", equalTo(BAD_REQUEST.value()))
+                .body("timestamp", isStringDateBetweenNowAndTenSecondsAgo())
+                .body("message", equalTo("Invalid request"))
+                .body("validationErrors[0].object", equalTo("ReportRequest"))
+                .body("validationErrors[0].field", equalTo("visits"))
+                .body("validationErrors[0].rejectedValue", nullValue())
+                .body("validationErrors[0].message", equalTo("must not be empty"))
+                .body("validationErrors", hasSize(1));
     }
 
     @Test
-    @DisplayName("when pivotDate is not numeric, reject everything")
-    void notNumericPivotDate() throws JsonProcessingException {
-        ReportRequest reportRequest = new ReportRequest(
-                List.of(new Visit(RandomStringUtils.randomAlphanumeric(20), 1L)), 0L
-        );
-        String json = objectMapper.writeValueAsString(reportRequest);
-        String badJson = json.replace("0", "a");
-        HttpEntity<String> request = new HttpEntity<>(badJson, newJsonHeader());
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        verifyNoMoreInteractions(reportService);
-        ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
-        assertThat(apiError.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        assertThat(apiError.getTimestamp()).isBefore(Instant.now());
-        assertThat(apiError.getMessage()).isEqualTo("JSON parse error");
-        assertThat(apiError.getValidationErrors()).isEmpty();
+    void a_report_with_an_empty_visits_list_causes_400_bad_request() {
+        final var request = ReportRequest.builder()
+                .pivotDate(0L)
+                .visits(List.of())
+                .build();
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(request)
+                .post("/api/clea/v1/wreport")
+
+                .then()
+                .statusCode(BAD_REQUEST.value())
+                .body("httpStatus", equalTo(BAD_REQUEST.value()))
+                .body("timestamp", isStringDateBetweenNowAndTenSecondsAgo())
+                .body("message", equalTo("Invalid request"))
+                .body("validationErrors[0].object", equalTo("ReportRequest"))
+                .body("validationErrors[0].field", equalTo("visits"))
+                .body("validationErrors[0].rejectedValue", hasSize(0))
+                .body("validationErrors[0].message", equalTo("must not be empty"))
+                .body("validationErrors", hasSize(1));
     }
 
     @Test
-    @DisplayName("when visit list is null, reject everything")
-    void nullVisitList() throws JsonProcessingException {
-        HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(null, 0L), newJsonHeader());
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        verifyNoMoreInteractions(reportService);
-        ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
-        assertThat(apiError.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        assertThat(apiError.getTimestamp()).isBefore(Instant.now());
-        assertThat(apiError.getMessage()).isEqualTo("Invalid request");
-        assertThat(apiError.getValidationErrors().size()).isEqualTo(2);
+    void a_visit_with_a_null_qrcode_is_ignored() {
+        final var now = Instant.now();
+        final var nowEpochMs = now.getEpochSecond() * 1000;
+        final var nowNtpTimestamp = TimeUtils.ntpTimestampFromInstant(now);
+        final var request = ReportRequest.builder()
+                .pivotDate(3L)
+                .visits(
+                        List.of(
+                                new Visit(QrCode.LOCATION_1_URL.getRef(), nowNtpTimestamp),
+                                new Visit(null, nowNtpTimestamp)
+                        )
+                )
+                .build();
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(request)
+                .post("/api/clea/v1/wreport")
+
+                .then()
+                .statusCode(OK.value())
+                .body("success", is(true))
+                .body("message", is("1/2 accepted visits"));
+
+        assertThatNextRecordInTopic("dev.clea.fct.visit-scans")
+                .hasNoKey()
+                .hasNoHeader("__TypeId__")
+                .hasJsonValue("encryptedLocationMessage", QrCode.LOCATION_1_LOCATION_SPECIFIC_PART_DECODED_BASE64)
+                .hasJsonValue("isBackward", false)
+                .hasJsonValue("qrCodeScanTime", nowEpochMs)
+                .hasJsonValue("type", 0)
+                .hasJsonValue("version", 0);
     }
 
     @Test
-    @DisplayName("when visit list is empty, reject everything")
-    void emptyVisitList() throws JsonProcessingException {
-        HttpEntity<ReportRequest> request = new HttpEntity<>(new ReportRequest(List.of(), 0L), newJsonHeader());
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        verifyNoMoreInteractions(reportService);
-        ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
-        assertThat(apiError.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        assertThat(apiError.getTimestamp()).isBefore(Instant.now());
-        assertThat(apiError.getMessage()).isEqualTo("Invalid request");
-        assertThat(apiError.getValidationErrors().size()).isEqualTo(1);
+    void a_visit_with_an_empty_qrcode_is_ignored() {
+        final var nowAsNtpTimestamp = TimeUtils.currentNtpTime();
+        final var nowEpochMs = TimeUtils.instantFromTimestamp(nowAsNtpTimestamp).getEpochSecond() * 1000;
+        final var request = ReportRequest.builder()
+                .pivotDate(3L)
+                .visits(
+                        List.of(
+                                new Visit(QrCode.LOCATION_1_URL.getRef(), nowAsNtpTimestamp),
+                                new Visit("", 2L)
+                        )
+                )
+                .build();
+
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(request)
+                .post("/api/clea/v1/wreport")
+
+                .then()
+                .statusCode(OK.value())
+                .body("success", is(true))
+                .body("message", is("1/2 accepted visits"));
+
+        assertThatNextRecordInTopic("dev.clea.fct.visit-scans")
+                .hasJsonValue("encryptedLocationMessage", QrCode.LOCATION_1_LOCATION_SPECIFIC_PART_DECODED_BASE64)
+                .hasJsonValue("isBackward", false)
+                .hasJsonValue("qrCodeScanTime", nowEpochMs)
+                .hasJsonValue("type", 0)
+                .hasJsonValue("version", 0);
     }
 
     @Test
-    @DisplayName("when a qrCode is null reject just the visit")
-    void nullQrCode() {
-        HttpEntity<ReportRequest> request = new HttpEntity<>(
-                new ReportRequest(List.of(new Visit("qr1", 1L), new Visit(null, 2L)), 3L),
-                newJsonHeader()
-        );
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
-        Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
-        assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
-        assertThat(
-                reportRequestArgumentCaptor.getValue().getVisits().stream().filter(it -> it.getQrCode() == null)
-                        .findAny()
-        ).isEmpty();
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCode()).isEqualTo("qr1");
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp())
-                .isEqualTo(1L);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    void a_visit_with_a_blank_qrcode_is_ignored() {
+        final var nowAsNtpTimestamp = TimeUtils.currentNtpTime();
+        final var nowEpochMs = TimeUtils.instantFromTimestamp(nowAsNtpTimestamp).getEpochSecond() * 1000;
+        final var request = ReportRequest.builder()
+                .pivotDate(3L)
+                .visits(
+                        List.of(
+                                new Visit(QrCode.LOCATION_1_URL.getRef(), nowAsNtpTimestamp),
+                                new Visit("      ", 2L)
+                        )
+                )
+                .build();
+
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(request)
+                .post("/api/clea/v1/wreport")
+
+                .then()
+                .statusCode(OK.value())
+                .body("success", is(true))
+                .body("message", is("1/2 accepted visits"));
+
+        assertThatNextRecordInTopic("dev.clea.fct.visit-scans")
+                .hasJsonValue("encryptedLocationMessage", QrCode.LOCATION_1_LOCATION_SPECIFIC_PART_DECODED_BASE64)
+                .hasJsonValue("isBackward", false)
+                .hasJsonValue("qrCodeScanTime", nowEpochMs)
+                .hasJsonValue("type", 0)
+                .hasJsonValue("version", 0);
     }
 
     @Test
-    @DisplayName("when a qrCode is empty reject just the visit")
-    void emptyQrCode() {
-        HttpEntity<ReportRequest> request = new HttpEntity<>(
-                new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("", 2L)), 3L),
-                newJsonHeader()
-        );
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
-        Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
-        assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
-        assertThat(
-                reportRequestArgumentCaptor.getValue().getVisits().stream().filter(it -> it.getQrCode().isEmpty())
-                        .findAny()
-        ).isEmpty();
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCode()).isEqualTo("qr1");
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp())
-                .isEqualTo(1L);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    void a_visit_with_a_null_qrcode_scantime_is_ignored() {
+        final var nowAsNtpTimestamp = TimeUtils.currentNtpTime();
+        final var nowEpochMs = TimeUtils.instantFromTimestamp(nowAsNtpTimestamp).getEpochSecond() * 1000;
+        final var request = ReportRequest.builder()
+                .pivotDate(3L)
+                .visits(
+                        List.of(
+                                new Visit(QrCode.LOCATION_1_URL.getRef(), nowAsNtpTimestamp),
+                                new Visit(QrCode.LOCATION_2_URL.getRef(), null)
+                        )
+                )
+                .build();
+
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(request)
+                .post("/api/clea/v1/wreport")
+
+                .then()
+                .statusCode(OK.value())
+                .body("success", is(true))
+                .body("message", is("1/2 accepted visits"));
+
+        assertThatNextRecordInTopic("dev.clea.fct.visit-scans")
+                .hasJsonValue("encryptedLocationMessage", QrCode.LOCATION_1_LOCATION_SPECIFIC_PART_DECODED_BASE64)
+                .hasJsonValue("isBackward", false)
+                .hasJsonValue("qrCodeScanTime", nowEpochMs)
+                .hasJsonValue("type", 0)
+                .hasJsonValue("version", 0);
     }
 
     @Test
-    @DisplayName("when a qrCode is blank reject just the visit")
-    void blankQrCode() {
-        HttpEntity<ReportRequest> request = new HttpEntity<>(
-                new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("     ", 2L)), 3L),
-                newJsonHeader()
-        );
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
-        Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
-        assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
-        assertThat(
-                reportRequestArgumentCaptor.getValue().getVisits().stream().filter(it -> it.getQrCode().isBlank())
-                        .findAny()
-        ).isEmpty();
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCode()).isEqualTo("qr1");
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp())
-                .isEqualTo(1L);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    void a_visit_with_a_negative_qrcode_scantime_is_ignored() {
+        final var nowAsNtpTimestamp = TimeUtils.currentNtpTime();
+        final var nowEpochMs = TimeUtils.instantFromTimestamp(nowAsNtpTimestamp).getEpochSecond() * 1000;
+        final var request = ReportRequest.builder()
+                .pivotDate(3L)
+                .visits(
+                        List.of(
+                                new Visit(QrCode.LOCATION_1_URL.getRef(), nowAsNtpTimestamp),
+                                new Visit(QrCode.LOCATION_2_URL.getRef(), -1L)
+                        )
+                )
+                .build();
+
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(request)
+                .post("/api/clea/v1/wreport")
+
+                .then()
+                .statusCode(OK.value())
+                .body("success", is(true))
+                .body("message", is("1/2 accepted visits"));
+
+        assertThatNextRecordInTopic("dev.clea.fct.visit-scans")
+                .hasJsonValue("encryptedLocationMessage", QrCode.LOCATION_1_LOCATION_SPECIFIC_PART_DECODED_BASE64)
+                .hasJsonValue("isBackward", false)
+                .hasJsonValue("qrCodeScanTime", nowEpochMs)
+                .hasJsonValue("type", 0)
+                .hasJsonValue("version", 0);
     }
 
     @Test
-    @DisplayName("when a qrScan is null reject just the visit")
-    void nullQrScan() {
-        HttpEntity<ReportRequest> request = new HttpEntity<>(
-                new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("qr2", null)), 3L),
-                newJsonHeader()
-        );
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
-        Mockito.verify(reportService).report(reportRequestArgumentCaptor.capture());
-        assertThat(reportRequestArgumentCaptor.getValue().getPivotDateAsNtpTimestamp()).isEqualTo(3L);
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().size()).isEqualTo(1);
-        assertThat(
-                reportRequestArgumentCaptor.getValue().getVisits().stream()
-                        .filter(it -> it.getQrCodeScanTimeAsNtpTimestamp() == null).findAny()
-        ).isEmpty();
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCode()).isEqualTo("qr1");
-        assertThat(reportRequestArgumentCaptor.getValue().getVisits().get(0).getQrCodeScanTimeAsNtpTimestamp())
-                .isEqualTo(1L);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    void a_visit_with_a_malformed_qrcode_scantime_causes_400_bad_request() {
+        final var nowAsNtpTimestamp = TimeUtils.currentNtpTime();
+        final var nowEpochMs = TimeUtils.instantFromTimestamp(nowAsNtpTimestamp).getEpochSecond() * 1000;
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(
+                        Map.of(
+                                "pivotDate", 3,
+                                "visits", List.of(
+                                        Map.of(
+                                                "qrCode", QrCode.LOCATION_1_URL.getRef(),
+                                                "qrCodeScanTime", 1
+                                        ),
+                                        Map.of(
+                                                "qrCode", QrCode.LOCATION_2_URL.getRef(),
+                                                "qrCodeScanTime", "a"
+                                        )
+                                )
+                        )
+                )
+                .post("/api/clea/v1/wreport")
+
+                .then()
+                .statusCode(BAD_REQUEST.value())
+                .body("httpStatus", equalTo(BAD_REQUEST.value()))
+                .body("timestamp", isStringDateBetweenNowAndTenSecondsAgo())
+                .body("message", equalTo("JSON parse error"))
+                .body("validationErrors", hasSize(0));
     }
 
     @Test
-    @DisplayName("when a qrScan is not numeric reject everything")
-    void notNumericQrScan() throws JsonProcessingException {
-        ReportRequest reportRequest = new ReportRequest(List.of(new Visit("qr1", 1L), new Visit("qr2", 2L)), 3L);
-        String json = objectMapper.writeValueAsString(reportRequest);
-        String badJson = json.replace("2", "a");
-        HttpEntity<String> request = new HttpEntity<>(badJson, newJsonHeader());
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        verifyNoMoreInteractions(reportService);
-        ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
-        assertThat(apiError.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        assertThat(apiError.getTimestamp()).isBefore(Instant.now());
-        assertThat(apiError.getMessage()).isEqualTo("JSON parse error");
-        assertThat(apiError.getValidationErrors()).isEmpty();
-    }
+    void a_report_with_no_valid_visit_returns_200_and_visits_are_ignored() {
+        final var request = ReportRequest.builder()
+                .pivotDate(2L)
+                .visits(
+                        List.of(
+                                new Visit(" ", 1L)
+                        )
+                )
+                .build();
 
-    @Test
-    @DisplayName("when no valid visit then reject everything")
-    void noValidVisits() throws JsonProcessingException {
-        ReportRequest reportRequest = new ReportRequest(List.of(new Visit(" ", 1L)), 2L);
-        String json = objectMapper.writeValueAsString(reportRequest);
-        HttpEntity<String> request = new HttpEntity<>(json, newJsonHeader());
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(pathPrefix + UriConstants.REPORT, request, String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        verifyNoMoreInteractions(reportService);
-        ApiError apiError = objectMapper.readValue(response.getBody(), ApiError.class);
-        assertThat(apiError.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        assertThat(apiError.getTimestamp()).isBefore(Instant.now());
-        assertThat(apiError.getMessage()).isEqualTo("Invalid request");
-        assertThat(apiError.getValidationErrors().size()).isEqualTo(1);
-        assertThat(apiError.getValidationErrors().stream().findFirst()).isPresent();
-        assertThat(apiError.getValidationErrors().stream().findFirst().get().getObject()).isEqualTo("Visit");
-        assertThat(apiError.getValidationErrors().stream().findFirst().get().getField()).isEqualTo("qrCode");
-        assertThat(apiError.getValidationErrors().stream().findFirst().get().getRejectedValue()).asString().isBlank();
-        // TODO find a way to test this localized message: vide / empty
-        // assertThat(apiError.getValidationErrors().stream().findFirst().get().getMessage()).isEqualTo("ne
-        // doit pas être vide");
+        givenAuthenticated()
+                .contentType(JSON)
+                .body(request)
+                .post("/api/clea/v1/wreport")
+
+                .then()
+                .statusCode(OK.value())
+                .body("message", equalTo("0/1 accepted visits"));
     }
 }
