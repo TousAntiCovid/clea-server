@@ -1,6 +1,5 @@
 FROM centos:7 AS installer
 
-
 # Install all the locales
 RUN sed -i 's/^override_install_langs=.*$/override_install_langs=fr_FR/g' /etc/yum.conf \
     && yum -y update \
@@ -15,13 +14,12 @@ ENV LC_ALL fr_FR.utf8
 ENV LANG fr_FR.utf8
 ENV PATH $PATH:~/.local/bin
 
-
 WORKDIR /tmp
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
     && unzip -q awscliv2.zip \
     && ./aws/install -i /usr/local/aws-cli -b /usr/local/bin \
-    && rm awscliv2.zip rm -rf aws
-
+    && rm awscliv2.zip \
+    && rm -rf aws
 
 WORKDIR /home/javaapp
 
@@ -33,13 +31,6 @@ FROM installer
 COPY ./target/clea*-exec.jar ./clea-batch.jar
 COPY ./src/main/scripts/* ./
 COPY ./src/main/docker/aws ./.aws
-
-USER root
-RUN chmod +x *.sh \
- && mkdir /logs \
- && touch /logs/clea-batch.log \
- && touch /logs/clea-batch.error.log \
- && chmod a+rw /logs/*.log
 
 USER javaapp
 
