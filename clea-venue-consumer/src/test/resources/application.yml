@@ -39,16 +39,6 @@ server:
   port: 8080
 
 spring:
-  datasource:
-    driverClassName: org.h2.Driver
-    url:
-    username:
-    password:
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
-    generate-ddl: true
-    hibernate:
-      ddl-auto: create-drop
   kafka:
     bootstrap-servers: localhost:9092
     consumer:

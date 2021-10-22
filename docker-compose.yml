@@ -54,7 +54,7 @@ services:
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: password
     volumes:
-      - ./clea-dbmigration/src/main/resources/db/migrations:/flyway/sql
+      - ./clea-dbmigration/src/main/resources/db/migration:/flyway/sql
     depends_on:
       - postgres
 
