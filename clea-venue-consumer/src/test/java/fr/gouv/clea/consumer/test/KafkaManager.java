@@ -1,19 +1,25 @@
 package fr.gouv.clea.consumer.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import fr.gouv.clea.consumer.model.ReportStat;
 import lombok.SneakyThrows;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.connect.json.JsonDeserializer;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.TestContext;
@@ -150,5 +156,18 @@ public class KafkaManager implements TestExecutionListener {
                     })
                     .collect(Collectors.toList());
         }
+    }
+
+    public static void sendReportStat(ReportStat reportStat) {
+        Map<String, Object> configs = KafkaTestUtils.producerProps(KafkaManager.getBootstrapServers());
+        Producer<String, ReportStat> producer = new DefaultKafkaProducerFactory<>(
+                configs,
+                new StringSerializer(),
+                new JsonSerializer<ReportStat>()
+        ).createProducer();
+        producer.send(new ProducerRecord<>("test.clea.fct.report-stat", reportStat));
+        producer.flush();
+        producer.close();
+
     }
 }

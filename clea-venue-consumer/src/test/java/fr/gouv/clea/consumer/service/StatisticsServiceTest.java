@@ -1,6 +1,5 @@
 package fr.gouv.clea.consumer.service;
 
-import fr.gouv.clea.consumer.model.ReportStat;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.test.IntegrationTest;
 import fr.inria.clea.lsp.utils.TimeUtils;
@@ -299,33 +298,6 @@ class StatisticsServiceTest {
                                 "venueCategory2", 2,
                                 "forwardVisits", 0,
                                 "backwardVisits", 1
-                        )
-                );
-    }
-
-    @Test
-    void should_send_report_stats_to_elastic() {
-        final var instant = Instant.parse("2019-07-22T09:37:42.251Z");
-        final var reportStat = ReportStat.builder()
-                .reported(10)
-                .rejected(2)
-                .backwards(5)
-                .forwards(3)
-                .close(4)
-                .timestamp(TimeUtils.ntpTimestampFromInstant(instant))
-                .build();
-
-        statisticsService.logStats(reportStat);
-
-        assertThatAllDocumentsFromElastic()
-                .containsExactlyInAnyOrder(
-                        Map.of(
-                                "@timestamp", "2019-07-22T09:37:42.000Z",
-                                "reported", 10,
-                                "rejected", 2,
-                                "backwards", 5,
-                                "forwards", 3,
-                                "close", 4
                         )
                 );
     }
