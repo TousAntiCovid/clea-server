@@ -2,16 +2,12 @@ package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
 import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
-import fr.gouv.clea.consumer.test.PostgreSqlManager;
+import fr.gouv.clea.consumer.test.IntegrationTest;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.TestPropertySource;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -21,13 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
 
-@SpringBootTest
-@DirtiesContext
-@TestPropertySource(properties = { "clea.conf.scheduling.purge.cron=*/10 * * * * *",
-        "clea.conf.scheduling.purge.enabled=true" })
-@TestExecutionListeners(listeners = { PostgreSqlManager.class }, mergeMode = MERGE_WITH_DEFAULTS)
+@IntegrationTest
 class ExposedVisitEntityServiceSchedulingTest {
 
     @Autowired
