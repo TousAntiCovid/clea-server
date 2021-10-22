@@ -15,7 +15,8 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
 @Retention(RUNTIME)
 @Target(TYPE)
 @SpringBootTest
-@TestExecutionListeners(listeners = { ElasticManager.class, KafkaManager.class }, mergeMode = MERGE_WITH_DEFAULTS)
+@TestExecutionListeners(listeners = { ElasticManager.class, KafkaManager.class,
+        PostgreSqlManager.class }, mergeMode = MERGE_WITH_DEFAULTS)
 @DisplayNameGeneration(ReplaceUnderscores.class)
 public @interface IntegrationTest {
 
