@@ -1,59 +1,10 @@
 variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
-  VERSIONING_DISABLE: "false"
-  VERSIONING_GIT_TAG: $CI_COMMIT_TAG
-  VERSIONING_GIT_BRANCH: $CI_COMMIT_BRANCH
+  ANSIBLE_DEPLOY_PROJECT: clea/clea-ansible
 
-default:
-  cache:
-    paths:
-      - .m2/repository/
-  tags:
-    - qlf-ci.inria.fr
+include:
+  - project: stopcovid19/accueil
+    file: gitlab/gitlab-ci-java-template.yml
 
-stages:
-  - build
-  - docker e2e tests
-  - deploy
-  - int e2e tests
-
-build:
-  image: maven:3.6.3-adoptopenjdk-11
-  stage: build
+e2e-tests-docker:
   script:
-    - mvn -B -s .mvn/settings-ci.xml -ntp -fae -DdeployAtEnd spotless:check deploy
-  artifacts:
-    paths:
-      - "**/target/*.jar"
-    reports:
-      junit:
-        - "**/target/surefire-reports/TEST-*.xml"
-
-tests-docker:
-  image: registry.gitlab.inria.fr/stemcovid19/tac-server/docker-image/tac-system-tests:latest
-  stage: docker e2e tests
-  before_script:
-    - export PATH="$PWD/docker-compose:$PATH"
-    - export CLEA_ROOT_DIR=$CI_PROJECT_DIR
-  script:
-    - currentContainer=$(basename $(cat /proc/1/cpuset))
-    - docker-compose up -d
-    - docker network connect clea-server_default $currentContainer
     - java -jar -Dspring.profiles.active=docker clea-integration-tests/target/clea-integration-tests-*.jar
-    - docker network disconnect clea-server_default $currentContainer
-    - docker-compose down
-  artifacts:
-    paths:
-      - "$CI_PROJECT_DIR/target/cucumber-reports.html"
-    expire_in: 2 weeks
-
-deploy-int:
-  stage: deploy
-  variables:
-    APP_VERSION: develop-SNAPSHOT
-  trigger:
-    project: stemcovid19/infrastructure/functional-zone/services/clea/clea-ansible
-    branch: master
-    strategy: depend
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "develop"'
