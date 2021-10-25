@@ -28,7 +28,7 @@ public class ConsumeReportStatTest {
                 .timestamp(TimeUtils.ntpTimestampFromInstant(instant))
                 .build();
 
-        KafkaManager.sendReportStat(reportStat);
+        KafkaManager.whenSendReportStat(reportStat);
 
         await().atMost(Duration.ofSeconds(10)).untilAsserted(
                 () -> assertThatAllDocumentsFromElastic()

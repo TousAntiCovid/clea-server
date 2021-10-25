@@ -1,7 +1,7 @@
 package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.test.IntegrationTest;
-import fr.gouv.clea.consumer.test.QrCode;
+import fr.gouv.clea.consumer.test.ReferenceData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,7 +26,7 @@ class StatisticsServiceRetryTest {
         givenElasticIndexIsFrozen("health-clealocations-2019.07.22");
 
         // when a visit is sent
-        final var visit = QrCode.defaultVisit()
+        final var visit = ReferenceData.defaultVisit()
                 .qrCodeScanTime(Instant.parse("2019-07-22T08:13:00Z"))
                 .venueType(4)
                 .venueCategory1(1)
@@ -48,7 +48,7 @@ class StatisticsServiceRetryTest {
     @Test
     void should_send_to_kafka_after_some_failed_update_attempts() {
         // given a visit has been written in elastic for period "2019-07-22T08:00:00Z"
-        final var visit = QrCode.defaultVisit()
+        final var visit = ReferenceData.defaultVisit()
                 .qrCodeScanTime(Instant.parse("2019-07-22T08:13:00Z"))
                 .venueType(4)
                 .venueCategory1(1)

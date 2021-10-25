@@ -1,6 +1,7 @@
 package fr.gouv.clea.consumer.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import fr.gouv.clea.consumer.model.DecodedVisit;
 import fr.gouv.clea.consumer.model.ReportStat;
 import lombok.SneakyThrows;
 import org.apache.kafka.clients.admin.Admin;
@@ -158,7 +159,7 @@ public class KafkaManager implements TestExecutionListener {
         }
     }
 
-    public static void sendReportStat(ReportStat reportStat) {
+    public static void whenSendReportStat(ReportStat reportStat) {
         Map<String, Object> configs = KafkaTestUtils.producerProps(KafkaManager.getBootstrapServers());
         Producer<String, ReportStat> producer = new DefaultKafkaProducerFactory<>(
                 configs,
@@ -166,6 +167,20 @@ public class KafkaManager implements TestExecutionListener {
                 new JsonSerializer<ReportStat>()
         ).createProducer();
         producer.send(new ProducerRecord<>("test.clea.fct.report-stat", reportStat));
+        producer.flush();
+        producer.close();
+
+    }
+
+    public static void whenSendDecodedVisit(DecodedVisit decodedVisit) {
+        Map<String, Object> configs = KafkaTestUtils.producerProps(KafkaManager.getBootstrapServers());
+        Producer<String, DecodedVisit> producer = new DefaultKafkaProducerFactory<>(
+                configs,
+                new StringSerializer(),
+                new KafkaVisitSerializer()
+        ).createProducer();
+
+        producer.send(new ProducerRecord<>("test.clea.fct.qr-code-scan", decodedVisit));
         producer.flush();
         producer.close();
 
