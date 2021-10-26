@@ -1,4 +1,4 @@
-package fr.gouv.clea.consumer.utils;
+package fr.gouv.clea.consumer.test;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;

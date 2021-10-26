@@ -1,5 +1,6 @@
 package fr.gouv.clea.consumer.test;
 
+import fr.gouv.clea.consumer.model.DecodedVisit;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.inria.clea.lsp.Location;
 import fr.inria.clea.lsp.LocationContact;
@@ -16,7 +17,7 @@ import java.util.UUID;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.HOURS;
 
-public class QrCode {
+public class ReferenceData {
 
     // server authority public key
     private static final String PK_SA = "02c3a58bf668fa3fe2fc206152abd6d8d55102adfee68c8b227676d1fe763f5a06";
@@ -51,6 +52,35 @@ public class QrCode {
         }
     }
 
+    public static DecodedVisit givenBackwardDecodedVisitAt(Instant qrCodeScanTime) {
+        return givenDecodedVisitAt(qrCodeScanTime, true);
+    }
+
+    private static DecodedVisit givenDecodedVisitAt(Instant qrCodeScanTime, boolean isBackward) {
+
+        try {
+
+            final var instant = Instant.now()
+                    .minus(365, DAYS)
+                    .truncatedTo(HOURS);
+
+            final var location = createRandomLocation(instant);
+            final var locationUrl = new URL(location.newDeepLink(qrCodeScanTime.minus(2, HOURS)));
+            final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(locationUrl.getRef());
+
+            return DecodedVisit.builder()
+                    .qrCodeScanTime(qrCodeScanTime)
+                    .encryptedLocationSpecificPart(
+                            new LocationSpecificPartDecoder().decodeHeader(binaryLocationSpecificPart)
+                    )
+                    .isBackward(isBackward)
+                    .build();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static Location createRandomLocation(Instant instant) {
         return Location.builder()
                 .manualContactTracingAuthorityPublicKey(PK_MCTA)
@@ -74,8 +104,8 @@ public class QrCode {
                 .periodDuration(255 /* unlimited */)
                 .qrCodeRenewalIntervalExponentCompact(0x1F /* no renewal */)
                 .venueType(1)
-                .venueCategory1(1)
-                .venueCategory2(1)
+                .venueCategory1(2)
+                .venueCategory2(3)
                 .build();
     }
 
