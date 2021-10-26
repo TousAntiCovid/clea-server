@@ -1,10 +1,19 @@
-variables:
-  ANSIBLE_DEPLOY_PROJECT: clea/clea-ansible
-
 include:
   - project: stopcovid19/accueil
+    ref: master
     file: gitlab/gitlab-ci-java-template.yml
 
 e2e-tests-docker:
   script:
     - java -jar -Dspring.profiles.active=docker clea-integration-tests/target/clea-integration-tests-*.jar
+
+deploy-int:
+  stage: deploy
+  variables:
+    APP_VERSION: develop-SNAPSHOT
+  trigger:
+    project: stemcovid19/infrastructure/functional-zone/services/clea/clea-ansible
+    branch: master
+    strategy: depend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
