@@ -4,3 +4,5 @@ integration-tests:
 
   bucket:
     bucket-name: clea-batch
+
+logging.level.root: WARN

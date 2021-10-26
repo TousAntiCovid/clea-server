@@ -136,7 +136,7 @@ public class CleaReportSteps {
                 .then()
                 .contentType(ContentType.JSON)
                 .statusCode(200)
-                .body("message", equalTo("0 reports processed, 1 rejected"))
+                .body("message", equalTo("0/1 accepted visits"))
                 .extract()
                 .as(WreportResponse.class);
         visitor.setLastReportResponse(response);
@@ -158,8 +158,8 @@ public class CleaReportSteps {
                 .post(cleaReportUrl)
                 .then()
                 .contentType(ContentType.JSON)
-                .statusCode(400)
-                .body("message", equalTo("Invalid request"));
+                .statusCode(200)
+                .body("message", equalTo("0/1 accepted visits"));
     }
 
     @Then("{word} has {int} rejected visit(s)")

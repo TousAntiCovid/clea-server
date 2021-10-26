@@ -24,8 +24,8 @@ public class CleaVisitorUserSteps {
     public void visitor_scans_qrcode_at_given_instant(String visitorName, String locationName, Instant qrCodeScanTime)
             throws CleaCryptoException {
         final var location = this.scenarioContext.getLocation(locationName);
-        final var deepLink = location.getQrCodeAt(qrCodeScanTime);
-        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(deepLink.getQrCode(), qrCodeScanTime);
+        final var qrCode = location.getQrCodeAt(qrCodeScanTime);
+        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qrCode.getDeepLink(), qrCodeScanTime);
     }
 
     // Visitor scan a staff QR code at given instant
@@ -33,8 +33,8 @@ public class CleaVisitorUserSteps {
     public void visitor_scans_staff_qrcode_at_given_instant(String visitorName, String locationName,
             Instant qrCodeScanTime) throws CleaCryptoException {
         final var location = this.scenarioContext.getStaffLocation(locationName);
-        final var qr = location.getQrCodeAt(qrCodeScanTime);
-        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qr.getQrCode(), qrCodeScanTime);
+        final var qrCode = location.getQrCodeAt(qrCodeScanTime);
+        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qrCode.getDeepLink(), qrCodeScanTime);
     }
 
     // Visitor scan a QR code at a given Instant, but the scanned QR code is valid
@@ -43,7 +43,7 @@ public class CleaVisitorUserSteps {
     public void visitor_scans_qrcode_at_given_instant_but_qr_code_valid_for_another_instant(String visitorName,
             String locationName, Instant qrCodeScanTime, Instant qrCodeValidTime) throws CleaCryptoException {
         final var location = this.scenarioContext.getLocation(locationName);
-        final var qr = location.getQrCodeAt(qrCodeValidTime);
-        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qr.getQrCode(), qrCodeScanTime);
+        final var qrCode = location.getQrCodeAt(qrCodeValidTime);
+        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qrCode.getDeepLink(), qrCodeScanTime);
     }
 }

@@ -7,8 +7,8 @@ clea:
     statSlotDurationInSeconds: 1800
     scheduling:
       purge:
-        cron: "0 0 1 * * *"
-        enabled: false
+        cron: "*/10 * * * * *"
+        enabled: true
     security:
       crypto:
         serverAuthorityPublicKey: 02c3a58bf668fa3fe2fc206152abd6d8d55102adfee68c8b227676d1fe763f5a06
@@ -39,16 +39,6 @@ server:
   port: 8080
 
 spring:
-  datasource:
-    driverClassName: org.h2.Driver
-    url:
-    username:
-    password:
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
-    generate-ddl: true
-    hibernate:
-      ddl-auto: create-drop
   kafka:
     bootstrap-servers: localhost:9092
     consumer:

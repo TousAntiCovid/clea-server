@@ -2,19 +2,12 @@ package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.model.ExposedVisitEntity;
 import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
+import fr.gouv.clea.consumer.test.IntegrationTest;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.scheduling.config.CronTask;
-import org.springframework.scheduling.config.ScheduledTask;
-import org.springframework.scheduling.config.ScheduledTaskHolder;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -23,23 +16,13 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
-@SpringBootTest
-@DirtiesContext
-@TestPropertySource(properties = { "clea.conf.scheduling.purge.cron=*/10 * * * * *",
-        "clea.conf.scheduling.purge.enabled=true" })
+@IntegrationTest
 class ExposedVisitEntityServiceSchedulingTest {
-
-    @Value("${clea.conf.scheduling.purge.cron}")
-    private String cronValue;
 
     @Autowired
     private ExposedVisitRepository repository;
-
-    @Autowired
-    private ScheduledTaskHolder scheduledTaskHolder;
 
     private static ExposedVisitEntity createExposedVisit(int timeSlot, long periodStart) {
         return new ExposedVisitEntity(
@@ -55,27 +38,6 @@ class ExposedVisitEntityServiceSchedulingTest {
                 null, // handled by db
                 null // handled by db
         );
-    }
-
-    @AfterEach
-    void clean() {
-        repository.deleteAll();
-    }
-
-    @Test
-    @DisplayName("check that croned job is active")
-    void testCronIsActive() {
-        assertThat(scheduledTaskHolder.getScheduledTasks())
-                .extracting(ScheduledTask::getTask)
-                .filteredOn(task -> task instanceof CronTask)
-                .extracting(task -> (CronTask) task)
-                .extracting(task -> tuple(task.getExpression(), task.toString()))
-                .containsExactly(
-                        tuple(
-                                cronValue,
-                                "fr.gouv.clea.consumer.service.ExposedVisitEntityService.deleteOutdatedExposedVisits"
-                        )
-                );
     }
 
     @Test

@@ -59,8 +59,8 @@ public class LocationQrCodeGeneratorTest {
 
     @Test
     public void shouldGenerateQR() throws Exception {
-        QRCode qr = staticGenerator.getQrCodeAt(staticGenerator.getInitialPeriodStart());
-        assertThat(qr.getQrCode()).isNotEmpty();
+        QRCode qrCode = staticGenerator.getQrCodeAt(staticGenerator.getInitialPeriodStart());
+        assertThat(qrCode.getDeepLink().getRef()).isNotEmpty();
     }
 
     @Test

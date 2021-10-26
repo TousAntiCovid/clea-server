@@ -30,6 +30,7 @@
     </description>
 
     <modules>
+        <module>clea-dbmigration</module>
         <module>clea-ws-rest</module>
         <module>clea-venue-consumer</module>
         <module>clea-batch</module>
@@ -176,6 +177,40 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.7</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.7</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>6.3.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.0.2155</version>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -275,10 +310,15 @@
 
     <repositories>
         <repository>
+            <id>gitlab-maven</id>
+            <url
+      >https://gitlab.inria.fr/api/v4/projects/29881/packages/maven</url>
+        </repository>
+        <repository>
             <id>gitlab-maven-clea-crypto</id>
             <url>
                 https://gitlab.inria.fr/api/v4/projects/28288/packages/maven
-	    </url>
+            </url>
         </repository>
     </repositories>
     <distributionManagement>
@@ -286,13 +326,13 @@
             <id>gitlab-maven</id>
             <url>
                 https://gitlab.inria.fr/api/v4/projects/29881/packages/maven
-	    </url>
+            </url>
         </repository>
         <snapshotRepository>
             <id>gitlab-maven</id>
             <url>
                 https://gitlab.inria.fr/api/v4/projects/29881/packages/maven
-	    </url>
+            </url>
         </snapshotRepository>
     </distributionManagement>
 

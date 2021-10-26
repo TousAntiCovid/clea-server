@@ -2,18 +2,12 @@ package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
-import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
-import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
+import fr.gouv.clea.consumer.test.IntegrationTest;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -22,8 +16,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@DirtiesContext
+@IntegrationTest
 class VisitExpositionAggregatorServiceTest {
 
     @Autowired
@@ -32,46 +25,15 @@ class VisitExpositionAggregatorServiceTest {
     @Autowired
     private VisitExpositionAggregatorService service;
 
-    @MockBean
-    private ExposureTimeConfiguration exposureTimeConfiguration;
+    private Instant todayAtMidnight = Instant.now().truncatedTo(ChronoUnit.DAYS);;
 
-    @MockBean
-    private StatisticsService statisticsService;
+    private Instant todayAt8am = todayAtMidnight.plus(8, ChronoUnit.HOURS);
 
-    private Instant todayAtMidnight;
+    private UUID uuid = UUID.randomUUID();
 
-    private Instant todayAt8am;
+    private byte[] locationTemporarySecretKey = RandomUtils.nextBytes(20);;
 
-    private UUID uuid;
-
-    private byte[] locationTemporarySecretKey;
-
-    private byte[] encryptedLocationContactMessage;
-
-    @BeforeEach
-    void init() {
-        todayAtMidnight = Instant.now().truncatedTo(ChronoUnit.DAYS);
-        todayAt8am = todayAtMidnight.plus(8, ChronoUnit.HOURS);
-        uuid = UUID.randomUUID();
-        locationTemporarySecretKey = RandomUtils.nextBytes(20);
-        encryptedLocationContactMessage = RandomUtils.nextBytes(20);
-        when(exposureTimeConfiguration.getConfigurationFor(anyInt(), anyInt(), anyInt()))
-                .thenReturn(
-                        ExposureTimeRule.builder()
-                                .exposureTimeBackward(3)
-                                .exposureTimeStaffBackward(3)
-                                .exposureTimeForward(3)
-                                .exposureTimeStaffForward(3)
-                                .build()
-                );
-
-        doNothing().when(statisticsService).logStats(any(Visit.class));
-    }
-
-    @AfterEach
-    void clean() {
-        repository.deleteAll();
-    }
+    private byte[] encryptedLocationContactMessage = RandomUtils.nextBytes(20);
 
     @Test
     @DisplayName("visits with no existing context should be saved in DB")

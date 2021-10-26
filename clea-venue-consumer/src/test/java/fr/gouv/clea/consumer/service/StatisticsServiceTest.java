@@ -1,6 +1,5 @@
 package fr.gouv.clea.consumer.service;
 
-import fr.gouv.clea.consumer.model.ReportStat;
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.test.IntegrationTest;
 import fr.inria.clea.lsp.utils.TimeUtils;
@@ -15,14 +14,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
 
 import static fr.gouv.clea.consumer.test.ElasticManager.assertThatAllDocumentsFromElastic;
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.MINUTES;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @IntegrationTest
 class StatisticsServiceTest {
@@ -303,76 +298,6 @@ class StatisticsServiceTest {
                                 "venueCategory2", 2,
                                 "forwardVisits", 0,
                                 "backwardVisits", 1
-                        )
-                );
-    }
-
-    @Test
-    void should_handle_multiple_updates_concurrently() throws InterruptedException {
-        // This test aims to observe that we don't loose data when we update the same
-        // document.
-        // We use a pool of 200 threads to simulate high concurrency,
-        // We send 500 statistics about the same location,
-        // This cause 500 updates on the same elastic document,
-        // Then we expect the right amount of backward/forward visits in the elastic
-        // document.
-
-        final var pool = new ForkJoinPool(200);
-        IntStream.rangeClosed(1, 500)
-                .parallel()
-                .mapToObj(
-                        i -> defaultVisit().toBuilder()
-                                .qrCodeScanTime(TODAY_AT_8AM)
-                                // 1/4 of visits are backward: 125
-                                // 3/4 of visits are forward: 375
-                                .isBackward(i % 4 == 0)
-                                .build()
-                )
-                .map(visit -> (Runnable) () -> statisticsService.logStats(visit))
-                .forEach(pool::submit);
-
-        pool.shutdown();
-        assertThat(pool.awaitTermination(60, TimeUnit.SECONDS))
-                .as("pool tasks are all finished")
-                .isTrue();
-
-        assertThatAllDocumentsFromElastic()
-                .containsExactly(
-                        Map.of(
-                                "id", TODAY_YYYYMMDD + "T08:00:00Z-vt:4-vc1:1-vc2:2",
-                                "@timestamp", TODAY_YYYYMMDD + "T08:00:00.000Z",
-                                "venueType", 4,
-                                "venueCategory1", 1,
-                                "venueCategory2", 2,
-                                "forwardVisits", 375,
-                                "backwardVisits", 125
-                        )
-                );
-    }
-
-    @Test
-    void should_send_report_stats_to_elastic() {
-        final var instant = Instant.parse("2019-07-22T09:37:42.251Z");
-        final var reportStat = ReportStat.builder()
-                .reported(10)
-                .rejected(2)
-                .backwards(5)
-                .forwards(3)
-                .close(4)
-                .timestamp(TimeUtils.ntpTimestampFromInstant(instant))
-                .build();
-
-        statisticsService.logStats(reportStat);
-
-        assertThatAllDocumentsFromElastic()
-                .containsExactlyInAnyOrder(
-                        Map.of(
-                                "@timestamp", "2019-07-22T09:37:42.000Z",
-                                "reported", 10,
-                                "rejected", 2,
-                                "backwards", 5,
-                                "forwards", 3,
-                                "close", 4
                         )
                 );
     }
