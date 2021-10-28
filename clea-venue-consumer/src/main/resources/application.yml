@@ -14,8 +14,6 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQL95Dialect
     generate-ddl: false
     open-in-view: false
-  main:
-    web-application-type: none
   output:
     ansi:
       enabled: ALWAYS

@@ -4,11 +4,13 @@ import fr.gouv.clea.ws.configuration.CleaWsProperties;
 import fr.gouv.clea.ws.model.DecodedVisit;
 import fr.gouv.clea.ws.model.ReportStat;
 import fr.gouv.clea.ws.service.model.Visit;
+import fr.gouv.clea.ws.utils.MetricsService;
 import fr.inria.clea.lsp.CleaEciesEncoder;
 import fr.inria.clea.lsp.LocationSpecificPart;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import fr.inria.clea.lsp.LocationSpecificPartEncoder;
 import fr.inria.clea.lsp.utils.TimeUtils;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -43,6 +45,8 @@ class ReportServiceTest {
     @Captor
     private ArgumentCaptor<List<DecodedVisit>> acceptedVisits;
 
+    private MetricsService metricsService;
+
     private ReportService reportService;
 
     private Instant now;
@@ -55,7 +59,11 @@ class ReportServiceTest {
         cleaWsProperties.setExposureTimeUnitInSeconds(Duration.ofMinutes(30).getSeconds());
         cleaWsProperties.setDuplicateScanThresholdInSeconds(Duration.ofHours(3).getSeconds());
 
-        reportService = new ReportService(cleaWsProperties, new LocationSpecificPartDecoder(), producerService);
+        metricsService = new MetricsService(new SimpleMeterRegistry());
+
+        reportService = new ReportService(
+                cleaWsProperties, new LocationSpecificPartDecoder(), producerService, metricsService
+        );
     }
 
     @Test
@@ -102,6 +110,8 @@ class ReportServiceTest {
                 .doesNotContain("33333333-3333-3333-3333-333333333333");
         assertThat(acceptedCount)
                 .isEqualTo(2);
+
+        assertThat(metricsService.getFutureVisitCounter().count()).isEqualTo(1.0);
     }
 
     @Test
@@ -127,6 +137,8 @@ class ReportServiceTest {
                 .doesNotContain("11111111-1111-1111-1111-111111111111");
         assertThat(acceptedCount)
                 .isEqualTo(3);
+
+        assertThat(metricsService.getOutdatedVisitCounter().count()).isEqualTo(1.0);
     }
 
     @Test
@@ -146,6 +158,7 @@ class ReportServiceTest {
                 .doesNotContain("22222222-2222-2222-2222-222222222222");
         assertThat(acceptedCount)
                 .isEqualTo(1);
+        assertThat(metricsService.getFutureVisitCounter().count()).isEqualTo(1.0);
     }
 
     @Test
@@ -180,6 +193,8 @@ class ReportServiceTest {
                 );
         assertThat(acceptedCount)
                 .isEqualTo(4);
+        assertThat(metricsService.getDuplicateVisitCounter().count()).isEqualTo(4.0);
+        assertThat(metricsService.getFutureVisitCounter().count()).isEqualTo(1.0);
     }
 
     private Visit newVisit(String uuid, Instant scanTime) {

@@ -7,6 +7,7 @@ import fr.gouv.clea.ws.api.model.ValidationError;
 import fr.gouv.clea.ws.exception.CleaBadRequestException;
 import fr.gouv.clea.ws.service.ReportService;
 import fr.gouv.clea.ws.service.model.Visit;
+import fr.gouv.clea.ws.utils.MetricsService;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,8 @@ public class CleaController implements CleaApi {
 
     private final ReportService reportService;
 
+    private final MetricsService metricsService;
+
     @Override
     public ResponseEntity<ReportResponse> reportUsingPOST(ReportRequest reportRequest) {
         nonNullPivotDateOrThrowBadRequest(reportRequest);
@@ -37,7 +40,9 @@ public class CleaController implements CleaApi {
                 .collect(toList());
 
         final var acceptedVisits = reportService.report(pivotDate, visits);
+        final var rejectedVisits = reportRequest.getVisits().size() - acceptedVisits;
         final var message = String.format("%d/%d accepted visits", acceptedVisits, reportRequest.getVisits().size());
+        metricsService.getProcessedVisitCounter().increment(acceptedVisits);
         log.info(message);
 
         return ResponseEntity.ok(
