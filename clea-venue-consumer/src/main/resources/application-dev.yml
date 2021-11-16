@@ -44,17 +44,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/cleadb
     username: postgres
     password: password
-  h2:
-    console:
-      enabled: false
-      path: /h2
-      settings:
-        trace: false
-        web-allow-others: true
-  jpa:
-    generate-ddl: true
-    hibernate:
-      ddl-auto: create-drop
   kafka:
     bootstrap-servers: localhost:9092
     consumer:

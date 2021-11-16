@@ -3,12 +3,6 @@ spring:
     url: jdbc:postgresql://postgres:5432/cleadb
     username: postgres
     password: password
-  h2:
-    console:
-      enabled: false
-  jpa:
-    hibernate:
-      ddl-auto: create
   kafka:
     bootstrap-servers: kafka:29092
   elasticsearch:
