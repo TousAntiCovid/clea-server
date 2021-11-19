@@ -108,7 +108,6 @@ Feature: Several healthy visitors visit different places
     Then Exposure status should reports Julie as not being at risk
     Then Exposure status should reports Mahe as not being at risk
 
-
   Scenario: Overlaps - 3 days with 3 different location and malformed pivot date for 1 person
 
     Given Anne recorded a visit to "Chez McDonald's" at 11:50, 6 days ago
@@ -179,7 +178,6 @@ Feature: Several healthy visitors visit different places
 
     Then Exposure status should reports Julie as being at risk of 3.0
 
-
   Scenario: Nominal case
     Given Hugo recorded a visit to "Chez McDonald's" at 12:30, 4 days ago
     Given Henry recorded a visit to "Chez McDonald's" at 11:30, 4 days ago
@@ -243,8 +241,7 @@ Feature: Several healthy visitors visit different places
     Then Yaël cannot send his visits
     Then Exposure status should reports Julie as not being at risk
 
-
-  Scenario: ERROR - A DEVELOPPER Pivot date in the past
+  Scenario: Pivot date in the past
     Given Yaël recorded a visit to "Chez McDonald's" at 13:45, 4 days ago
     Given Julie recorded a visit to "Chez McDonald's" at 13:40, 4 days ago
     When Yaël declares himself sick with a 18 days ago pivot date
@@ -252,7 +249,7 @@ Feature: Several healthy visitors visit different places
     Then Yaël sends his visits
     Then Exposure status should reports Julie as being at risk of 2
 
-  Scenario: ERROR - A DEVELOPPER Pivot date in the future
+  Scenario: Pivot date in the future
     Given Yaël recorded a visit to "Chez McDonald's" at 13:45, 4 days ago
     Given Julie recorded a visit to "Chez McDonald's" at 13:40, 4 days ago
     When Yaël declares himself sick with a in 3 days pivot date
@@ -260,13 +257,14 @@ Feature: Several healthy visitors visit different places
     Then Yaël sends his visits
     Then Exposure status should reports Julie as being at risk of 2
 
-  Scenario: ERROR - A DEVELOPPER Duplicated QR code STAFF and NO STAFF
+  Scenario: Duplicated QR code STAFF and NO STAFF
     Given Hugo recorded a visit as a STAFF to "Chez McDonald's" at 12:30, 6 days ago
     Given Hugo recorded a visit to "Chez McDonald's" at 12:35, 6 days ago
     Given Laure recorded a visit to "Chez McDonald's" at 12:56, 6 days ago
     When Hugo declares himself sick with a 14 days ago pivot date
     When Cluster detection triggered
     Then Hugo sends his visits
+    #rejected visit should be the "not staff" qr code
     And Hugo has 1 rejected visit
     Then Exposure status should reports Laure as being at risk of 2.0
 
