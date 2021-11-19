@@ -7,13 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ParameterizedPreparedStatementSetter;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -21,29 +18,12 @@ import java.util.UUID;
 
 @Disabled("for local development purpose")
 @SpringBootTest
-// @ExtendWith(SpringExtension.class)
-// @RunWith(SpringRunner.class)
-// @ContextConfiguration(locationsForMirgation =
-// {"/context/flywayContainerContext.xml" })
-// @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
-// FlywayTestExecutionListener.class })
-// @DataJpaTest
 @ActiveProfiles("jpatest")
 @Slf4j
 public class ExposedVisitGenerator {
 
     @Autowired
     DataSource ds;
-    //
-    // @Autowired
-    // protected Flyway flyway;
-    //
-    // @BeforeAll
-    // public void init() {
-    // //flyway.configure().dataSource(ds);
-    //// /flyway.clean();
-    //// flyway.migrate();
-    // }
 
     @Test
     void fillRandomVisits() {
@@ -56,7 +36,7 @@ public class ExposedVisitGenerator {
 
         final Random r = new Random();
 
-        final long janv21 = 3818448000l;
+        final long janv21 = 3818448000L;
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 
@@ -95,19 +75,15 @@ public class ExposedVisitGenerator {
 												"values (?,?,?,?,?,?,?,?)",
 					batch,
 					batchSize,
-					new ParameterizedPreparedStatementSetter<ExposedVisit>() {
-						@Override
-						public void setValues(PreparedStatement ps, ExposedVisit visit)
-						        throws SQLException {
-							ps.setObject(1,visit.getLocationTemporaryPublicId());
-							ps.setObject(2,visit.getVenueType());
-							ps.setObject(3,visit.getVenueCategory1());
-							ps.setObject(4,visit.getVenueCategory2());
-							ps.setObject(5,visit.getPeriodStart());
-							ps.setObject(6,visit.getTimeSlot());
-							ps.setObject(7,visit.getBackwardVisits());
-							ps.setObject(8,visit.getForwardVisits());
-						}
+					(ps, visit) -> {
+						ps.setObject(1,visit.getLocationTemporaryPublicId());
+						ps.setObject(2,visit.getVenueType());
+						ps.setObject(3,visit.getVenueCategory1());
+						ps.setObject(4,visit.getVenueCategory2());
+						ps.setObject(5,visit.getPeriodStart());
+						ps.setObject(6,visit.getTimeSlot());
+						ps.setObject(7,visit.getBackwardVisits());
+						ps.setObject(8,visit.getForwardVisits());
 					});
 			//@formatter:on
 
