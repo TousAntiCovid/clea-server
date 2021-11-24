@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr" data-fr-scheme="system" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" th:href="@{/dsfr/dsfr.min.css}">
+
+        <title>Génération d'un cluster TAC-CLEA</title>
+    </head>
+    <header role="banner" class="fr-header">
+        <div class="fr-header__body">
+            <div class="fr-container">
+                <div class="fr-header__body-row">
+                    <div class="fr-header__brand fr-enlarge-link">
+                        <div class="fr-header__brand-top">
+                            <div class="fr-header__logo">
+                                <p class="fr-logo">
+                                    République
+                                    <br>Française
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <body>
+        <form action="#" th:action="@{/generate}" th:object="${generate}" method="post">
+            <label class="fr-label" for="text-input-text">URL complète contenue dans le QR code (deeplink)</label>
+            <input class="fr-input" type="text" id="text-input-text" name="deeplink" th:field="*{deeplink}">
+            <div class="fr-input-group">
+                <label class="fr-label" for="text-input-calendar">
+                    Date de début du cluster
+                </label>
+                <div class="fr-input-wrap">
+                    <input class="fr-input" type="datetime-local" id="text-input-calendar" name="date" th:field="*{date}">
+                </div>
+            </div>
+            <button type="submit" value="Submit" class="fr-btn">
+                Déclarer le cluster
+            </button>
+        </form>
+    <script type="module" th:src="@{../static/dsfr/dsfr.module.min.js}"></script>
+    <script type="text/javascript" nomodule th:src="@{/dsfr/dsfr.nomodule.min.js}"></script>
+    </body>
+</html>
