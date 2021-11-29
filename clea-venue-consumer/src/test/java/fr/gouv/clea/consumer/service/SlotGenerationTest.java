@@ -7,6 +7,7 @@ import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.gouv.clea.scoring.configuration.ScoringRule;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
+import fr.gouv.clea.scoring.configuration.risk.RiskConfiguration;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,8 @@ class SlotGenerationTest {
 
     private final ExposureTimeConfiguration exposureTimeConfig = new ExposureTimeConfiguration();
 
+    private final RiskConfiguration riskConfig = new RiskConfiguration();
+
     @Mock
     private ExposedVisitRepository repository;
 
@@ -66,7 +69,11 @@ class SlotGenerationTest {
                 )
         );
         properties.setDurationUnitInSeconds(Duration.ofMinutes(30).toSeconds());
-        service = new VisitExpositionAggregatorService(repository, exposureTimeConfig, properties, statisticsService);
+        // service = new VisitExpositionAggregatorService(repository,
+        // exposureTimeConfig, properties, statisticsService);
+        service = new VisitExpositionAggregatorService(
+                repository, exposureTimeConfig, riskConfig, properties, statisticsService
+        );
     }
 
     @Test
@@ -78,7 +85,7 @@ class SlotGenerationTest {
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         // => scanTimeSlot = 8*2 = 16
         // => slots to generate = 3 before + scanTimeSlot + 3 after = 7
@@ -99,7 +106,7 @@ class SlotGenerationTest {
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         // => scanTimeSlot = 0
         // => slots to generate = scanTimeSlot + 1 after = 2
@@ -120,7 +127,7 @@ class SlotGenerationTest {
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         // => scanTimeSlot = 0
         // => slots to generate = scanTimeSlot + 3 after = 4
@@ -141,7 +148,7 @@ class SlotGenerationTest {
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         verify(repository, never()).saveAll(exposedVisitEntitiesCaptor.capture());
     }
@@ -158,7 +165,7 @@ class SlotGenerationTest {
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         // => scanTimeSlot = 8
         // => slots to generate = scanTimeSlot + 3 after + 3 before

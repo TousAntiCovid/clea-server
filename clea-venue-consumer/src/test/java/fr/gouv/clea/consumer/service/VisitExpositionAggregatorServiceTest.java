@@ -14,7 +14,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @IntegrationTest
 class VisitExpositionAggregatorServiceTest {
@@ -43,7 +42,7 @@ class VisitExpositionAggregatorServiceTest {
                 .isBackward(true)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         assertThat(repository.findAll())
                 .allMatch(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid), "has uuid" + uuid)
@@ -57,10 +56,10 @@ class VisitExpositionAggregatorServiceTest {
                 .locationTemporaryPublicId(uuid)
                 .isBackward(true)
                 .build();
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
         long before = repository.count();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         long after = repository.count();
         assertThat(before).isEqualTo(after);
@@ -77,7 +76,7 @@ class VisitExpositionAggregatorServiceTest {
                 .locationTemporaryPublicId(uuid)
                 .isBackward(true)
                 .build();
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
         visit.setBackward(false);
         UUID newUUID = UUID.randomUUID();
         Visit visit2 = visit.toBuilder()
@@ -85,8 +84,8 @@ class VisitExpositionAggregatorServiceTest {
                 .isBackward(true)
                 .build();
 
-        service.updateExposureCount(visit);
-        service.updateExposureCount(visit2);
+        service.updateExposureCount(visit, false);
+        service.updateExposureCount(visit2, false);
 
         assertThat(repository.findAll())
                 .filteredOn(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid))
@@ -97,6 +96,21 @@ class VisitExpositionAggregatorServiceTest {
                 .filteredOn(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(newUUID))
                 .allMatch(exposedVisit -> exposedVisit.getBackwardVisits() == 1, "has 1 backward visit")
                 .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 0, "has 0 forward visit");
+    }
+
+    @Test
+    @DisplayName("manually declared cluster with no existing context should be saved in DB ")
+    void saveManuallyDeclaredClusterWithNoContext() {
+        Visit visit = defaultVisit().toBuilder()
+                .locationTemporaryPublicId(uuid)
+                .isBackward(false)
+                .build();
+
+        service.updateExposureCount(visit, true);
+
+        assertThat(repository.findAll())
+                .allMatch(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid), "has uuid" + uuid)
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 3, "has 3 backward visits");
     }
 
     @Test
@@ -111,7 +125,7 @@ class VisitExpositionAggregatorServiceTest {
                 .qrCodeScanTime(todayAtMidnight)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         assertThat(repository.count()).isZero();
     }
