@@ -35,7 +35,7 @@ public class ConsumerService {
         optionalVisit.ifPresentOrElse(
                 visit -> {
                     log.debug("Consumer: visit after decrypt + validation: {}, ", visit);
-                    visitExpositionAggregatorService.updateExposureCount(visit);
+                    visitExpositionAggregatorService.updateExposureCount(visit, false);
                     statisticsService.logStats(visit);
                 },
                 () -> log.info("empty visit after decrypt + validation")

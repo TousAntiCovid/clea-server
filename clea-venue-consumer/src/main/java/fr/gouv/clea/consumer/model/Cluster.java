@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Generate {
+public class Cluster {
 
     private String deeplink;
 
