@@ -37,6 +37,7 @@
         <module>clea-qr-simulator</module>
         <module>clea-scoring-conf</module>
         <module>clea-integration-tests</module>
+        <module>clea-exposed-visits-loader</module>
     </modules>
 
     <properties>
