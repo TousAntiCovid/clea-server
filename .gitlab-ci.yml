@@ -3,8 +3,13 @@ include:
     ref: master
     file: gitlab/gitlab-ci-java-template.yml
 
+build:
+  script:
+    - mvn -B -s .mvn/settings-ci.xml deploy -DskipTests=true
+
 e2e-tests-docker:
   script:
+    - docker ps
     - java -jar -Dspring.profiles.active=docker clea-integration-tests/target/clea-integration-tests-*.jar
 
 deploy-int:
