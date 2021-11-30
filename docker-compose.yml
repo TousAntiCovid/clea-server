@@ -77,10 +77,10 @@ services:
   minio:
     image: minio/minio:edge
     environment:
-      MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
-      MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      MINIO_ROOT_USER: AKIAIOSFODNN7EXAMPLE
+      MINIO_ROOT_PASSWORD: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     entrypoint: sh
-    command: -c 'mkdir -p /data/clea-batch /data/clea-batch-scaleway && /usr/bin/minio server /data'
+    command: -c 'mkdir -p /data/clea-batch /data/clea-batch-scaleway && /opt/bin/minio server /data'
     ports:
       - "9000:9000"
     healthcheck:
