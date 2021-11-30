@@ -8,8 +8,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 
-import static fr.gouv.clea.exposedvisitsloader.Runner.MAX_VISITS_PER_PLACE;
-import static fr.gouv.clea.exposedvisitsloader.Runner.NUMBER_OF_LOCATIONS_TO_GENERATE;
+import static fr.gouv.clea.exposedvisitsloader.FillExposedVisitWithVisitsRunner.MAX_VISITS_PER_PLACE;
+import static fr.gouv.clea.exposedvisitsloader.FillExposedVisitWithVisitsRunner.NUMBER_OF_LOCATIONS_TO_GENERATE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
@@ -22,7 +22,7 @@ class CleaExposedVisitsLoaderApplicationTests {
     private DataSource ds;
 
     @Autowired
-    private Runner runner;
+    private FillExposedVisitWithVisitsRunner runner;
 
     @Test
     void verify_runner_loaded_NUMBER_OF_LOCATIONS_TO_GENERATE_ltids_in_base() {

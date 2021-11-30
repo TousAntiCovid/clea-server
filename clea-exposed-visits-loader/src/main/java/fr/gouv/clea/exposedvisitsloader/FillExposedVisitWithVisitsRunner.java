@@ -21,7 +21,7 @@ import static java.util.UUID.randomUUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class Runner implements ApplicationRunner {
+public class FillExposedVisitWithVisitsRunner implements ApplicationRunner {
 
     private final DataSource ds;
 
@@ -42,18 +42,18 @@ public class Runner implements ApplicationRunner {
 
         for (int l = 0; l < NUMBER_OF_LOCATIONS_TO_GENERATE; l++) {
             UUID locationId = randomUUID();
-            var venueType = random.nextInt(18) + 1; // 1 to 18
-            var venueCategory1 = random.nextInt(4) + 1; // 1 to 4
-            var venueCategory2 = random.nextInt(4) + 1; // 1 to 4
+            final var venueType = random.nextInt(18) + 1; // 1 to 18
+            final var venueCategory1 = random.nextInt(4) + 1; // 1 to 4
+            final var venueCategory2 = random.nextInt(4) + 1; // 1 to 4
 
             List<ExposedVisit> batch = new ArrayList<>();
 
-            var clusterStart = date.toEpochDay() + (random.nextInt(65) * 1000L);
-            var visitsPerPlace = random.nextInt(MAX_VISITS_PER_PLACE);
+            final var clusterStart = date.toEpochDay() + (random.nextInt(65) * 1000L);
+            final var visitsPerPlace = random.nextInt(MAX_VISITS_PER_PLACE);
             for (var slot = 0; slot <= visitsPerPlace; slot++) {
 
                 //@formatter:off
-                var exposedVisit = ExposedVisit.builder()
+                final var exposedVisit = ExposedVisit.builder()
                         .locationTemporaryPublicId(locationId)
                         .venueType(venueType)
                         .venueCategory1(venueCategory1)
