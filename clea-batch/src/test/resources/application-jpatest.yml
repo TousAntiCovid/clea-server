@@ -4,10 +4,4 @@ spring:
     username: username
     password: password
 
-  batch:
-    # Manage it's batch metadata tables
-    #prevent job to launch on startup
-    job:
-      enabled: false
-    jdbc:
-      initialize-schema: never
+  batch.job.enabled: false
