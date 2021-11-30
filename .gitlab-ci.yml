@@ -10,6 +10,7 @@ build:
 e2e-tests-docker:
   script:
     - docker ps
+    - docker logs clea-server_minio_1
     - java -jar -Dspring.profiles.active=docker clea-integration-tests/target/clea-integration-tests-*.jar
 
 deploy-int:
