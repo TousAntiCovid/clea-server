@@ -4,7 +4,7 @@ services:
     image: clea-ws-rest
     build: clea-ws-rest
     environment:
-      SPRING_PROFILES_ACTIVE: dev,docker
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       CLEA_CONF_AUTHORIZATION_CHECK_ACTIVE: "false"
       CLEA_WS_REST_LOG_FILE_PATH: /logs
@@ -18,13 +18,14 @@ services:
     image: clea-venue-consumer
     build: clea-venue-consumer
     environment:
-      SPRING_PROFILES_ACTIVE: dev,docker
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      CLEA_VENUE_CONSUMER_LOG_FILE_PATH: /logs
-      CLEA_VENUE_CONSUMER_LOG_FILE_NAME: clea-venue-consumer
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cleadb
       SPRING_DATASOURCE_USERNAME: username
       SPRING_DATASOURCE_PASSWORD: password
+      SPRING_ELASTICSEARCH_REST_PASSWORD: password
+      SPRING_ELASTICSEARCH_REST_USERNAME: elastic
+      SPRING_ELASTICSEARCH_REST_URIS: http://elasticsearch:9200
     depends_on:
       - postgres
       - kafka
@@ -36,7 +37,9 @@ services:
     image: clea-batch:latest
     build: clea-batch
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cleadb
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
       BUCKET_OUTSCALE: clea-batch
       ENDPOINT_OUTSCALE: http://minio:9000
       BUCKET_SCALEWAY: clea-batch-scaleway

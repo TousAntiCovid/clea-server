@@ -13,10 +13,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import static fr.gouv.clea.consumer.test.ElasticManager.assertThatAllDocumentsFromElastic;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @IntegrationTest
@@ -82,7 +82,7 @@ class StatisticsServiceConcurrencyTest {
                 .forEach(pool::submit);
 
         pool.shutdown();
-        assertThat(pool.awaitTermination(60, TimeUnit.SECONDS))
+        assertThat(pool.awaitTermination(2, MINUTES))
                 .as("pool tasks are all finished")
                 .isTrue();
 

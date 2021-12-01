@@ -5,17 +5,17 @@ spring:
   cloud:
     consul:
       config:
-        enabled: ${CONSUL_CONFIG_ENABLED:false}
+        enabled: false
         format: YAML
-      enabled: ${CONSUL_ENABLED:false}
-      host: ${CONSUL_HOST:localhost}
-      port: ${CONSUL_PORT:8500}
-      scheme: ${CONSUL_SCHEME:http}
-      token: ${CLEA_VENUE_CONSUMER_CONSUL_ACL_TOKEN:token}
+        acl-token: token
+      enabled: false
+      host: localhost
+      port: 8500
+      scheme: http
 
     vault:
-      enabled: ${VAULT_ENABLED:false}
-      host: ${VAULT_HOST:localhost}
-      port: ${VAULT_PORT:8200}
-      scheme: ${VAULT_SCHEME:http}
-      token: ${VAULT_TOKEN:token}
+      enabled: false
+      host: localhost
+      port: 8200
+      scheme: http
+      token: token

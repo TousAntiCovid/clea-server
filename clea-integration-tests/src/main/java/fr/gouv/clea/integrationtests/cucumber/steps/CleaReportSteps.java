@@ -7,6 +7,7 @@ import fr.gouv.clea.integrationtests.service.visitorsimulator.WreportResponse;
 import fr.gouv.clea.integrationtests.utils.CleaApiResponseParser;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import io.cucumber.core.exception.CucumberException;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.http.ContentType;
@@ -29,10 +30,23 @@ public class CleaReportSteps {
 
     private final URL cleaReportUrl;
 
+    private final URL cleaHealthUrl;
+
     public CleaReportSteps(ScenarioContext scenarioContext, ApplicationProperties applicationProperties)
             throws MalformedURLException {
         this.scenarioContext = scenarioContext;
         this.cleaReportUrl = new URL(applicationProperties.getWsRest().getBaseUrl(), "/api/clea/v1/wreport");
+        this.cleaHealthUrl = new URL(applicationProperties.getWsRest().getBaseUrl(), "/actuator/health");
+    }
+
+    @Given("application clea ws rest is ready")
+    public void applicationCleaIsReady() {
+        given()
+                .when()
+                .get(cleaHealthUrl)
+                .then()
+                .statusCode(200)
+                .body("status", equalTo("UP"));
     }
 
     @When("{word} declares himself/herself sick")

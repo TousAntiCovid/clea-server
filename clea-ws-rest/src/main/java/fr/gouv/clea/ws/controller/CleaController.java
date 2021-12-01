@@ -40,7 +40,6 @@ public class CleaController implements CleaApi {
                 .collect(toList());
 
         final var acceptedVisits = reportService.report(pivotDate, visits);
-        final var rejectedVisits = reportRequest.getVisits().size() - acceptedVisits;
         final var message = String.format("%d/%d accepted visits", acceptedVisits, reportRequest.getVisits().size());
         metricsService.getProcessedVisitCounter().increment(acceptedVisits);
         log.info(message);
