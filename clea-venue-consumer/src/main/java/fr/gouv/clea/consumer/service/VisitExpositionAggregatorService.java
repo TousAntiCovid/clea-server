@@ -30,11 +30,11 @@ public class VisitExpositionAggregatorService {
 
     private final ExposureTimeConfiguration exposureTimeConfig;
 
-    // private final RiskConfiguration riskConfig;
-
     private final VenueConsumerProperties properties;
 
     private final StatisticsService statisticsService;
+
+    private final int clusterThresholdValue = 100;
 
     @Transactional
     public void updateExposureCount(Visit visit, boolean isManualDeclaredCluster) {
@@ -129,17 +129,15 @@ public class VisitExpositionAggregatorService {
 
     protected ExposedVisitEntity updateExposedVisit(Visit visit, ExposedVisitEntity exposedVisit,
             boolean isManualDeclaredCluster) {
-        // if (isManualDeclaredCluster) {
-        // exposedVisit.setForwardVisits(exposedVisit.getForwardVisits() +
-        // getRisk(visit.getVenueType(), visit.getVenueCategory1(),
-        // visit.getVenueCategory2()));
-        // } else {
-        if (visit.isBackward()) {
-            exposedVisit.setBackwardVisits(exposedVisit.getBackwardVisits() + 1);
+        if (isManualDeclaredCluster) {
+            exposedVisit.setForwardVisits(exposedVisit.getForwardVisits() + clusterThresholdValue);
         } else {
-            exposedVisit.setForwardVisits(exposedVisit.getForwardVisits() + 1);
+            if (visit.isBackward()) {
+                exposedVisit.setBackwardVisits(exposedVisit.getBackwardVisits() + 1);
+            } else {
+                exposedVisit.setForwardVisits(exposedVisit.getForwardVisits() + 1);
+            }
         }
-        // }
 
         return exposedVisit;
     }
@@ -155,10 +153,9 @@ public class VisitExpositionAggregatorService {
                 .periodStart(periodStart)
                 .timeSlot(slotIndex)
                 .backwardVisits(visit.isBackward() ? 1 : 0)
-                .forwardVisits(/*
-                                * isManualDeclaredCluster ? getRisk(visit.getVenueType(),
-                                * visit.getVenueCategory1(), visit.getVenueCategory2()) :
-                                */ visit.isBackward() ? 0 : 1)
+                .forwardVisits(
+                        isManualDeclaredCluster ? 100 : visit.isBackward() ? 0 : 1
+                )
                 .build();
     }
 
@@ -188,10 +185,4 @@ public class VisitExpositionAggregatorService {
         }
         return exposureTime;
     }
-
-    // protected int getRisk(int venueType, int venueCategory1, int venueCategory2)
-    // {
-    // return riskConfig.getConfigurationFor(venueType, venueCategory1,
-    // venueCategory2).getClusterThresholdForward();
-    // }
 }
