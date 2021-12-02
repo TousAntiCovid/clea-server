@@ -26,12 +26,12 @@
         </div>
     </header>
     <body>
-        <form action="#" th:action="@{/cluster-declaration}" th:object="${clusterDeclarationRequest}" method="post">
-            <label class="fr-label" for="text-input-text">deeplink</label>
+        <form action="#" th:action="@{/cluster-declaration}" th:object="${clusterDeclarationRequest}" method="post" class="fr-p-5">
+            <label class="fr-label" for="text-input-text">Deeplink contenu dans le QRCode</label>
             <input class="fr-input" type="text" id="text-input-text" name="deepLink" th:field="*{deeplink}" placeholder="https://tac.gouv.fr?v=0#AHG24PXS3W9VsDGr(...)0KwZRzHvmTek">
-            <!--<p th:if="${#fields.hasErrors('deeplink')}" th:errorclass="fr-error-text" th:errors="*{deeplink}">
+            <p th:if="${#fields.hasErrors('deeplink')}" th:errorclass="fr-error-text" th:errors="*{deeplink}">
                 Veuillez renseigner le deeplink
-            </p>-->
+            </p>
             <div class="fr-input-group">
                 <label class="fr-label" for="text-input-calendar">
                     Date de début du cluster
