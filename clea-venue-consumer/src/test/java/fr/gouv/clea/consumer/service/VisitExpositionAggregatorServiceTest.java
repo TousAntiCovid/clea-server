@@ -24,13 +24,13 @@ class VisitExpositionAggregatorServiceTest {
     @Autowired
     private VisitExpositionAggregatorService service;
 
-    private Instant todayAtMidnight = Instant.now().truncatedTo(ChronoUnit.DAYS);;
+    private Instant todayAtMidnight = Instant.now().truncatedTo(ChronoUnit.DAYS);
 
     private Instant todayAt8am = todayAtMidnight.plus(8, ChronoUnit.HOURS);
 
     private UUID uuid = UUID.randomUUID();
 
-    private byte[] locationTemporarySecretKey = RandomUtils.nextBytes(20);;
+    private byte[] locationTemporarySecretKey = RandomUtils.nextBytes(20);
 
     private byte[] encryptedLocationContactMessage = RandomUtils.nextBytes(20);
 
@@ -99,18 +99,64 @@ class VisitExpositionAggregatorServiceTest {
     }
 
     @Test
-    @DisplayName("manually declared cluster with no existing context should be saved in DB ")
+    @DisplayName("manually declared cluster with no context should be save in DB ")
     void saveManuallyDeclaredClusterWithNoContext() {
         Visit visit = defaultVisit().toBuilder()
                 .locationTemporaryPublicId(uuid)
                 .isBackward(false)
                 .build();
-
         service.updateExposureCount(visit, true);
 
         assertThat(repository.findAll())
                 .allMatch(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid), "has uuid" + uuid)
-                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 3, "has 3 backward visits");
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 100, "has 100 forward visits");
+    }
+
+    @Test
+    @DisplayName("manually declared cluster with no existing context should be update in DB")
+    void updateManuallyDeclaredClusterWithExistingContext() {
+        Visit visit = defaultVisit().toBuilder()
+                .locationTemporaryPublicId(uuid)
+                .isBackward(false)
+                .build();
+        service.updateExposureCount(visit, false);
+        long before = repository.count();
+
+        service.updateExposureCount(visit, true);
+
+        long after = repository.count();
+        assertThat(before).isEqualTo(after);
+
+        assertThat(repository.findAll())
+                .allMatch(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid), "has uuid" + uuid)
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 101, "has 101 forward visits");
+    }
+
+    @Test
+    @DisplayName("new manually declared clusters should be saved while existing be updated in DB")
+    void manuallyDeclaredClusterWithMixedContext() {
+        Visit visit = defaultVisit().toBuilder()
+                .locationTemporaryPublicId(uuid)
+                .isBackward(false)
+                .build();
+        service.updateExposureCount(visit, false);
+        visit.setBackward(false);
+        UUID newUUID = UUID.randomUUID();
+        Visit visit2 = visit.toBuilder()
+                .locationTemporaryPublicId(newUUID)
+                .isBackward(false)
+                .build();
+
+        service.updateExposureCount(visit, true);
+        service.updateExposureCount(visit2, true);
+
+        assertThat(repository.findAll())
+                .filteredOn(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid))
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 101, "has 101 forward visit");
+
+        assertThat(repository.findAll())
+                .filteredOn(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(newUUID))
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 100, "has 100 forward visit");
     }
 
     @Test
