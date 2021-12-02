@@ -10,9 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 
@@ -42,11 +44,9 @@ public class ClusterDeclarationController {
 
     @PostMapping(value = "/cluster-declaration")
     public String generate(
-            @Valid @ModelAttribute("clusterDeclarationRequest") ClusterDeclarationRequest clusterDeclarationRequest,
-            BindingResult result) throws Exception {
-        if (result.hasErrors()) {
-            log.error("Erreurs dans la déclaration du cluster");
-        }
+            @Valid ClusterDeclarationRequest clusterDeclarationRequest,
+            BindingResult result,
+            RedirectAttributes redirectAttributes) throws Exception {
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         try {
@@ -68,19 +68,27 @@ public class ClusterDeclarationController {
                             log.info("Consumer: visit after decrypt + validation: {}, ", visit);
                             visitExpositionAggregatorService.updateExposureCount(visit, true);
                         },
-                        () -> {
-                            log.info("empty visit after decrypt + validation");
-                        }
+                        () -> log.info("empty visit after decrypt + validation")
                 );
             } else {
                 log.info(
                         "Erreur dans le qrCode de déclaration du cluster : {} ", clusterDeclarationRequest.getDeeplink()
                 );
+                ObjectError error = new ObjectError("globalError", "Erreur dans le qrCode de déclaration du cluster");
+                result.addError(error);
+                return "cluster-declaration";
             }
         } catch (Exception e) {
             log.info("Erreur dans la date de déclaration du cluster : {} ", clusterDeclarationRequest.getDate());
+            ObjectError error = new ObjectError("globalError", e.getMessage());
+            result.addError(error);
+            return "cluster-declaration";
         }
-        return "cluster-declaration";
+        redirectAttributes.addFlashAttribute(
+                "success_message",
+                "Visites enregistrées avec succès, le cluster sera actif au prochain déclenchement du batch"
+        );
+        return "redirect:/cluster-declaration";
     }
 
 }

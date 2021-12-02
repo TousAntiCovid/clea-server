@@ -1,17 +1,15 @@
 package fr.gouv.clea.consumer.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 
-@Getter
-@Setter
+@Data
 public class ClusterDeclarationRequest {
 
-    @NotEmpty(message = "deeplink cannot be empty.")
+    @NotEmpty(message = "Deeplink cannot be empty.")
     private String deeplink;
 
-    @NotEmpty(message = "date cannot be empty.")
+    @NotEmpty(message = "Date cannot be empty.")
     private String date;
 }
