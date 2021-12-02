@@ -6,7 +6,6 @@ import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
-import fr.gouv.clea.scoring.configuration.risk.RiskConfiguration;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,7 @@ public class VisitExpositionAggregatorService {
 
     private final ExposureTimeConfiguration exposureTimeConfig;
 
-    private final RiskConfiguration riskConfig;
+    // private final RiskConfiguration riskConfig;
 
     private final VenueConsumerProperties properties;
 

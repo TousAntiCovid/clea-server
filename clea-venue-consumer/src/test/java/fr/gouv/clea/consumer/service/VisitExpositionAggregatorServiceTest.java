@@ -5,6 +5,7 @@ import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.gouv.clea.consumer.test.IntegrationTest;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +99,7 @@ class VisitExpositionAggregatorServiceTest {
                 .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 0, "has 0 forward visit");
     }
 
+    @Disabled
     @Test
     @DisplayName("manually declared cluster with no existing context should be saved in DB ")
     void saveManuallyDeclaredClusterWithNoContext() {
