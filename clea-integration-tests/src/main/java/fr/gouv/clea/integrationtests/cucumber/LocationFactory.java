@@ -39,14 +39,19 @@ public class LocationFactory {
             final int venueCategory2,
             final Duration qrCodeRenewalInterval,
             final int periodDurationHours) {
+        final int formattedDeepLinkRenewalInterval = getFormattedDeeplinkRenewalInterval(qrCodeRenewalInterval);
         return createLocation(
                 venueType,
                 venueCategory1,
                 venueCategory2,
-                compactQrCodeRenewalInterval(qrCodeRenewalInterval),
+                formattedDeepLinkRenewalInterval,
                 periodDurationHours,
                 false
         );
+    }
+
+    private int getFormattedDeeplinkRenewalInterval(Duration qrCodeRenewalInterval) {
+        return (int) (Math.log(qrCodeRenewalInterval.getSeconds()) / Math.log(2));
     }
 
     public Location createStaticStaffLocation(final int venueType,
@@ -68,18 +73,15 @@ public class LocationFactory {
             final int venueCategory2,
             final Duration qrCodeRenewalInterval,
             final int periodDurationHours) {
+        final int formattedDeepLinkRenewalInterval = getFormattedDeeplinkRenewalInterval(qrCodeRenewalInterval);
         return createLocation(
                 venueType,
                 venueCategory1,
                 venueCategory2,
-                compactQrCodeRenewalInterval(qrCodeRenewalInterval),
+                formattedDeepLinkRenewalInterval,
                 periodDurationHours,
                 true
         );
-    }
-
-    private int compactQrCodeRenewalInterval(Duration qrCodeRenewalInterval) {
-        return (int) (Math.log(qrCodeRenewalInterval.getSeconds()) / Math.log(2));
     }
 
     private Location createLocation(final int venueType,

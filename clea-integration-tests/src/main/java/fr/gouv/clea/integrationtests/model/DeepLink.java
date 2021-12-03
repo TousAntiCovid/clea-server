@@ -16,4 +16,18 @@ public class DeepLink {
     Instant validityStartTime;
 
     Duration renewalInterval;
+
+    public boolean containsProvidedScanTime(final Instant scanTime) {
+        if (isStaticDeeplink()) {
+            return scanTime.isAfter(validityStartTime) || scanTime.equals(validityStartTime);
+        } else {
+            final var validityEndTime = validityStartTime.plus(renewalInterval);
+            return (scanTime.isAfter(validityStartTime) || scanTime.equals(validityStartTime))
+                    && (scanTime.isBefore(validityEndTime) || scanTime.equals(validityEndTime));
+        }
+    }
+
+    private boolean isStaticDeeplink() {
+        return renewalInterval.abs().isZero();
+    }
 }
