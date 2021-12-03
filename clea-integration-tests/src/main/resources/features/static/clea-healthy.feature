@@ -11,20 +11,26 @@ Feature: Several healthy visitors visit different places
     Given Julie registered on TAC
     Given Mahe registered on TAC
     Given Yaël registered on TAC
-    Given "Chez McDonald's" created a static QRCode at 11:00, 13 days ago with VType as 1, with VCategory1 as 1, with VCategory2 as 1 and with a periodDuration of 24 hours
-    Given "NRFight Club Olympiades" created a static QRCode at 11:00, 13 days ago with VType as 4, with VCategory1 as 2, with VCategory2 as 2 and with a periodDuration of 24 hours
-    Given "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as 4, with VCategory1 as 1, with VCategory2 as 2 and with a periodDuration of 24 hours
+    Given Place named "McDonald's" has configuration: venue type 1, venue category 1 1, venue category 2 1, and a periodDuration of 24 hours
+    Given Place named "NRFight Club Olympiades" has configuration: venue type 4, venue category 1 2, venue category 2 2, and a periodDuration of 24 hours
+    Given Place named "OrangeBleue" has configuration: venue type 4, venue category 1 1, venue category 2 2, and a periodDuration of 24 hours
+    Given "McDonald's" created a static deeplink at 11:00, 13 days ago
+    Given "McDonald's" created a static staff deeplink at 11:00, 13 days ago
+    Given "NRFight Club Olympiades" created a static deeplink at 11:00, 13 days ago
+    Given "NRFight Club Olympiades" created a static staff deeplink at 11:00, 13 days ago
+    Given "OrangeBleue" created a static deeplink at 11:00, 8 days ago
+    Given "OrangeBleue" created a static staff deeplink at 11:00, 8 days ago
 
   Scenario: One location with duplicated visits - Exposure Time 30 min
-    Given Hugo recorded a visit to "Chez McDonald's" at 12:30, 6 days ago
-    Given Hugo recorded a visit to "Chez McDonald's" at 12:35, 6 days ago
-    Given Hugo recorded a visit to "Chez McDonald's" at 15:35, 6 days ago
-    Given Heather recorded a visit to "Chez McDonald's" at 13:30, 6 days ago
-    Given Henry recorded a visit to "Chez McDonald's" at 11:45, 6 days ago
-    Given Laure recorded a visit to "Chez McDonald's" at 12:59, 6 days ago
-    Given Anne recorded a visit to "Chez McDonald's" at 20:30, 6 days ago
-    Given Julie recorded a visit to "Chez McDonald's" at 16:00, 6 days ago
-    Given Mahe recorded a visit to "Chez McDonald's" at 12:13, 6 days ago
+    Given Hugo recorded a visit to "McDonald's" at 12:30, 6 days ago
+    Given Hugo recorded a visit to "McDonald's" at 12:35, 6 days ago
+    Given Hugo recorded a visit to "McDonald's" at 15:35, 6 days ago
+    Given Heather recorded a visit to "McDonald's" at 13:30, 6 days ago
+    Given Henry recorded a visit to "McDonald's" at 11:45, 6 days ago
+    Given Laure recorded a visit to "McDonald's" at 12:59, 6 days ago
+    Given Anne recorded a visit to "McDonald's" at 20:30, 6 days ago
+    Given Julie recorded a visit to "McDonald's" at 16:00, 6 days ago
+    Given Mahe recorded a visit to "McDonald's" at 12:13, 6 days ago
 
     When Hugo declares himself sick with a 14 days ago pivot date
     When Heather declares himself sick with a 12 days ago pivot date
@@ -110,11 +116,11 @@ Feature: Several healthy visitors visit different places
 
   Scenario: Overlaps - 3 days with 3 different location and malformed pivot date for 1 person
 
-    Given Anne recorded a visit to "Chez McDonald's" at 11:50, 6 days ago
-    Given Hugo recorded a visit to "Chez McDonald's" at 12:30, 6 days ago
-    Given Laure recorded a visit to "Chez McDonald's" at 12:45, 6 days ago
-    Given Heather recorded a visit to "Chez McDonald's" at 12:58, 6 days ago
-    Given Julie recorded a visit to "Chez McDonald's" at 12:50, 6 days ago
+    Given Anne recorded a visit to "McDonald's" at 11:50, 6 days ago
+    Given Hugo recorded a visit to "McDonald's" at 12:30, 6 days ago
+    Given Laure recorded a visit to "McDonald's" at 12:45, 6 days ago
+    Given Heather recorded a visit to "McDonald's" at 12:58, 6 days ago
+    Given Julie recorded a visit to "McDonald's" at 12:50, 6 days ago
 
     Given Anne recorded a visit to "NRFight Club Olympiades" at 11:58, 4 days ago
     Given Mahe recorded a visit to "NRFight Club Olympiades" at 11:50, 4 days ago
@@ -158,12 +164,12 @@ Feature: Several healthy visitors visit different places
     Then Yaël cannot send his visits
     Then Exposure status should reports Julie as being at risk of 2.0
     Then Exposure status should reports Mahe as being at risk of 2.0
-
+#FIXME
   Scenario: Visits staff trigger a cluster of no STAFF visits
-    Given Hugo recorded a visit as a STAFF to "Chez McDonald's" at 20:32, 6 days ago
-    Given Henry recorded a visit as a STAFF to "Chez McDonald's" at 20:40, 6 days ago
-    Given Laure recorded a visit as a STAFF to "Chez McDonald's" at 20:30, 6 days ago
-    Given Julie recorded a visit to "Chez McDonald's" at 20:55, 6 days ago
+    Given Hugo recorded a visit as a STAFF to "McDonald's" at 20:32, 6 days ago
+    Given Henry recorded a visit as a STAFF to "McDonald's" at 20:40, 6 days ago
+    Given Laure recorded a visit as a STAFF to "McDonald's" at 20:30, 6 days ago
+    Given Julie recorded a visit to "McDonald's" at 20:55, 6 days ago
 
     When Hugo declares himself sick with a 5 days ago pivot date
     When Henry declares himself sick with a 3 days ago pivot date
@@ -179,9 +185,9 @@ Feature: Several healthy visitors visit different places
     Then Exposure status should reports Julie as being at risk of 3.0
 
   Scenario: Nominal case
-    Given Hugo recorded a visit to "Chez McDonald's" at 12:30, 4 days ago
-    Given Henry recorded a visit to "Chez McDonald's" at 11:30, 4 days ago
-    Given Heather recorded a visit to "Chez McDonald's" at 13:35, 4 days ago
+    Given Hugo recorded a visit to "McDonald's" at 12:30, 4 days ago
+    Given Henry recorded a visit to "McDonald's" at 11:30, 4 days ago
+    Given Heather recorded a visit to "McDonald's" at 13:35, 4 days ago
 
     When Heather declares himself sick with a 5 days ago pivot date
     When Cluster detection triggered
@@ -193,9 +199,9 @@ Feature: Several healthy visitors visit different places
     Then Exposure status should reports Henry as not being at risk
 
   Scenario: Duplicated QR code
-    Given Hugo recorded a visit to "Chez McDonald's" at 12:30, 6 days ago
-    Given Hugo recorded a visit to "Chez McDonald's" at 12:35, 6 days ago
-    Given Laure recorded a visit to "Chez McDonald's" at 12:59, 6 days ago
+    Given Hugo recorded a visit to "McDonald's" at 12:30, 6 days ago
+    Given Hugo recorded a visit to "McDonald's" at 12:35, 6 days ago
+    Given Laure recorded a visit to "McDonald's" at 12:59, 6 days ago
     When Hugo declares himself sick with a 14 days ago pivot date
     When Cluster detection triggered
     Then Hugo sends his visits
@@ -203,64 +209,65 @@ Feature: Several healthy visitors visit different places
     Then Exposure status should reports Laure as being at risk of 2.0
 
   Scenario: Malformed pivot date (not in timestamp)
-    Given Yaël recorded a visit to "Chez McDonald's" at 13:45, 4 days ago
-    Given Julie recorded a visit to "Chez McDonald's" at 13:40, 4 days ago
+    Given Yaël recorded a visit to "McDonald's" at 13:45, 4 days ago
+    Given Julie recorded a visit to "McDonald's" at 13:40, 4 days ago
     When Yaël declares himself sick with malformed pivot date
     When Cluster detection triggered
     Then Yaël cannot send his visits
     Then Exposure status should reports Julie as not being at risk
 
   Scenario: Malformed QrCode
-    Given Yaël recorded a visit to "Chez McDonald's" at 13:45, 4 days ago
-    Given Julie recorded a visit to "Chez McDonald's" at 13:40, 4 days ago
+    Given Yaël recorded a visit to "McDonald's" at 13:45, 4 days ago
+    Given Julie recorded a visit to "McDonald's" at 13:40, 4 days ago
     When Yaël declares himself sick with malformed QrCode
     When Cluster detection triggered
     Then Yaël cannot send his visits
     Then Exposure status should reports Julie as not being at risk
 
   Scenario: No QrCODE
-    Given Julie recorded a visit to "Chez McDonald's" at 13:45, 4 days ago
+    Given Julie recorded a visit to "McDonald's" at 13:45, 4 days ago
     When Yaël declares himself sick with a 5 days ago pivot date with no QRCode
     When Cluster detection triggered
     Then Yaël cannot send his visits
     Then Exposure status should reports Julie as not being at risk
 
   Scenario: Malformed scan time
-    Given Yaël recorded a visit to "Chez McDonald's" at 13:45, 4 days ago
-    Given Julie recorded a visit to "Chez McDonald's" at 13:40, 4 days ago
+    Given Yaël recorded a visit to "McDonald's" at 13:45, 4 days ago
+    Given Julie recorded a visit to "McDonald's" at 13:40, 4 days ago
     When Yaël declares himself sick with malformed scan time
     When Cluster detection triggered
     Then Yaël has 1 rejected visit
     Then Exposure status should reports Julie as not being at risk
 
   Scenario: No scan time
-    Given Yaël recorded a visit to "Chez McDonald's" at 13:45, 4 days ago
-    Given Julie recorded a visit to "Chez McDonald's" at 13:40, 4 days ago
+    Given Yaël recorded a visit to "McDonald's" at 13:45, 4 days ago
+    Given Julie recorded a visit to "McDonald's" at 13:40, 4 days ago
     When Yaël declares himself sick with no scan time
     When Cluster detection triggered
     Then Yaël cannot send his visits
     Then Exposure status should reports Julie as not being at risk
 
   Scenario: Pivot date in the past
-    Given Yaël recorded a visit to "Chez McDonald's" at 13:45, 4 days ago
-    Given Julie recorded a visit to "Chez McDonald's" at 13:40, 4 days ago
+    Given Yaël recorded a visit to "McDonald's" at 13:45, 4 days ago
+    Given Julie recorded a visit to "McDonald's" at 13:40, 4 days ago
     When Yaël declares himself sick with a 18 days ago pivot date
     When Cluster detection triggered
     Then Yaël sends his visits
     Then Exposure status should reports Julie as being at risk of 2
 
   Scenario: Pivot date in the future
-    Given Yaël recorded a visit to "Chez McDonald's" at 13:45, 4 days ago
-    Given Julie recorded a visit to "Chez McDonald's" at 13:40, 4 days ago
+    Given Yaël recorded a visit to "McDonald's" at 13:45, 4 days ago
+    Given Julie recorded a visit to "McDonald's" at 13:40, 4 days ago
     When Yaël declares himself sick with a in 3 days pivot date
     When Cluster detection triggered
     Then Yaël sends his visits
     Then Exposure status should reports Julie as being at risk of 2
 
+    #FIXME
   Scenario: Duplicated QR code STAFF and NO STAFF
-    Given Hugo recorded a visit as a STAFF to "Chez McDonald's" at 12:30, 6 days ago
-    Given Hugo recorded a visit to "Chez McDonald's" at 12:35, 6 days ago
-    Given Laure recorded a visit to "Chez McDonald's" at 12:56, 6 days ago
+    Given Hugo recorded a visit as a STAFF to "McDonald's" at 12:30, 6 days ago
+    Given Hugo recorded a visit to "McDonald's" at 12:35, 6 days ago
+    Given Laure recorded a visit to "McDonald's" at 12:56, 6 days ago
     When Hugo declares himself sick with a 14 days ago pivot date
     When Cluster detection triggered
     Then Hugo sends his visits
@@ -270,8 +277,8 @@ Feature: Several healthy visitors visit different places
 
 #FIXME: step "with malformed token" not yet implemented
 #     Scenario: ERROR - A DEVELOPPER malformed Robert Token (validity period passed)
-#     Given Yaël recorded a visit to "Chez McDonald's" at 13:45, 10 days ago
-#     Given Julie recorded a visit to "Chez McDonald's" at 13:45, 4 days ago
+#     Given Yaël recorded a visit to "McDonald's" at 13:45, 10 days ago
+#     Given Julie recorded a visit to "McDonald's" at 13:45, 4 days ago
 #     When Yaël declares himself sick with malformed token
 #     When Cluster detection triggered
 #     Then Yaël cannot send his visits

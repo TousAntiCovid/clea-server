@@ -1,59 +1,77 @@
 package fr.gouv.clea.integrationtests.cucumber.steps;
 
 import fr.gouv.clea.integrationtests.cucumber.ScenarioContext;
+import fr.gouv.clea.integrationtests.model.DeepLink;
+import fr.gouv.clea.integrationtests.model.Place;
 import fr.inria.clea.lsp.exception.CleaCryptoException;
 import io.cucumber.java.en.Given;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
+@Slf4j
 @AllArgsConstructor
 public class CleaQrCodeSteps {
 
     private final ScenarioContext scenarioContext;
 
-    // Dynamic Location
-    @Given("{string} created a dynamic QRCode at {naturalTime} with VType as {int}, with VCategory1 as {int}, with VCategory2 as {int}, with a renewal time of {duration} and with a periodDuration of {int} hours")
-    public void dynamic_location_with_a_periodDuration_and_renewalTime(String locationName, Instant periodStartTime,
-            Integer venueType, Integer venueCategory1, Integer venueCategory2, Duration qrCodeRenewalIntervalDuration,
-            Integer periodDuration) throws CleaCryptoException {
-        this.scenarioContext.getOrCreateDynamicLocation(
-                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
-                qrCodeRenewalIntervalDuration,
-                periodDuration
+    @Given("{string} created a dynamic deeplink at {naturalTime} with a renewal time of {duration}")
+    public void create_qrcode_at_periodStartTime_with_renewalTime(final String locationName,
+            final Instant qrCodePeriodStartTime,
+            final Duration qrCodeRenewalIntervalDuration) {
+        scenarioContext.getPlace(locationName).ifPresent(
+                it -> it.addDeepLink(createDynamicDeepLink(it, qrCodePeriodStartTime, qrCodeRenewalIntervalDuration))
         );
-        // TODO: add QR id
     }
 
-    @Given("{string} created a dynamic QRCode at {naturalTime} with VType as {int} and with VCategory1 as {int} and with VCategory2 as {int} and with and with a renewal time of {duration}")
-    public void dynamic_location_without_periodDuration_with_renewalTime(String locationName, Instant periodStartTime,
-            Integer venueType, Integer venueCategory1, Integer venueCategory2, Duration qrCodeRenewalIntervalDuration)
-            throws CleaCryptoException {
-        this.scenarioContext.getOrCreateDynamicLocation(
-                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
-                qrCodeRenewalIntervalDuration
+    @Given("{string} created a static deeplink at {naturalTime}")
+    public void create_deeplink_with_periodStartTime_without_qrCodeRenewalIntervalDuration(final String locationName,
+            final Instant periodStartTime) {
+        scenarioContext.getPlace(locationName).ifPresent(
+                place -> place.addDeepLink(createStaticDeepLink(place, periodStartTime))
         );
-        // TODO: add QR id
     }
 
-    @Given("{string} created a static QRCode at {naturalTime} with VType as {int}, with VCategory1 as {int}, with VCategory2 as {int} and with a periodDuration of {int} hours")
-    public void static_location_without_renewalTime_with_periodDuration(String locationName, Instant periodStartTime,
-            Integer venueType, Integer venueCategory1, Integer venueCategory2, Integer periodDuration)
-            throws CleaCryptoException {
-        this.scenarioContext.getOrCreateStaticLocation(
-                locationName, periodStartTime, venueType, venueCategory1, venueCategory2,
-                periodDuration
+    @Given("{string} created a static staff deeplink at {naturalTime}")
+    public void create_staff_deeplink_with_periodStartTime_without_qrCodeRenewalIntervalDuration(
+            final String locationName,
+            final Instant periodStartTime) {
+        scenarioContext.getPlace(locationName).ifPresent(
+                place -> place.addStaffDeepLink(createStaticDeepLink(place, periodStartTime))
         );
-        // TODO: add QR id
     }
 
-    @Given("{string} created a static QRCode at {naturalTime} with VType as {string} and VCategory1 as {int} and with VCategory2 as {int}")
-    public void static_location_with_default_periodDuration(String locationName, Instant periodStartTime,
-            Integer venueType, Integer venueCategory1, Integer venueCategory2) throws CleaCryptoException {
-        this.scenarioContext.getOrCreateStaticLocationWithUnlimitedDuration(
-                locationName, periodStartTime, venueType, venueCategory1, venueCategory2
-        );
-        // TODO: add QR id
+    private DeepLink createDynamicDeepLink(final Place place,
+            final Instant periodStartTime,
+            final Duration qrCodeRenewalIntervalDuration) {
+        try {
+            return DeepLink.builder()
+                    .url(new URL(place.getLocation().newDeepLink(periodStartTime)))
+                    .validityStartTime(periodStartTime)
+                    .renewalInterval(qrCodeRenewalIntervalDuration)
+                    .build();
+        } catch (CleaCryptoException | MalformedURLException e) {
+            log.warn(e.getMessage());
+        }
+        return null;
+    }
+
+    private DeepLink createStaticDeepLink(final Place place,
+            final Instant periodStartTime) {
+        try {
+            return DeepLink.builder()
+                    .url(new URL(place.getLocation().newDeepLink(periodStartTime)))
+                    .validityStartTime(periodStartTime)
+                    .renewalInterval(Duration.of(0, ChronoUnit.DAYS))
+                    .build();
+        } catch (CleaCryptoException | MalformedURLException e) {
+            log.warn(e.getMessage());
+        }
+        return null;
     }
 }

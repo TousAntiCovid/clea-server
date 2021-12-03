@@ -17,6 +17,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static fr.inria.clea.lsp.utils.TimeUtils.ntpTimestampFromInstant;
+
 @Data
 @Slf4j
 @RequiredArgsConstructor
@@ -70,11 +72,10 @@ public class Visitor {
     }
 
     public void registerDeepLink(final URL deepLink, final Instant scanTime) {
-        final var encodedInformation = deepLink.getRef();
         localList.add(
                 Visit.builder()
-                        .deepLinkLocationSpecificPart(encodedInformation)
-                        .scanTime(TimeUtils.ntpTimestampFromInstant(scanTime)).build()
+                        .deepLinkLocationSpecificPart(deepLink.getRef())
+                        .scanTime(ntpTimestampFromInstant(scanTime)).build()
         );
     }
 

@@ -34,7 +34,6 @@
         <module>clea-ws-rest</module>
         <module>clea-venue-consumer</module>
         <module>clea-batch</module>
-        <module>clea-qr-simulator</module>
         <module>clea-scoring-conf</module>
         <module>clea-integration-tests</module>
     </modules>
