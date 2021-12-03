@@ -4,7 +4,6 @@ import fr.gouv.clea.integrationtests.cucumber.ScenarioContext;
 import fr.gouv.clea.integrationtests.service.CleaBatchService;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
