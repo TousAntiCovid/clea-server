@@ -5,7 +5,8 @@ Feature: One healthy and one sick visitors visit the same location
   Background:
     Given Hugo registered on TAC
     Given Heather registered on TAC
-    Given "Chez Gusto" created a dynamic QRCode at 04:00, 10 days ago with VType as 1, with VCategory1 as 1, with VCategory2 as 1, with a renewal time of 15 minutes and with a periodDuration of 24 hours
+    Given Place named "Chez Gusto" with venue type 1, venue category 1 1, venue category 2 1, qr code renewal duration of 15 minutes, and a periodDuration of 24 hours
+    Given "Chez Gusto" created a dynamic deeplink at 04:00, 10 days ago
 
   Scenario: One person visiting the same location as one sick, before exposure time
     Given Heather recorded a visit to "Chez Gusto" at 15:00, 4 days ago

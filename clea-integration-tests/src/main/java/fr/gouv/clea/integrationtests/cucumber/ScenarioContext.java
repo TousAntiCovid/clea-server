@@ -4,7 +4,6 @@ import fr.gouv.clea.integrationtests.config.ApplicationProperties;
 import fr.gouv.clea.integrationtests.model.Place;
 import fr.gouv.clea.integrationtests.service.ClusterExpositionService;
 import fr.gouv.clea.integrationtests.service.visitorsimulator.Visitor;
-import fr.inria.clea.lsp.Location;
 import io.cucumber.spring.ScenarioScope;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.of;
 
 @Slf4j
 @Component
@@ -52,12 +51,12 @@ public class ScenarioContext {
             final int periodDurationHours) {
         return places.put(
                 placeName, new Place(
-                        createStaticLocation(
+                        locationFactory.createStaticLocation(
                                 venueType,
                                 venueCategory1,
                                 venueCategory2
                         ),
-                        createStaticStaffLocation(
+                        locationFactory.createStaticStaffLocation(
                                 venueType,
                                 venueCategory1,
                                 venueCategory2,
@@ -75,14 +74,14 @@ public class ScenarioContext {
             final int periodDuration) {
         return places.put(
                 placeName, new Place(
-                        createDynamicLocation(
+                        locationFactory.createDynamicLocation(
                                 venueType,
                                 venueCategory1,
                                 venueCategory2,
                                 qrCodeRenewalInterval,
                                 periodDuration
                         ),
-                        createDynamicStaffLocation(
+                        locationFactory.createDynamicStaffLocation(
                                 venueType,
                                 venueCategory1,
                                 venueCategory2,
@@ -94,57 +93,6 @@ public class ScenarioContext {
     }
 
     public Optional<Place> getPlace(final String placeName) {
-        return ofNullable(places.get(placeName));
+        return of(places.get(placeName));
     }
-
-    private Location createDynamicLocation(final int venueType,
-            final int venueCategory1,
-            final int venueCategory2,
-            final Duration qrCodeRenewalInterval,
-            final int periodDuration) {
-        return locationFactory.createDynamicLocation(
-                venueType,
-                venueCategory1,
-                venueCategory2,
-                qrCodeRenewalInterval,
-                periodDuration
-        );
-    }
-
-    private Location createDynamicStaffLocation(final int venueType,
-            final int venueCategory1,
-            final int venueCategory2,
-            final Duration qrCodeRenewalInterval,
-            final int periodDuration) {
-        return locationFactory.createDynamicStaffLocation(
-                venueType,
-                venueCategory1,
-                venueCategory2,
-                qrCodeRenewalInterval,
-                periodDuration
-        );
-    }
-
-    private Location createStaticLocation(final int venueType,
-            final int venueCategory1,
-            final int venueCategory2) {
-        return locationFactory.createStaticLocation(
-                venueType,
-                venueCategory1,
-                venueCategory2
-        );
-    }
-
-    private Location createStaticStaffLocation(final int venueType,
-            final int venueCategory1,
-            final int venueCategory2,
-            final int periodDuration) {
-        return locationFactory.createStaticStaffLocation(
-                venueType,
-                venueCategory1,
-                venueCategory2,
-                periodDuration
-        );
-    }
-
 }

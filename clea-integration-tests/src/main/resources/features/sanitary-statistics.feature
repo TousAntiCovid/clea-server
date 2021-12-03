@@ -4,16 +4,19 @@ Feature: Record health statistics
     Given Laure registered on TAC
     And Henry registered on TAC
     And Yaël registered on TAC
-    And "Burger king" created a dynamic QRCode at 04:00, 10 days ago with VType as 1, with VCategory1 as 1, with VCategory2 as 1, with a renewal time of 15 minutes and with a periodDuration of 24 hours
-    And "Le Klub" created a dynamic QRCode at 04:00, 10 days ago with VType as 2, with VCategory1 as 0, with VCategory2 as 2, with a renewal time of 15 minutes and with a periodDuration of 24 hours
-    And "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as 4, with VCategory1 as 4, with VCategory2 as 2 and with a periodDuration of 24 hours
+    And Place named "Burger King" with venue type 1, venue category 1 1, venue category 2 1, qr code renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And Place named "Le Klub" with venue type 2, venue category 1 0, venue category 2 2, qr code renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And Place named "OrangeBleue" with venue type 4, venue category 1 4, venue category 2 2, qr code renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And "Burger King" created a dynamic deeplink at 04:00, 10 days ago
+    And "Le Klub" created a dynamic deeplink at 04:00, 10 days ago
+    And "OrangeBleue" created a static deeplink at 04:00, 10 days ago
 
   Scenario: Sanitary statistics
 
-    Given Laure recorded a visit to "Burger king" at 12:45, 6 days ago
-    And Henry recorded a visit to "Burger king" at 12:57, 6 days ago
-    And Laure recorded a visit to "Burger king" at 12:45, 4 days ago
-    And Henry recorded a visit to "Burger king" at 20:57, 2 days ago
+    Given Laure recorded a visit to "Burger King" at 12:45, 6 days ago
+    And Henry recorded a visit to "Burger King" at 12:57, 6 days ago
+    And Laure recorded a visit to "Burger King" at 12:45, 4 days ago
+    And Henry recorded a visit to "Burger King" at 20:57, 2 days ago
 
     Given Henry recorded a visit to "Le Klub" at 11:46, 4 days ago
     And Henry recorded a visit to "Le Klub" at 11:47, 4 days ago
