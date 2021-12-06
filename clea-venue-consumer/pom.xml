@@ -90,11 +90,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>fr.gouv.clea</groupId>
-            <artifactId>clea-qr-simulator</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>fr.inria.clea</groupId>
             <artifactId>clea-crypto</artifactId>
         </dependency>

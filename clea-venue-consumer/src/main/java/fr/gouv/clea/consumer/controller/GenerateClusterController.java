@@ -7,11 +7,12 @@ import fr.gouv.clea.consumer.service.VisitExpositionAggregatorService;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 
@@ -22,7 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Optional;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @Slf4j
 public class GenerateClusterController {
@@ -42,15 +43,15 @@ public class GenerateClusterController {
     @PostMapping(value = "/cluster-declaration")
     public String generate(
             @Valid @ModelAttribute("clusterDeclarationRequest") ClusterDeclarationRequest clusterDeclarationRequest,
-            BindingResult result) throws Exception {
+            BindingResult result, RedirectAttributes redirectAttributes) throws Exception {
         if (result.hasErrors()) {
-            log.error("Erreurs dans la déclaration du cluster");
+            log.info("Erreurs dans la déclaration du cluster : {}", clusterDeclarationRequest);
         }
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         try {
             Instant date = LocalDateTime.parse(clusterDeclarationRequest.getDate(), formatter)
-                    .atZone(ZoneId.systemDefault()).toInstant();
+                    .atZone(ZoneId.of("UTC")).toInstant();
             final var urlsPart = clusterDeclarationRequest.getDeeplink().split("#");
             if (urlsPart.length > 1) {
                 final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(urlsPart[1]);
