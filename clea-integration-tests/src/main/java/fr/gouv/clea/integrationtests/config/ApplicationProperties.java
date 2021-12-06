@@ -28,6 +28,8 @@ public class ApplicationProperties {
 
     Bucket bucket;
 
+    VenueConsumer venueConsumer;
+
     @Value
     public static class Batch {
 
@@ -37,6 +39,13 @@ public class ApplicationProperties {
 
     @Value
     public static class WsRest {
+
+        @NotNull
+        URL baseUrl;
+    }
+
+    @Value
+    public static class VenueConsumer {
 
         @NotNull
         URL baseUrl;

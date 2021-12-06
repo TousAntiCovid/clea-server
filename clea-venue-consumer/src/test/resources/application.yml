@@ -19,11 +19,7 @@ clea:
         # venueType, venueCat1, venueCat2, exposureTimeBackward, exposureTimeForward, exposureTimeStaffBackward, exposureTimeStaffForward
         - "*,*,*,3,3,3,3"
       risk:
-        enabled: "true"
-        rules: # FIXME: change with real values
-          # venueType, venueCat1, venueCat2, clusterThresholdBackward, clusterThresholdForward, riskLevelBackward, riskLevelForward
-          - "*,*,*,3,3,3,3"
-
+        enabled: "false"
   kafka:
     qrCodesTopic: test.clea.fct.qr-code-scan
     reportStatsTopic: test.clea.fct.report-stat

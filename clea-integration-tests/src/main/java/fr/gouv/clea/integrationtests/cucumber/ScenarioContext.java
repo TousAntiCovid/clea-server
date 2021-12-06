@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 @Slf4j
@@ -159,4 +161,5 @@ public class ScenarioContext {
     public LocationQrCodeGenerator getStaffLocation(final String locationName) {
         return staffLocations.get(locationName);
     }
+
 }
