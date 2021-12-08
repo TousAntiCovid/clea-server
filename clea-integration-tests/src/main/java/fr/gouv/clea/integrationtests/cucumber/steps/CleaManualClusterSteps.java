@@ -34,7 +34,8 @@ public class CleaManualClusterSteps {
     }
 
     @When("a manual cluster report is made for {string} at {naturalTime}")
-    public void create_cluster_manually(String locationName, Instant qrCodeScanTime) throws CleaCryptoException {
+    public void create_cluster_manually(final String locationName, final Instant qrCodeScanTime)
+            throws CleaCryptoException {
         final var location = this.scenarioContext.getLocation(locationName);
         final var deeplink = location.getQrCodeAt(qrCodeScanTime).getDeepLink().toString();
         var date = LocalDateTime.ofInstant(qrCodeScanTime, ZoneId.of("UTC")).format(formatter);
@@ -42,7 +43,7 @@ public class CleaManualClusterSteps {
         clusterParams.add("deeplink", deeplink);
         clusterParams.add("date", date);
         given().contentType(ContentType.URLENC).params(clusterParams).when().post(cleaManualClusterDeclarationtUrl)
-                .then().statusCode(200);
+                .then().statusCode(302);
 
     }
 

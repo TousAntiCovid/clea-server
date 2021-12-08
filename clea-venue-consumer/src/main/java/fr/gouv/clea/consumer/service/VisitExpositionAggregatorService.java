@@ -154,7 +154,7 @@ public class VisitExpositionAggregatorService {
                 .timeSlot(slotIndex)
                 .backwardVisits(visit.isBackward() ? 1 : 0)
                 .forwardVisits(
-                        isManualDeclaredCluster ? 100 : visit.isBackward() ? 0 : 1
+                        isManualDeclaredCluster ? clusterThresholdValue : visit.isBackward() ? 0 : 1
                 )
                 .build();
     }

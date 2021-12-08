@@ -7,7 +7,6 @@ import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.gouv.clea.scoring.configuration.ScoringRule;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
 import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
-import fr.gouv.clea.scoring.configuration.risk.RiskConfiguration;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,8 +38,6 @@ class SlotGenerationTest {
     private final VenueConsumerProperties properties = VenueConsumerProperties.builder().build();
 
     private final ExposureTimeConfiguration exposureTimeConfig = new ExposureTimeConfiguration();
-
-    private final RiskConfiguration riskConfig = new RiskConfiguration();
 
     @Mock
     private ExposedVisitRepository repository;
