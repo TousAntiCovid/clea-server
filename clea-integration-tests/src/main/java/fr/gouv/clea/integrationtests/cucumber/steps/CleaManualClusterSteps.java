@@ -42,7 +42,7 @@ public class CleaManualClusterSteps {
         clusterParams.add("deeplink", deeplink);
         clusterParams.add("date", date);
         given().contentType(ContentType.URLENC).params(clusterParams).when().post(cleaManualClusterDeclarationtUrl)
-                .then().statusCode(200);
+                .then().statusCode(302);
 
     }
 
