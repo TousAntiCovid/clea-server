@@ -1,28 +1,28 @@
 package fr.gouv.clea.consumer.controller;
 
 import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
+import fr.gouv.clea.consumer.service.VisitExpositionAggregatorService;
 import fr.gouv.clea.consumer.test.IntegrationTest;
 import fr.gouv.clea.consumer.test.ReferenceData;
+import fr.inria.clea.lsp.utils.TimeUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+import static io.restassured.RestAssured.given;
+import static io.restassured.http.ContentType.URLENC;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.http.HttpStatus.FOUND;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ExtendWith(MockitoExtension.class)
 @IntegrationTest
@@ -34,9 +34,7 @@ public class GenerateClusterControllerTest {
     private ExposedVisitRepository repository;
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    private MockMvc mockMvc;
+    private VisitExpositionAggregatorService service;
 
     private String deeplink;
 
@@ -44,65 +42,117 @@ public class GenerateClusterControllerTest {
 
     private MultiValueMap<String, String> clusterParams;
 
+    private long periodStart;
+
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
         deeplink = ReferenceData.LOCATION_1_URL.toString();
+        periodStart = (long) ReferenceData.LOCATION_1.getLocationSpecificPart().getCompressedPeriodStartTime()
+                * TimeUtils.NB_SECONDS_PER_HOUR;
         LocalDateTime localDate = LocalDateTime.now().plus(1, ChronoUnit.HOURS);
         date = localDate.format(formatter);
         clusterParams = new LinkedMultiValueMap<>();
     }
 
     @Test
-    void create_cluster_manually_with_correct_deeplink_and_date_thenOk() throws Exception {
+    void create_cluster_manually_with_no_context() {
 
         clusterParams.add("deeplink", deeplink);
         clusterParams.add("date", date);
 
-        this.mockMvc.perform(
-                post("/cluster-declaration").params(clusterParams).contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        ).andDo(print()).andExpect(status().isOk());
+        given()
+                .urlEncodingEnabled(false)
+                .when()
+                .contentType(URLENC)
+                .params(clusterParams)
+                .post("/cluster-declaration")
+                .then()
+                .statusCode(FOUND.value());
 
-        var exposedVisitList = repository.findAll();
+        final var exposedVisitList = repository.findAll();
 
+        assertThat(exposedVisitList).isNotEmpty();
         assertThat(exposedVisitList)
                 .allMatch(
                         exposedVisit -> exposedVisit.getLocationTemporaryPublicId()
                                 .equals(ReferenceData.LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID),
                         "has uuid" + ReferenceData.LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID
                 )
+                .allMatch(exposedVisit -> exposedVisit.getPeriodStart() == periodStart)
                 .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 100, "has 100 forward visits");
     }
 
     @Test
-    void create_cluster_manually_with_wrong_deeplink_and_correct_date_then_no_visit_save_in_database()
-            throws Exception {
+    void create_cluster_manually_with_existing_context() {
+
+        final var visit = ReferenceData.defaultVisit()
+                .qrCodeScanTime(
+                        LocalDateTime.parse(date, DateTimeFormatter.ISO_DATE_TIME).atZone(ZoneId.of("UTC")).toInstant()
+                )
+                .isBackward(false)
+                .build();
+        service.updateExposureCount(visit, false);
+
+        clusterParams.add("deeplink", deeplink);
+        clusterParams.add("date", date);
+
+        given()
+                .urlEncodingEnabled(false)
+                .when()
+                .contentType(URLENC)
+                .params(clusterParams)
+                .post("/cluster-declaration")
+                .then()
+                .statusCode(FOUND.value());
+
+        final var exposedVisitList = repository.findAll();
+
+        assertThat(exposedVisitList).isNotEmpty();
+        assertThat(exposedVisitList)
+                .allMatch(
+                        exposedVisit -> exposedVisit.getLocationTemporaryPublicId()
+                                .equals(ReferenceData.LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID),
+                        "has uuid" + ReferenceData.LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID
+                )
+                .allMatch(exposedVisit -> exposedVisit.getPeriodStart() == periodStart)
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 101, "has 101 forward visits");
+    }
+
+    @Test
+    void create_cluster_manually_with_wrong_deeplink_and_correct_date_then_no_visit_save_in_database() {
 
         clusterParams.add("deeplink", "test");
         clusterParams.add("date", date);
 
-        this.mockMvc.perform(
-                post("/cluster-declaration").params(clusterParams).contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        ).andDo(print()).andExpect(status().isOk());
+        given()
+                .urlEncodingEnabled(false)
+                .when()
+                .contentType(URLENC)
+                .params(clusterParams)
+                .post("/cluster-declaration")
+                .then()
+                .statusCode(INTERNAL_SERVER_ERROR.value());
 
-        var exposedVisitList = repository.findAll();
-        assertThat(exposedVisitList).isEmpty();
+        assertThat(repository.findAll()).isEmpty();
 
     }
 
     @Test
-    void create_cluster_manually_with_correct_deeplink_and_wrong_date_then_no_visit_save_in_database()
-            throws Exception {
+    void create_cluster_manually_with_correct_deeplink_and_wrong_date_then_no_visit_save_in_database() {
 
         clusterParams.add("deeplink", deeplink);
         clusterParams.add("date", "");
 
-        this.mockMvc.perform(
-                post("/cluster-declaration").params(clusterParams).contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        ).andDo(print()).andExpect(status().isOk());
+        given()
+                .urlEncodingEnabled(false)
+                .when()
+                .contentType(URLENC)
+                .params(clusterParams)
+                .post("/cluster-declaration")
+                .then()
+                .statusCode(INTERNAL_SERVER_ERROR.value());
 
-        var exposedVisitList = repository.findAll();
-        assertThat(exposedVisitList).isEmpty();
+        assertThat(repository.findAll()).isEmpty();
 
     }
 
