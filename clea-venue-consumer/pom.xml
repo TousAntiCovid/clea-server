@@ -202,10 +202,32 @@
                 <configuration>
                     <url>https://github.com/GouvernementFR/dsfr/releases/download/v1.2.1/dsfr-v1.2.1.zip</url>
                     <unpack>true</unpack>
-                    <excludes>**/src/</excludes>
-                    <outputDirectory>${project.build.directory}/sources/public</outputDirectory>
+                    <outputDirectory>${project.build.directory}/dsfr</outputDirectory>
                     <md5>e73e25580caa61873df6184088ced116</md5>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/classes/public/lib/dsfr</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/dsfr/dist</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
