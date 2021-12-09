@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr" data-fr-scheme="system" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" th:href="@{/dist/dsfr/dsfr.min.css}">
+        <link rel="stylesheet" th:href="@{/dist/core/core.min.css}">
+
+        <title>Génération d'un cluster TAC-CLEA</title>
+    </head>
+    <header role="banner" class="fr-header">
+        <div class="fr-header__body">
+            <div class="fr-container">
+                <div class="fr-header__body-row">
+                    <div class="fr-header__brand fr-enlarge-link">
+                        <div class="fr-header__brand-top">
+                            <div class="fr-header__logo">
+                                <p class="fr-logo">
+                                    République
+                                    <br>Française
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <h3>Service de génération d'un cluster TAC</h3>
+                </div>
+            </div>
+        </div>
+    </header>
+    <body>
+        <form action="#" th:action="@{/cluster-declaration}" th:object="${clusterDeclarationRequest}" method="post" class="fr-pt-6w fr-pl-6w fr-pr-6w">
+            <label class="fr-label" for="text-input-text">Deeplink contenu dans le QRCode :</label>
+            <input class="fr-input" type="text" id="text-input-text" name="deepLink" th:field="*{deeplink}" placeholder="https://tac.gouv.fr?v=0#AHG24PXS3W9VsDGr(...)0KwZRzHvmTek">
+            <p th:if="${#fields.hasErrors('deeplink')}" th:errorclass="fr-error-text" th:errors="*{deeplink}">
+                Veuillez renseigner le deeplink
+            </p>
+            <div class="fr-input-group fr-pt-4w">
+                <label class="fr-label" for="text-input-calendar">
+                    Date de début du cluster :
+                </label>
+                <div class="fr-input-wrap">
+                    <input class="fr-input" type="datetime-local" id="text-input-calendar" name="date" th:field="*{date}">
+                </div>
+            </div>
+            <button type="submit" value="Submit" class="fr-btn">
+                Déclarer le cluster
+            </button>
+            <div th:if="${#fields.hasErrors('global')}">
+                <p th:each="err : ${#fields.errors('global')}" th:text="${err}" class="fr-error-text"></p>
+            </div>
+            <div class="fr-pt-4w" th:if="${success_message}">
+                <h3 th:text="${success_message}"></h3>
+            </div>
+        </form>
+        <script type="module" th:src="@{/dist/dsfr/dsfr.module.min.js}"></script>
+        <script type="text/javascript" nomodule th:src="@{/dist/dsfr/dsfr.nomodule.min.js}"></script>
+        <script type="text/javascript" nomodule th:src="@{/dist//legacy/legacy.nomodule.min.js}" ></script>
+        <script type="module" th:src="@{/dist//core/core.module.min.js}" ></script>
+        <script type="text/javascript" nomodule th:src="@{/dist//core/core.nomodule.min.js}" ></script>
+    </body>
+</html>
