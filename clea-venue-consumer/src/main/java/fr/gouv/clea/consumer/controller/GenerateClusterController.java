@@ -7,6 +7,7 @@ import fr.gouv.clea.consumer.service.VisitExpositionAggregatorService;
 import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -19,6 +20,9 @@ import javax.validation.Valid;
 
 import java.time.ZoneOffset;
 import java.util.Base64;
+
+import static java.time.ZoneOffset.UTC;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
 @Controller
 @RequiredArgsConstructor
@@ -33,20 +37,17 @@ public class GenerateClusterController {
 
     @GetMapping("/cluster-declaration")
     public String generate(
-            @ModelAttribute("clusterDeclarationRequest") final ClusterDeclarationRequest clusterDeclarationRequest) {
+            @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest) {
         return "cluster-declaration";
     }
 
     @PostMapping(value = "/cluster-declaration")
     public String generate(
-            @Valid @ModelAttribute("clusterDeclarationRequest") final ClusterDeclarationRequest clusterDeclarationRequest,
+            @Valid @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest,
             final BindingResult result, final RedirectAttributes redirectAttributes) {
-        if (result.hasErrors()) {
-            log.info("Errors in the cluster declaration : {}, {}", clusterDeclarationRequest, result.getAllErrors());
-        }
-
         try {
-            final var qrCodeScanTime = clusterDeclarationRequest.getDate().toInstant(ZoneOffset.UTC);
+            final var qrCodeScanTime = clusterDeclarationRequest.getDate().toInstant(UTC);
+
             final var deepLinkLocationSpecificPart = clusterDeclarationRequest.getDeeplink().getRef();
 
             final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(deepLinkLocationSpecificPart);

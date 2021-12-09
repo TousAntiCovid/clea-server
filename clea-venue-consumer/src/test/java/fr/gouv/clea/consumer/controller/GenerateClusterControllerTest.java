@@ -18,6 +18,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+import static fr.gouv.clea.consumer.test.ReferenceData.LOCATION_1_URL;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.URLENC;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +47,7 @@ public class GenerateClusterControllerTest {
 
     @BeforeEach
     public void setup() {
-        deeplink = ReferenceData.LOCATION_1_URL.toString();
+        deeplink = LOCATION_1_URL.toString();
         periodStart = (long) ReferenceData.LOCATION_1.getLocationSpecificPart().getCompressedPeriodStartTime()
                 * TimeUtils.NB_SECONDS_PER_HOUR;
         LocalDateTime localDate = LocalDateTime.now().plus(1, ChronoUnit.HOURS);
@@ -140,15 +141,17 @@ public class GenerateClusterControllerTest {
     @Test
     void create_cluster_manually_with_correct_deeplink_and_wrong_date_then_no_visit_save_in_database() {
 
-        clusterParams.add("deeplink", deeplink);
+        clusterParams.add("deeplink", LOCATION_1_URL.toString());
         clusterParams.add("date", "");
 
         given()
                 .urlEncodingEnabled(false)
+
                 .when()
                 .contentType(URLENC)
                 .params(clusterParams)
                 .post("/cluster-declaration")
+
                 .then()
                 .statusCode(INTERNAL_SERVER_ERROR.value());
 

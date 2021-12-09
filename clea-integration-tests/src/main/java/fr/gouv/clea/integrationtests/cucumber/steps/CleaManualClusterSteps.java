@@ -13,17 +13,18 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
+import static java.time.ZoneOffset.UTC;
 
 public class CleaManualClusterSteps {
 
     private final URL cleaManualClusterDeclarationtUrl;
 
     private final ScenarioContext scenarioContext;
-
-    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
     public CleaManualClusterSteps(ScenarioContext scenarioContext, ApplicationProperties applicationProperties)
             throws MalformedURLException {
@@ -34,17 +35,24 @@ public class CleaManualClusterSteps {
     }
 
     @When("a manual cluster report is made for {string} at {naturalTime}")
-    public void create_cluster_manually(final String locationName, final Instant qrCodeScanTime)
+    public void create_cluster_manually(final String locationName, final Instant clusterStartTime)
             throws CleaCryptoException {
         final var location = this.scenarioContext.getLocation(locationName);
-        final var deeplink = location.getQrCodeAt(qrCodeScanTime).getDeepLink().toString();
-        var date = LocalDateTime.ofInstant(qrCodeScanTime, ZoneId.of("UTC")).format(formatter);
-        MultiValueMap<String, String> clusterParams = new LinkedMultiValueMap<>();
-        clusterParams.add("deeplink", deeplink);
-        clusterParams.add("date", date);
-        given().contentType(ContentType.URLENC).params(clusterParams).when().post(cleaManualClusterDeclarationtUrl)
-                .then().statusCode(302);
+        final var deeplink = location.getQrCodeAt(clusterStartTime)
+                .getDeepLink();
 
+        given()
+                .contentType(ContentType.URLENC)
+                .params(Map.of(
+                        "deeplink", deeplink.toString(),
+                        "date", clusterStartTime.toString()
+                ))
+
+                .when()
+                .post(cleaManualClusterDeclarationtUrl)
+
+                .then()
+                .statusCode(302);
     }
 
 }
