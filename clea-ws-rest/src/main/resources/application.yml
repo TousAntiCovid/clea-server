@@ -1,6 +1,6 @@
 management:
   server.port: 8081
-  endpoints.web.exposure.include: health,metrics,prometheus
+  endpoints.web.exposure.include: health,info,metrics,prometheus
 
 logging.level:
-    fr.gouv.clea.consumer: INFO
+  fr.gouv.clea.consumer: INFO
