@@ -207,9 +207,12 @@ public class Place {
     private Instant getValidityStartTime(final Instant deepLinkScanTime,
             final Period concernedPeriod,
             final int deepLinkRenewalInterval) {
+        final var secondsBetweenPeriodStartAndScanTime = Duration
+                .between(deepLinkScanTime, concernedPeriod.getStartTime()).abs().getSeconds();
+        final var timeBetweenLastRenewalIntervalAndScanTime = secondsBetweenPeriodStartAndScanTime
+                % deepLinkRenewalInterval;
         return deepLinkScanTime.minus(
-                Duration.between(deepLinkScanTime, concernedPeriod.getStartTime()).abs().getSeconds()
-                        % deepLinkRenewalInterval,
+                timeBetweenLastRenewalIntervalAndScanTime,
                 SECONDS
         );
     }
@@ -217,8 +220,7 @@ public class Place {
     private Period createNewPeriod(final Instant instantPeriodStart,
             final int periodDuration) {
         return new Period(
-                instantPeriodStart,
-                Duration.of(periodDuration, HOURS)
+                instantPeriodStart, Duration.of(periodDuration, HOURS)
         );
     }
 
