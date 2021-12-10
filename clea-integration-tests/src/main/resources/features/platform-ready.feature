@@ -7,7 +7,7 @@ Feature: Smoke tests
 
   Scenario: clea-ws-rest is ready
     Given application clea ws rest is ready
-    Given Place named "McDonald's" has configuration: venue type 1, venue category 1 1, venue category 2 1, and a periodDuration of 24 hours
+    Given Place named "McDonald's" has configuration: venue type 1, venue category 1 1, venue category 2 1
     Given "McDonald's" created a static deeplink at 11:00, 13 days ago
     And Hugo registered on TAC
     And Hugo recorded a visit to "McDonald's" at 12:30, 6 days ago

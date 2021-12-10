@@ -92,7 +92,7 @@ public class CleaReportSteps {
         visitor.setLastReportResponse(response);
     }
 
-    @When("{word} declares himself/herself sick with a {naturalTime} pivot date with no QRCode")
+    @When("{word} declares himself/herself sick with a {naturalTime} pivot date with no deepLink")
     public void visitor_declares_sick_with_pivot_date_and_no_deeplink(String visitorName, Instant pivotDate) {
         final var localList = scenarioContext.getVisitor(visitorName).getLocalList();
         final var request = new WreportRequest(
@@ -112,7 +112,7 @@ public class CleaReportSteps {
                 .body("message", equalTo("Invalid request"));
     }
 
-    @When("{word} declares himself/herself sick with malformed QrCode")
+    @When("{word} declares himself/herself sick with malformed deepLink")
     public void visitor_declares_sick_with_malformed_deeplink(String visitorName) {
         final Instant pivotDate = now().minus(ofDays(13));
         final var localList = scenarioContext.getVisitor(visitorName).getLocalList();

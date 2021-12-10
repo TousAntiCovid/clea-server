@@ -11,9 +11,9 @@ Feature: Several healthy visitors visit different places
     Given Julie registered on TAC
     Given Mahe registered on TAC
     Given Yaël registered on TAC
-    Given Place named "McDonald's" has configuration: venue type 1, venue category 1 1, venue category 2 1, and a periodDuration of 24 hours
-    Given Place named "NRFight Club Olympiades" has configuration: venue type 4, venue category 1 2, venue category 2 2, and a periodDuration of 24 hours
-    Given Place named "OrangeBleue" has configuration: venue type 4, venue category 1 1, venue category 2 2, and a periodDuration of 24 hours
+    Given Place named "McDonald's" has configuration: venue type 1, venue category 1 1, venue category 2 1
+    Given Place named "NRFight Club Olympiades" has configuration: venue type 4, venue category 1 2, venue category 2 2
+    Given Place named "OrangeBleue" has configuration: venue type 4, venue category 1 1, venue category 2 2
     Given "McDonald's" created a static deeplink at 11:00, 13 days ago
     Given "McDonald's" created a static staff deeplink at 11:00, 13 days ago
     Given "NRFight Club Olympiades" created a static deeplink at 11:00, 13 days ago
@@ -198,7 +198,7 @@ Feature: Several healthy visitors visit different places
     Then Exposure status should reports Hugo as not being at risk
     Then Exposure status should reports Henry as not being at risk
 
-  Scenario: Duplicated QR code
+  Scenario: Duplicated deepLink
     Given Hugo recorded a visit to "McDonald's" at 12:30, 6 days ago
     Given Hugo recorded a visit to "McDonald's" at 12:35, 6 days ago
     Given Laure recorded a visit to "McDonald's" at 12:59, 6 days ago
@@ -216,17 +216,17 @@ Feature: Several healthy visitors visit different places
     Then Yaël cannot send his visits
     Then Exposure status should reports Julie as not being at risk
 
-  Scenario: Malformed QrCode
+  Scenario: Malformed deepLink
     Given Yaël recorded a visit to "McDonald's" at 13:45, 4 days ago
     Given Julie recorded a visit to "McDonald's" at 13:40, 4 days ago
-    When Yaël declares himself sick with malformed QrCode
+    When Yaël declares himself sick with malformed deepLink
     When Cluster detection triggered
     Then Yaël cannot send his visits
     Then Exposure status should reports Julie as not being at risk
 
-  Scenario: No QrCODE
+  Scenario: No deepLink
     Given Julie recorded a visit to "McDonald's" at 13:45, 4 days ago
-    When Yaël declares himself sick with a 5 days ago pivot date with no QRCode
+    When Yaël declares himself sick with a 5 days ago pivot date with no deepLink
     When Cluster detection triggered
     Then Yaël cannot send his visits
     Then Exposure status should reports Julie as not being at risk
@@ -264,14 +264,14 @@ Feature: Several healthy visitors visit different places
     Then Exposure status should reports Julie as being at risk of 2
 
     #FIXME
-  Scenario: Duplicated QR code STAFF and NO STAFF
+  Scenario: Duplicated deepLink STAFF and NO STAFF
     Given Hugo recorded a visit as a STAFF to "McDonald's" at 12:30, 6 days ago
     Given Hugo recorded a visit to "McDonald's" at 12:35, 6 days ago
     Given Laure recorded a visit to "McDonald's" at 12:56, 6 days ago
     When Hugo declares himself sick with a 14 days ago pivot date
     When Cluster detection triggered
     Then Hugo sends his visits
-    #rejected visit should be the "not staff" qr code
+    #rejected visit should be the "not staff" deepLink
     And Hugo has 1 rejected visit
     Then Exposure status should reports Laure as being at risk of 2.0
 

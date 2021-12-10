@@ -225,13 +225,13 @@ public class Place {
     }
 
     @SneakyThrows
-    private DeepLink createDynamicDeepLink(final Instant qrCodePeriodStartTime,
-            final Instant qrCodeValidityStartTime,
-            final Duration qrCodeRenewalIntervalDuration) {
+    private DeepLink createDynamicDeepLink(final Instant deepLinkPeriodStartTime,
+            final Instant deepLinkValidityStartTime,
+            final Duration deepLinkRenewalIntervalDuration) {
         return DeepLink.builder()
-                .url(new URL(location.newDeepLink(qrCodePeriodStartTime, qrCodeValidityStartTime)))
-                .validityStartTime(qrCodePeriodStartTime)
-                .renewalInterval(qrCodeRenewalIntervalDuration)
+                .url(new URL(location.newDeepLink(deepLinkPeriodStartTime, deepLinkValidityStartTime)))
+                .validityStartTime(deepLinkPeriodStartTime)
+                .renewalInterval(deepLinkRenewalIntervalDuration)
                 .build();
     }
 }

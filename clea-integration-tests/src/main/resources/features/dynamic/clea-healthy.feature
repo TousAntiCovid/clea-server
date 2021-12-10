@@ -6,9 +6,9 @@ Feature: Several healthy visitors visit different places
     Given Hugo registered on TAC
     Given Heather registered on TAC
     Given Henry registered on TAC
-    Given Place named "Chez Gusto" with venue type 1, venue category 1 1, venue category 2 1, qr code renewal duration of 15 minutes, and a periodDuration of 24 hours
+    Given Place named "Chez Gusto" with venue type 1, venue category 1 1, venue category 2 1, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
     Given "Chez Gusto" created a dynamic deeplink at 04:00, 10 days ago
-    Given Place named "La fontaine aux perles" with venue type 1, venue category 1 1, venue category 2 1, qr code renewal duration of 15 minutes, and a periodDuration of 24 hours
+    Given Place named "La fontaine aux perles" with venue type 1, venue category 1 1, venue category 2 1, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
     Given "La fontaine aux perles" created a dynamic deeplink at 04:00, 10 days ago
 
   Scenario: One healthy visitor alone
@@ -42,14 +42,14 @@ Feature: Several healthy visitors visit different places
     Then Exposure status should reports Heather as not being at risk
     Then Exposure status should reports Hugo as not being at risk
 
-  Scenario: Multiple scans of the qrcode by same visitor within the dupScanThreshold of 3 hours
+  Scenario: Multiple scans of the deepLink by same visitor within the dupScanThreshold of 3 hours
     Given Heather recorded a visit to "La fontaine aux perles" at 12:30, 2 days ago
     Given Heather recorded a visit to "La fontaine aux perles" at 12:47, 2 days ago
     When Heather declares himself sick
     When Cluster detection triggered
     Then Heather has 1 rejected visit
 
-  Scenario: Multiple scans of the qrcode by same visitor outside of the dupScanThreshold of 3 hours
+  Scenario: Multiple scans of the deepLink by same visitor outside of the dupScanThreshold of 3 hours
     Given Heather recorded a visit to "La fontaine aux perles" at 12:30, 2 days ago
     Given Heather recorded a visit to "La fontaine aux perles" at 19:47, 2 days ago
     When Heather declares himself sick

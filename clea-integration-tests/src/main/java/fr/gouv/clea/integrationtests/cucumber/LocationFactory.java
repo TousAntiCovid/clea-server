@@ -37,9 +37,9 @@ public class LocationFactory {
     public Location createDynamicLocation(final int venueType,
             final int venueCategory1,
             final int venueCategory2,
-            final Duration qrCodeRenewalInterval,
+            final Duration deepLinkRenewalInterval,
             final int periodDurationHours) {
-        final int formattedDeepLinkRenewalInterval = getFormattedDeeplinkRenewalInterval(qrCodeRenewalInterval);
+        final int formattedDeepLinkRenewalInterval = getFormattedDeeplinkRenewalInterval(deepLinkRenewalInterval);
         return createLocation(
                 venueType,
                 venueCategory1,
@@ -50,20 +50,19 @@ public class LocationFactory {
         );
     }
 
-    private int getFormattedDeeplinkRenewalInterval(Duration qrCodeRenewalInterval) {
-        return (int) (Math.log(qrCodeRenewalInterval.getSeconds()) / Math.log(2));
+    private int getFormattedDeeplinkRenewalInterval(Duration deepLinkRenewalInterval) {
+        return (int) (Math.log(deepLinkRenewalInterval.getSeconds()) / Math.log(2));
     }
 
     public Location createStaticStaffLocation(final int venueType,
             final int venueCategory1,
-            final int venueCategory2,
-            final int periodDurationHours) {
+            final int venueCategory2) {
         return createLocation(
                 venueType,
                 venueCategory1,
                 venueCategory2,
                 STATIC_LOCATION_DEEPLINK_RENEWAL_INTERVAL,
-                periodDurationHours,
+                INFINITE_PERIOD_DURATION,
                 true
         );
     }
@@ -71,9 +70,9 @@ public class LocationFactory {
     public Location createDynamicStaffLocation(final int venueType,
             final int venueCategory1,
             final int venueCategory2,
-            final Duration qrCodeRenewalInterval,
+            final Duration deepLinkRenewalInterval,
             final int periodDurationHours) {
-        final int formattedDeepLinkRenewalInterval = getFormattedDeeplinkRenewalInterval(qrCodeRenewalInterval);
+        final int formattedDeepLinkRenewalInterval = getFormattedDeeplinkRenewalInterval(deepLinkRenewalInterval);
         return createLocation(
                 venueType,
                 venueCategory1,
@@ -87,7 +86,7 @@ public class LocationFactory {
     private Location createLocation(final int venueType,
             final int venueCategory1,
             final int venueCategory2,
-            final int qrCodeRenewalInterval,
+            final int deepLinkRenewalInterval,
             final int periodDurationHours,
             final boolean staff) {
         final var permanentLocationSecretKey = toHexString(randomUUID().toString().getBytes());
@@ -97,7 +96,7 @@ public class LocationFactory {
                         LocationSpecificPart.builder()
                                 .staff(staff)
                                 .periodDuration(periodDurationHours)
-                                .qrCodeRenewalIntervalExponentCompact(qrCodeRenewalInterval)
+                                .qrCodeRenewalIntervalExponentCompact(deepLinkRenewalInterval)
                                 .venueType(venueType)
                                 .venueCategory1(venueCategory1)
                                 .venueCategory2(venueCategory2)

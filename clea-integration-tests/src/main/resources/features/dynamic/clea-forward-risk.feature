@@ -6,7 +6,7 @@ Feature: Several healthy visitors and a single sick visitor visit different plac
     Given Hugo registered on TAC
     Given Heather registered on TAC
     Given Henry registered on TAC
-    Given Place named "Chez Gusto" with venue type 1, venue category 1 1, venue category 2 1, qr code renewal duration of 15 minutes, and a periodDuration of 24 hours
+    Given Place named "Chez Gusto" with venue type 1, venue category 1 1, venue category 2 1, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
     Given "Chez Gusto" created a dynamic deeplink at 04:00, 10 days ago
 
   Scenario: One sick and two persons at risk (same location and average RiskLevel)
