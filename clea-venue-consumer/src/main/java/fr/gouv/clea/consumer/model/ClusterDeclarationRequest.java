@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 @Data
 public class ClusterDeclarationRequest {
 
-    @NotNull(message = "{deeplink.notempty}")
+    @NotNull
     private URL deeplink;
 
-    @NotNull(message = "{date.notempty}")
+    @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime date;
 }

@@ -4,31 +4,26 @@ import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.gouv.clea.consumer.service.VisitExpositionAggregatorService;
 import fr.gouv.clea.consumer.test.IntegrationTest;
 import fr.gouv.clea.consumer.test.ReferenceData;
-import fr.inria.clea.lsp.utils.TimeUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
+import static fr.gouv.clea.consumer.test.ReferenceData.*;
+import static fr.inria.clea.lsp.utils.TimeUtils.NB_SECONDS_PER_HOUR;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.URLENC;
+import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.FOUND;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
 
-@ExtendWith(MockitoExtension.class)
 @IntegrationTest
-public class GenerateClusterControllerTest {
-
-    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+public class ManualClusterDeclarationControllerTest {
 
     @Autowired
     private ExposedVisitRepository repository;
@@ -36,35 +31,28 @@ public class GenerateClusterControllerTest {
     @Autowired
     private VisitExpositionAggregatorService service;
 
-    private String deeplink;
-
-    private String date;
-
-    private MultiValueMap<String, String> clusterParams;
-
     private long periodStart;
 
     @BeforeEach
     public void setup() {
-        deeplink = ReferenceData.LOCATION_1_URL.toString();
-        periodStart = (long) ReferenceData.LOCATION_1.getLocationSpecificPart().getCompressedPeriodStartTime()
-                * TimeUtils.NB_SECONDS_PER_HOUR;
-        LocalDateTime localDate = LocalDateTime.now().plus(1, ChronoUnit.HOURS);
-        date = localDate.format(formatter);
-        clusterParams = new LinkedMultiValueMap<>();
+        periodStart = (long) LOCATION_1.getLocationSpecificPart().getCompressedPeriodStartTime()
+                * NB_SECONDS_PER_HOUR;
     }
 
     @Test
     void create_cluster_manually_with_no_context() {
 
-        clusterParams.add("deeplink", deeplink);
-        clusterParams.add("date", date);
-
         given()
                 .urlEncodingEnabled(false)
+
                 .when()
                 .contentType(URLENC)
-                .params(clusterParams)
+                .params(
+                        Map.of(
+                                "deeplink", LOCATION_1_URL.toString(),
+                                "date", LocalDateTime.now().plus(1, ChronoUnit.HOURS).format(ISO_DATE_TIME)
+                        )
+                )
                 .post("/cluster-declaration")
                 .then()
                 .statusCode(FOUND.value());
@@ -75,8 +63,8 @@ public class GenerateClusterControllerTest {
         assertThat(exposedVisitList)
                 .allMatch(
                         exposedVisit -> exposedVisit.getLocationTemporaryPublicId()
-                                .equals(ReferenceData.LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID),
-                        "has uuid" + ReferenceData.LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID
+                                .equals(LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID),
+                        "has uuid" + LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID
                 )
                 .allMatch(exposedVisit -> exposedVisit.getPeriodStart() == periodStart)
                 .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 100, "has 100 forward visits");
@@ -87,21 +75,27 @@ public class GenerateClusterControllerTest {
 
         final var visit = ReferenceData.defaultVisit()
                 .qrCodeScanTime(
-                        LocalDateTime.parse(date, DateTimeFormatter.ISO_DATE_TIME).atZone(ZoneId.of("UTC")).toInstant()
+                        LocalDateTime.parse(
+                                LocalDateTime.now().plus(1, ChronoUnit.HOURS).format(ISO_DATE_TIME), ISO_DATE_TIME
+                        ).atZone(ZoneId.of("UTC")).toInstant()
                 )
                 .isBackward(false)
                 .build();
         service.updateExposureCount(visit, false);
 
-        clusterParams.add("deeplink", deeplink);
-        clusterParams.add("date", date);
-
         given()
                 .urlEncodingEnabled(false)
+
                 .when()
                 .contentType(URLENC)
-                .params(clusterParams)
+                .params(
+                        Map.of(
+                                "deeplink", LOCATION_1_URL.toString(),
+                                "date", LocalDateTime.now().plus(1, ChronoUnit.HOURS).format(ISO_DATE_TIME)
+                        )
+                )
                 .post("/cluster-declaration")
+
                 .then()
                 .statusCode(FOUND.value());
 
@@ -111,8 +105,8 @@ public class GenerateClusterControllerTest {
         assertThat(exposedVisitList)
                 .allMatch(
                         exposedVisit -> exposedVisit.getLocationTemporaryPublicId()
-                                .equals(ReferenceData.LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID),
-                        "has uuid" + ReferenceData.LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID
+                                .equals(LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID),
+                        "has uuid" + LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID
                 )
                 .allMatch(exposedVisit -> exposedVisit.getPeriodStart() == periodStart)
                 .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 101, "has 101 forward visits");
@@ -121,17 +115,21 @@ public class GenerateClusterControllerTest {
     @Test
     void create_cluster_manually_with_wrong_deeplink_and_correct_date_then_no_visit_save_in_database() {
 
-        clusterParams.add("deeplink", "test");
-        clusterParams.add("date", date);
-
         given()
                 .urlEncodingEnabled(false)
+
                 .when()
                 .contentType(URLENC)
-                .params(clusterParams)
+                .params(
+                        Map.of(
+                                "deeplink", "test",
+                                "date", LocalDateTime.now().plus(1, ChronoUnit.HOURS).format(ISO_DATE_TIME)
+                        )
+                )
                 .post("/cluster-declaration")
+
                 .then()
-                .statusCode(INTERNAL_SERVER_ERROR.value());
+                .statusCode(OK.value());
 
         assertThat(repository.findAll()).isEmpty();
 
@@ -140,17 +138,21 @@ public class GenerateClusterControllerTest {
     @Test
     void create_cluster_manually_with_correct_deeplink_and_wrong_date_then_no_visit_save_in_database() {
 
-        clusterParams.add("deeplink", deeplink);
-        clusterParams.add("date", "");
-
         given()
                 .urlEncodingEnabled(false)
+
                 .when()
                 .contentType(URLENC)
-                .params(clusterParams)
+                .params(
+                        Map.of(
+                                "deeplink", LOCATION_1_URL.toString(),
+                                "date", ""
+                        )
+                )
                 .post("/cluster-declaration")
+
                 .then()
-                .statusCode(INTERNAL_SERVER_ERROR.value());
+                .statusCode(OK.value());
 
         assertThat(repository.findAll()).isEmpty();
 
