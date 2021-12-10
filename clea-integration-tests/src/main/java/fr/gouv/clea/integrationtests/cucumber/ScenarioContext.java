@@ -1,7 +1,7 @@
 package fr.gouv.clea.integrationtests.cucumber;
 
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
-import fr.gouv.clea.integrationtests.model.Place;
+import fr.gouv.clea.integrationtests.cucumber.model.Place;
 import fr.gouv.clea.integrationtests.service.ClusterExpositionService;
 import fr.gouv.clea.integrationtests.service.visitorsimulator.Visitor;
 import io.cucumber.spring.ScenarioScope;

@@ -1,4 +1,4 @@
-package fr.gouv.clea.integrationtests.model;
+package fr.gouv.clea.integrationtests.cucumber.model;
 
 import fr.inria.clea.lsp.Location;
 import lombok.RequiredArgsConstructor;
