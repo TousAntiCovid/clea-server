@@ -4,9 +4,9 @@ Feature: Record health statistics
     Given Laure registered on TAC
     And Henry registered on TAC
     And Yaël registered on TAC
-    And Place named "Burger King" with venue type 1, venue category 1 1, venue category 2 1, qr code renewal duration of 15 minutes, and a periodDuration of 24 hours
-    And Place named "Le Klub" with venue type 2, venue category 1 0, venue category 2 2, qr code renewal duration of 15 minutes, and a periodDuration of 24 hours
-    And Place named "OrangeBleue" with venue type 4, venue category 1 4, venue category 2 2, qr code renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And Place named "Burger King" with venue type 1, venue category 1 1, venue category 2 1, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And Place named "Le Klub" with venue type 2, venue category 1 0, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And Place named "OrangeBleue" with venue type 4, venue category 1 4, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
     And "Burger King" created a dynamic deeplink at 04:00, 10 days ago
     And "Le Klub" created a dynamic deeplink at 04:00, 10 days ago
     And "OrangeBleue" created a static deeplink at 04:00, 10 days ago
@@ -21,7 +21,7 @@ Feature: Record health statistics
     Given Henry recorded a visit to "Le Klub" at 11:46, 4 days ago
     And Henry recorded a visit to "Le Klub" at 11:47, 4 days ago
 
-    # Laure scanned two different QRCodes in less than "duplicateScanThresholdInSeconds" (default 1800)
+    # Laure scanned two different deepLinks in less than "duplicateScanThresholdInSeconds" (default 1800)
     Given Laure recorded a visit to "Le Klub" at 12:59, 4 days ago
 
     Given Yaël recorded a visit to "OrangeBleue" at 16:30, 18 days ago

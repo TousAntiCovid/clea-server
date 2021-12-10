@@ -15,10 +15,10 @@ public class CleaDeepLinksSteps {
 
     @Given("{string} created a dynamic deeplink at {naturalTime}")
     public void create_dynamic_deeplink_at_periodStartTime_with_renewalTime(final String locationName,
-            final Instant qrCodePeriodStartTime) {
+            final Instant deepLinkPeriodStartTime) {
         scenarioContext.getPlace(locationName)
                 .orElseThrow()
-                .createDynamicDeepLinkAt(qrCodePeriodStartTime);
+                .createDynamicDeepLinkAt(deepLinkPeriodStartTime);
     }
 
     @Given("{string} initialized dynamic deeplink at {naturalTime}")
@@ -38,7 +38,7 @@ public class CleaDeepLinksSteps {
     }
 
     @Given("{string} created a static deeplink at {naturalTime}")
-    public void create_static_deeplink_with_periodStartTime_without_qrCodeRenewalIntervalDuration(
+    public void create_static_deeplink_with_periodStartTime(
             final String locationName,
             final Instant periodStartTime) {
         scenarioContext.getPlace(locationName)
@@ -47,7 +47,7 @@ public class CleaDeepLinksSteps {
     }
 
     @Given("{string} created a static staff deeplink at {naturalTime}")
-    public void create_static_staff_deeplink_with_periodStartTime_without_qrCodeRenewalIntervalDuration(
+    public void create_static_staff_deeplink_with_periodStartTime(
             final String locationName,
             final Instant periodStartTime) {
         scenarioContext.getPlace(locationName)

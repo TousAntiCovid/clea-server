@@ -19,28 +19,28 @@ public class CleaVisitorUserSteps {
         scenarioContext.getOrCreateUser(username);
     }
 
-    // Visitor scan a QR code at given instant
+    // Visitor scan a deepLink at given instant
     @Given("{word} recorded a visit to {string} at {naturalTime}")
-    public void visitor_scans_qrcode_at_given_instant(final String visitorName,
+    public void visitor_scans_deepLink_at_given_instant(final String visitorName,
             final String locationName,
-            final Instant qrCodeScanTime) {
+            final Instant deepLinkScanTime) {
 
         final var place = scenarioContext.getPlace(locationName).orElseThrow();
-        scanDeepLink(visitorName, qrCodeScanTime, place.getDeepLinkAt(qrCodeScanTime).getUrl());
+        scanDeepLink(visitorName, deepLinkScanTime, place.getDeepLinkAt(deepLinkScanTime).getUrl());
     }
 
-    // Visitor scan a staff QR code at given instant
+    // Visitor scan a staff deepLink at given instant
     @Given("{word} recorded a visit as a STAFF to {string} at {naturalTime}")
-    public void visitor_scans_staff_qrcode_at_given_instant(final String visitorName,
+    public void visitor_scans_staff_deepLink_at_given_instant(final String visitorName,
             final String locationName,
-            final Instant qrCodeScanTime) {
+            final Instant deepLinkScanTime) {
         final var place = scenarioContext.getPlace(locationName).orElseThrow();
-        scanDeepLink(visitorName, qrCodeScanTime, place.getDeepLinkAt(qrCodeScanTime).getUrl());
+        scanDeepLink(visitorName, deepLinkScanTime, place.getStaffDeepLinkAt(deepLinkScanTime).getUrl());
     }
 
     private void scanDeepLink(final String visitorName,
-            final Instant qrCodeScanTime,
+            final Instant deepLinkScanTime,
             final URL locationDeepLink) {
-        scenarioContext.getOrCreateUser(visitorName).registerDeepLink(locationDeepLink, qrCodeScanTime);
+        scenarioContext.getOrCreateUser(visitorName).registerDeepLink(locationDeepLink, deepLinkScanTime);
     }
 }

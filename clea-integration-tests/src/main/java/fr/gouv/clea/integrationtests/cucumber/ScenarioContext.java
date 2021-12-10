@@ -47,8 +47,7 @@ public class ScenarioContext {
     public Place createStaticPlace(final String placeName,
             final int venueType,
             final int venueCategory1,
-            final int venueCategory2,
-            final int periodDurationHours) {
+            final int venueCategory2) {
         return places.put(
                 placeName, new Place(
                         locationFactory.createStaticLocation(
@@ -59,8 +58,7 @@ public class ScenarioContext {
                         locationFactory.createStaticStaffLocation(
                                 venueType,
                                 venueCategory1,
-                                venueCategory2,
-                                periodDurationHours
+                                venueCategory2
                         )
                 )
         );
@@ -70,7 +68,7 @@ public class ScenarioContext {
             final int venueType,
             final int venueCategory1,
             final int venueCategory2,
-            final Duration qrCodeRenewalInterval,
+            final Duration deepLinkRenewalInterval,
             final int periodDuration) {
         return places.put(
                 placeName, new Place(
@@ -78,14 +76,14 @@ public class ScenarioContext {
                                 venueType,
                                 venueCategory1,
                                 venueCategory2,
-                                qrCodeRenewalInterval,
+                                deepLinkRenewalInterval,
                                 periodDuration
                         ),
                         locationFactory.createDynamicStaffLocation(
                                 venueType,
                                 venueCategory1,
                                 venueCategory2,
-                                qrCodeRenewalInterval,
+                                deepLinkRenewalInterval,
                                 periodDuration
                         )
                 )
