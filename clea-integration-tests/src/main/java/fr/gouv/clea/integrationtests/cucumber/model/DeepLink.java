@@ -1,4 +1,4 @@
-package fr.gouv.clea.integrationtests.model;
+package fr.gouv.clea.integrationtests.cucumber.model;
 
 import lombok.Builder;
 import lombok.Value;
