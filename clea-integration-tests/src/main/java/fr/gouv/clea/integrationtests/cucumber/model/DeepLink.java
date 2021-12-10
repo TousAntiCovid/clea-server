@@ -13,21 +13,13 @@ public class DeepLink {
 
     URL url;
 
-    Instant validityStartTime;
+    Instant startTime;
 
-    Duration renewalInterval;
+    Duration validity;
 
     public boolean containsProvidedScanTime(final Instant scanTime) {
-        if (isStaticDeeplink()) {
-            return scanTime.isAfter(validityStartTime) || scanTime.equals(validityStartTime);
-        } else {
-            final var validityEndTime = validityStartTime.plus(renewalInterval);
-            return (scanTime.isAfter(validityStartTime) || scanTime.equals(validityStartTime))
-                    && (scanTime.isBefore(validityEndTime) || scanTime.equals(validityEndTime));
-        }
-    }
-
-    private boolean isStaticDeeplink() {
-        return renewalInterval.abs().isZero();
+        final var validityEndTime = startTime.plus(validity);
+        return (scanTime.isAfter(startTime) || scanTime.equals(startTime))
+                && (scanTime.isBefore(validityEndTime) || scanTime.equals(validityEndTime));
     }
 }

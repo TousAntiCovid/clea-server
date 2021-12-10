@@ -17,7 +17,7 @@ public class ClusterDetectionSteps {
 
     private final ScenarioContext scenarioContext;
 
-    @When("Cluster detection triggered")
+    @When("cluster detection triggered")
     public void trigger_cluster_identification() throws IOException, InterruptedException {
         cleaBatchService.triggerNewClusterIdenfication();
     }
@@ -26,19 +26,19 @@ public class ClusterDetectionSteps {
     public void visitor_asks_for_exposure_status(final String visitorName) {
     }
 
-    @Then("Exposure status should reports {word} as not being at risk")
+    @Then("exposure status should reports {word} as not being at risk")
     public void visitor_should_not_be_at_risk(String visitorName) {
         final var riskLevel = this.scenarioContext.getOrCreateUser(visitorName).getStatus();
         assertThat(riskLevel).isEqualTo(0);
     }
 
-    @Then("Exposure status should reports {word} as being at risk of {float}")
+    @Then("exposure status should reports {word} as being at risk of {float}")
     public void visitor_should_be_at_specified_risk(String visitorName, Float risk) {
         final var riskLevel = this.scenarioContext.getVisitor(visitorName).getStatus();
         assertThat(riskLevel).isEqualTo(risk);
     }
 
-    @Then("Exposure status request for {word} should include only {int} visit\\(s) to {string} at {string}")
+    @Then("exposure status request for {word} should include only {int} visit\\(s) to {string} at {string}")
     public void visitor_should_include_only_expected_visits(String visitorName, Integer nbVisits, String locationName,
             String qrScanTime) {
         final var visitor = this.scenarioContext.getVisitor(visitorName);
