@@ -5,16 +5,19 @@ import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Duration;
+import java.time.Instant;
 
 @RequiredArgsConstructor
 public class CleaPlacesSteps {
 
     private final ScenarioContext scenarioContext;
 
-    @Given("Place named {string} with venue type {int}, venue category 1 {int}, venue category 2 {int}," +
+    @Given("{string} manager configured qrcode generators at {naturalTime} with venue type {int}, venue category 1 {int}, venue category 2 {int},"
+            +
             " deepLink renewal duration of {duration}, and a periodDuration of {int} hours")
     public void create_dynamic_place_with_vType_vCat1_vCat2_deepLinkRenewalDuration_and_periodDuration(
             final String locationName,
+            final Instant dynamicDeepLinkStartTime,
             final Integer venueType,
             final Integer venueCategory1,
             final Integer venueCategory2,
@@ -22,6 +25,7 @@ public class CleaPlacesSteps {
             final Integer periodDuration) {
         scenarioContext.createDynamicPlace(
                 locationName,
+                dynamicDeepLinkStartTime,
                 venueType,
                 venueCategory1,
                 venueCategory2,
@@ -30,17 +34,21 @@ public class CleaPlacesSteps {
         );
     }
 
-    @Given("Place named {string} has configuration: venue type {int}, venue category 1 {int}, venue category 2 {int}")
+    @Given("{string} manager generated qrcodes at {naturalTime} has configuration: venue type {int}, venue category 1 {int}, venue category 2 {int}")
     public void create_static_place_with_vType_vCat1_vCat2_and_periodDuration(
             final String locationName,
+            final Instant deepLinkStartTime,
             final Integer venueType,
             final Integer venueCategory1,
             final Integer venueCategory2) {
-        scenarioContext.createStaticPlace(
+        final var place = scenarioContext.createStaticPlace(
                 locationName,
+                deepLinkStartTime,
                 venueType,
                 venueCategory1,
                 venueCategory2
         );
+        place.createStaticDeepLink(deepLinkStartTime);
+        place.createStaticStaffDeepLink(deepLinkStartTime);
     }
 }

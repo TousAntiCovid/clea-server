@@ -1,15 +1,10 @@
 Feature: Record health statistics
 
   Background:
-    Given Laure registered on TAC
-    And Henry registered on TAC
-    And Yaël registered on TAC
-    And Place named "Burger King" with venue type 1, venue category 1 1, venue category 2 1, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
-    And Place named "Le Klub" with venue type 2, venue category 1 0, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
-    And Place named "OrangeBleue" with venue type 4, venue category 1 4, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
-    And "Burger King" created a dynamic deeplink at 04:00, 10 days ago
-    And "Le Klub" created a dynamic deeplink at 04:00, 10 days ago
-    And "OrangeBleue" created a static deeplink at 04:00, 10 days ago
+    Given users Laure, Henry, Yaël are registered on TAC
+    And "Burger King" manager configured qrcode generators at 04:00, 10 days ago with venue type 1, venue category 1 1, venue category 2 1, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And "Le Klub" manager configured qrcode generators at 04:00, 10 days ago with venue type 2, venue category 1 0, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And "OrangeBleue" manager configured qrcode generators at 04:00, 10 days ago with venue type 4, venue category 1 4, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
 
   Scenario: Sanitary statistics
 

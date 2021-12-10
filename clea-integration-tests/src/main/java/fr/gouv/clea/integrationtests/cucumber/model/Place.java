@@ -1,6 +1,7 @@
 package fr.gouv.clea.integrationtests.cucumber.model;
 
 import fr.inria.clea.lsp.Location;
+import fr.inria.clea.lsp.LocationSpecificPart;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -14,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import static java.time.Duration.ZERO;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Comparator.comparing;
@@ -38,6 +38,11 @@ public class Place {
 
     TreeMap<Period, List<DeepLink>> staffLocationDeepLinks = new TreeMap<>(comparing(Period::getStartTime));
 
+    private static final Duration MAX_DURATION = Duration.ofSeconds(
+            Long.MAX_VALUE,
+            999999999L
+    );
+
     public DeepLink getDeepLinkAt(final Instant scanTime) {
         if (this.location.getLocationSpecificPart().getQrCodeRenewalInterval() == 0) {
             return getStaticDeepLink();
@@ -57,12 +62,12 @@ public class Place {
     @SneakyThrows
     public void createStaticDeepLink(final Instant periodStartTime) {
         locationDeepLinks.put(
-                new Period(periodStartTime, ZERO),
+                new Period(periodStartTime, MAX_DURATION),
                 List.of(
                         DeepLink.builder()
                                 .url(new URL(location.newDeepLink(periodStartTime)))
-                                .validityStartTime(periodStartTime)
-                                .renewalInterval(ZERO)
+                                .startTime(periodStartTime)
+                                .validity(MAX_DURATION)
                                 .build()
                 )
         );
@@ -71,38 +76,12 @@ public class Place {
     @SneakyThrows
     public void createStaticStaffDeepLink(final Instant periodStartTime) {
         staffLocationDeepLinks.put(
-                new Period(periodStartTime, ZERO),
+                new Period(periodStartTime, MAX_DURATION),
                 List.of(
                         DeepLink.builder()
                                 .url(new URL(staffLocation.newDeepLink(periodStartTime)))
-                                .validityStartTime(periodStartTime)
-                                .renewalInterval(ZERO)
-                                .build()
-                )
-        );
-    }
-
-    public void createDynamicDeepLinkAt(final Instant periodStartTime) {
-        createDeepLinkAtPeriodStartTimeFrom(periodStartTime, location);
-    }
-
-    public void createDynamicStaffDeepLinkAt(final Instant periodStartTime) {
-        createDeepLinkAtPeriodStartTimeFrom(periodStartTime, staffLocation);
-    }
-
-    @SneakyThrows
-    private void createDeepLinkAtPeriodStartTimeFrom(final Instant periodStartTime, final Location location) {
-        locationDeepLinks.put(
-                new Period(periodStartTime, Duration.of(location.getLocationSpecificPart().getPeriodDuration(), HOURS)),
-                List.of(
-                        DeepLink.builder()
-                                .url(new URL(location.newDeepLink(periodStartTime)))
-                                .validityStartTime(periodStartTime)
-                                .renewalInterval(
-                                        Duration.of(
-                                                location.getLocationSpecificPart().getQrCodeRenewalInterval(), SECONDS
-                                        )
-                                )
+                                .startTime(periodStartTime)
+                                .validity(MAX_DURATION)
                                 .build()
                 )
         );
@@ -111,7 +90,7 @@ public class Place {
     private DeepLink getStaticDeepLink() {
         return locationDeepLinks.values().stream()
                 .flatMap(List::stream)
-                .filter(deepLink -> deepLink.getRenewalInterval() == ZERO)
+                .filter(deepLink -> deepLink.getValidity() == MAX_DURATION)
                 .findFirst()
                 .orElseThrow();
     }
@@ -119,7 +98,7 @@ public class Place {
     private DeepLink getStaticStaffDeepLink() {
         return staffLocationDeepLinks.values().stream()
                 .flatMap(List::stream)
-                .filter(deepLink -> deepLink.getRenewalInterval() == ZERO)
+                .filter(deepLink -> deepLink.getValidity() == MAX_DURATION)
                 .findFirst()
                 .orElseThrow();
     }
@@ -136,17 +115,7 @@ public class Place {
             final Location location,
             final TreeMap<Period, List<DeepLink>> deepLinks) {
         final var locationSpecificPart = location.getLocationSpecificPart();
-        final var deepLinkInitialStartTime = getInitialStartTime(deepLinks);
-        final var instantPeriodStart = computePeriodStart(
-                deepLinkScanTime,
-                locationSpecificPart.getPeriodDuration(),
-                deepLinkInitialStartTime
-        );
-        final var concernedPeriod = getCorrespondingPeriod(
-                deepLinkScanTime,
-                instantPeriodStart,
-                locationSpecificPart.getPeriodDuration()
-        );
+        final Period concernedPeriod = getDeepLinkPeriod(deepLinkScanTime, deepLinks, locationSpecificPart);
 
         deepLinks.computeIfAbsent(concernedPeriod, (p) -> new ArrayList<>());
 
@@ -165,30 +134,26 @@ public class Place {
                 );
     }
 
-    private Instant getInitialStartTime(TreeMap<Period, List<DeepLink>> deepLinks) {
-        return deepLinks.get(locationDeepLinks.firstKey()).get(0).getValidityStartTime();
-    }
-
-    private Instant computePeriodStart(Instant scanTime, int periodDuration, Instant initialPeriodStartTime) {
-        final var periodDurationInSeconds = periodDuration * 3600L;
-        final var secondsBetweenScanTimeAndInitialPeriodStartTime = Duration.between(scanTime, initialPeriodStartTime)
+    private Period getDeepLinkPeriod(final Instant deepLinkScanTime,
+            final TreeMap<Period, List<DeepLink>> deepLinks,
+            final LocationSpecificPart locationSpecificPart) {
+        final var deepLinkInitialStartTime = locationSpecificPart.getQrCodeValidityStartTime();
+        final var periodDurationInSeconds = locationSpecificPart.getPeriodDuration() * 3600L;
+        final var secondsBetweenScanTimeAndInitialPeriodStartTime = Duration
+                .between(deepLinkScanTime, deepLinkInitialStartTime)
                 .abs().getSeconds();
         final var timeBetweenPeriodStartTimeAndScanTime = secondsBetweenScanTimeAndInitialPeriodStartTime
                 % periodDurationInSeconds;
-        return scanTime.minus(
+        final var instantPeriodStart = deepLinkScanTime.minus(
                 timeBetweenPeriodStartTimeAndScanTime,
                 ChronoUnit.SECONDS
         );
-    }
 
-    private Period getCorrespondingPeriod(final Instant scanTime,
-            final Instant instantPeriodStart,
-            final int periodDuration) {
-        return locationDeepLinks.keySet()
+        return deepLinks.keySet()
                 .stream()
-                .filter(p -> p.containsInstant(scanTime))
+                .filter(p -> p.contains(deepLinkScanTime))
                 .findFirst()
-                .orElseGet(() -> createNewPeriod(instantPeriodStart, periodDuration));
+                .orElseGet(() -> createNewPeriod(instantPeriodStart, locationSpecificPart.getPeriodDuration()));
     }
 
     private DeepLink createDeepLinkFrom(final Instant scanTime,
@@ -230,8 +195,8 @@ public class Place {
             final Duration deepLinkRenewalIntervalDuration) {
         return DeepLink.builder()
                 .url(new URL(location.newDeepLink(deepLinkPeriodStartTime, deepLinkValidityStartTime)))
-                .validityStartTime(deepLinkPeriodStartTime)
-                .renewalInterval(deepLinkRenewalIntervalDuration)
+                .startTime(deepLinkPeriodStartTime)
+                .validity(deepLinkRenewalIntervalDuration)
                 .build();
     }
 }

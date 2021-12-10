@@ -1,20 +1,20 @@
 package fr.gouv.clea.integrationtests.cucumber.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Value;
 
 import java.time.Duration;
 import java.time.Instant;
 
-@Data
+@Value
 @AllArgsConstructor
 public class Period {
 
-    private Instant startTime;
+    Instant startTime;
 
-    private Duration duration;
+    Duration duration;
 
-    public boolean containsInstant(final Instant instant) {
+    public boolean contains(final Instant instant) {
         return !(instant.isBefore(startTime) || instant.isAfter(startTime.plus(duration)));
     }
 }

@@ -7,9 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-
-import static java.util.UUID.randomUUID;
-import static org.bouncycastle.util.encoders.Hex.toHexString;
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -21,32 +19,40 @@ public class LocationFactory {
 
     private final int INFINITE_PERIOD_DURATION = 255;
 
-    public Location createStaticLocation(final int venueType,
+    public Location createStaticLocation(final Instant deepLinkStartTime,
+            final int venueType,
             final int venueCategory1,
-            final int venueCategory2) {
+            final int venueCategory2,
+            final String permanentLocationSecretKey) {
         return createLocation(
+                deepLinkStartTime,
                 venueType,
                 venueCategory1,
                 venueCategory2,
                 STATIC_LOCATION_DEEPLINK_RENEWAL_INTERVAL,
                 INFINITE_PERIOD_DURATION,
-                false
+                false,
+                permanentLocationSecretKey
         );
     }
 
-    public Location createDynamicLocation(final int venueType,
+    public Location createDynamicLocation(final Instant deepLinkStartTime,
+            final int venueType,
             final int venueCategory1,
             final int venueCategory2,
             final Duration deepLinkRenewalInterval,
-            final int periodDurationHours) {
+            final int periodDurationHours,
+            final String permanentLocationSecretKey) {
         final int formattedDeepLinkRenewalInterval = getFormattedDeeplinkRenewalInterval(deepLinkRenewalInterval);
         return createLocation(
+                deepLinkStartTime,
                 venueType,
                 venueCategory1,
                 venueCategory2,
                 formattedDeepLinkRenewalInterval,
                 periodDurationHours,
-                false
+                false,
+                permanentLocationSecretKey
         );
     }
 
@@ -54,47 +60,57 @@ public class LocationFactory {
         return (int) (Math.log(deepLinkRenewalInterval.getSeconds()) / Math.log(2));
     }
 
-    public Location createStaticStaffLocation(final int venueType,
+    public Location createStaticStaffLocation(final Instant dynamicDeepLinkStartTime,
+            final int venueType,
             final int venueCategory1,
-            final int venueCategory2) {
+            final int venueCategory2,
+            final String permanentLocationSecretKey) {
         return createLocation(
+                dynamicDeepLinkStartTime,
                 venueType,
                 venueCategory1,
                 venueCategory2,
                 STATIC_LOCATION_DEEPLINK_RENEWAL_INTERVAL,
                 INFINITE_PERIOD_DURATION,
-                true
+                true,
+                permanentLocationSecretKey
         );
     }
 
-    public Location createDynamicStaffLocation(final int venueType,
+    public Location createDynamicStaffLocation(final Instant deepLinkStartTime,
+            final int venueType,
             final int venueCategory1,
             final int venueCategory2,
             final Duration deepLinkRenewalInterval,
-            final int periodDurationHours) {
+            final int periodDurationHours,
+            final String permanentLocationSecretKey) {
         final int formattedDeepLinkRenewalInterval = getFormattedDeeplinkRenewalInterval(deepLinkRenewalInterval);
         return createLocation(
+                deepLinkStartTime,
                 venueType,
                 venueCategory1,
                 venueCategory2,
                 formattedDeepLinkRenewalInterval,
                 periodDurationHours,
-                true
+                true,
+                permanentLocationSecretKey
         );
     }
 
-    private Location createLocation(final int venueType,
+    private Location createLocation(final Instant deepLinkStartTime,
+            final int venueType,
             final int venueCategory1,
             final int venueCategory2,
             final int deepLinkRenewalInterval,
             final int periodDurationHours,
-            final boolean staff) {
-        final var permanentLocationSecretKey = toHexString(randomUUID().toString().getBytes());
+            final boolean staff,
+            final String permanentLocationSecretKey) {
 
         return Location.builder()
                 .locationSpecificPart(
                         LocationSpecificPart.builder()
                                 .staff(staff)
+                                .qrCodeValidityStartTime(deepLinkStartTime)
                                 .periodDuration(periodDurationHours)
                                 .qrCodeRenewalIntervalExponentCompact(deepLinkRenewalInterval)
                                 .venueType(venueType)
