@@ -45,17 +45,25 @@ public class Place {
 
     public DeepLink getDeepLinkAt(final Instant scanTime) {
         if (this.location.getLocationSpecificPart().getQrCodeRenewalInterval() == 0) {
-            return getStaticDeepLink();
+            return locationDeepLinks.values().stream()
+                    .flatMap(List::stream)
+                    .filter(deepLink -> deepLink.getValidity() == MAX_DURATION)
+                    .findFirst()
+                    .orElseThrow();
         } else {
-            return getOrCreateDynamicDeepLinkAt(scanTime);
+            return getDeepLink(scanTime, location, locationDeepLinks);
         }
     }
 
     public DeepLink getStaffDeepLinkAt(final Instant scanTime) {
         if (this.location.getLocationSpecificPart().getQrCodeRenewalInterval() == 0) {
-            return getStaticStaffDeepLink();
+            return staffLocationDeepLinks.values().stream()
+                    .flatMap(List::stream)
+                    .filter(deepLink -> deepLink.getValidity() == MAX_DURATION)
+                    .findFirst()
+                    .orElseThrow();
         } else {
-            return getOrCreateStaffDynamicDeepLinkAt(scanTime);
+            return getDeepLink(scanTime, staffLocation, staffLocationDeepLinks);
         }
     }
 
@@ -85,30 +93,6 @@ public class Place {
                                 .build()
                 )
         );
-    }
-
-    private DeepLink getStaticDeepLink() {
-        return locationDeepLinks.values().stream()
-                .flatMap(List::stream)
-                .filter(deepLink -> deepLink.getValidity() == MAX_DURATION)
-                .findFirst()
-                .orElseThrow();
-    }
-
-    private DeepLink getStaticStaffDeepLink() {
-        return staffLocationDeepLinks.values().stream()
-                .flatMap(List::stream)
-                .filter(deepLink -> deepLink.getValidity() == MAX_DURATION)
-                .findFirst()
-                .orElseThrow();
-    }
-
-    private DeepLink getOrCreateDynamicDeepLinkAt(final Instant deepLinkScanTime) {
-        return getDeepLink(deepLinkScanTime, location, locationDeepLinks);
-    }
-
-    private DeepLink getOrCreateStaffDynamicDeepLinkAt(final Instant deepLinkScanTime) {
-        return getDeepLink(deepLinkScanTime, staffLocation, staffLocationDeepLinks);
     }
 
     private DeepLink getDeepLink(final Instant deepLinkScanTime,
