@@ -10,13 +10,14 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
 
 @Retention(RUNTIME)
 @Target(TYPE)
-@SpringBootTest
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 @TestExecutionListeners(listeners = { ElasticManager.class, KafkaManager.class,
-        PostgreSqlManager.class }, mergeMode = MERGE_WITH_DEFAULTS)
+        PostgreSqlManager.class, RestAssuredManager.class }, mergeMode = MERGE_WITH_DEFAULTS)
 @DisplayNameGeneration(ReplaceUnderscores.class)
 public @interface IntegrationTest {
 
