@@ -62,6 +62,7 @@
         <jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
         <maven-site-plugin.version>3.7.1</maven-site-plugin.version>
         <maven-jxr-plugin.version>2.1</maven-jxr-plugin.version>
+        <log4j2.version>2.15.0</log4j2.version>
     </properties>
 
     <dependencyManagement>
