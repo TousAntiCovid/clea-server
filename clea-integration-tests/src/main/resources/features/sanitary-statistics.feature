@@ -4,7 +4,7 @@ Feature: Record health statistics
     Given users Laure, Henry, Yaël are registered on TAC
     And "Burger King" manager configured qrcode generators at 04:00, 10 days ago with venue type 1, venue category 1 1, venue category 2 1, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
     And "Le Klub" manager configured qrcode generators at 04:00, 10 days ago with venue type 2, venue category 1 0, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
-    And "OrangeBleue" manager configured qrcode generators at 04:00, 10 days ago with venue type 4, venue category 1 4, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And "OrangeBleue" manager configured qrcode generators at 04:00, 20 days ago with venue type 4, venue category 1 4, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
 
   Scenario: Sanitary statistics
 

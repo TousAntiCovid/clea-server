@@ -5,7 +5,6 @@ import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URL;
 import java.time.Instant;
 import java.util.List;
 
@@ -25,28 +24,25 @@ public class CleaVisitorUserSteps {
         usernames.forEach(scenarioContext::getOrCreateUser);
     }
 
-    // Visitor scan a deepLink at given instant
     @Given("{word} recorded a visit to {string} at {naturalTime}")
     public void visitor_scans_deepLink_at_given_instant(final String visitorName,
-            final String locationName,
-            final Instant deepLinkScanTime) {
-
-        final var place = scenarioContext.getPlace(locationName);
-        scanDeepLink(visitorName, deepLinkScanTime, place.getDeepLinkAt(deepLinkScanTime).getUrl());
+            final String placeName,
+            final Instant scanTime) {
+        final var deepLink = scenarioContext.getPlace(placeName)
+                .getDeepLinkAt(scanTime)
+                .getUrl();
+        scenarioContext.getVisitor(visitorName)
+                .scans(deepLink, scanTime);
     }
 
-    // Visitor scan a staff deepLink at given instant
     @Given("{word} recorded a visit as a STAFF to {string} at {naturalTime}")
     public void visitor_scans_staff_deepLink_at_given_instant(final String visitorName,
-            final String locationName,
-            final Instant deepLinkScanTime) {
-        final var place = scenarioContext.getPlace(locationName);
-        scanDeepLink(visitorName, deepLinkScanTime, place.getStaffDeepLinkAt(deepLinkScanTime).getUrl());
-    }
-
-    private void scanDeepLink(final String visitorName,
-            final Instant deepLinkScanTime,
-            final URL locationDeepLink) {
-        scenarioContext.getOrCreateUser(visitorName).registerDeepLink(locationDeepLink, deepLinkScanTime);
+            final String placeName,
+            final Instant scanTime) {
+        final var deepLink = scenarioContext.getPlace(placeName)
+                .getDeepLinkAt(scanTime)
+                .getUrl();
+        scenarioContext.getVisitor(visitorName)
+                .scans(deepLink, scanTime);
     }
 }

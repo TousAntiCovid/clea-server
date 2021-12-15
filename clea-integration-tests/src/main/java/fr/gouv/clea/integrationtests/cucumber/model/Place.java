@@ -1,186 +1,90 @@
 package fr.gouv.clea.integrationtests.cucumber.model;
 
+import fr.gouv.clea.integrationtests.cucumber.LocationFactory;
 import fr.inria.clea.lsp.Location;
-import fr.inria.clea.lsp.LocationSpecificPart;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
 
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 
-import static java.time.temporal.ChronoUnit.HOURS;
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static java.util.Comparator.comparing;
-
-@Value
-@Slf4j
-@RequiredArgsConstructor
 public class Place {
 
-    Location location;
+    private static final Duration MAX_DURATION = Duration.ofNanos(Long.MAX_VALUE);
 
-    Location staffLocation;
+    private final Instant startTime;
 
-    /**
-     * Maps are ordered by start time so that the first deeplink is the one
-     * providing the initial start time
-     *
-     * @see TreeMap#TreeMap(java.util.Comparator)
-     */
-    TreeMap<Period, List<DeepLink>> locationDeepLinks = new TreeMap<>(comparing(Period::getStartTime));
+    private final DeepLinks visitorDeepLinks;
 
-    TreeMap<Period, List<DeepLink>> staffLocationDeepLinks = new TreeMap<>(comparing(Period::getStartTime));
+    private final DeepLinks staffDeepLinks;
 
-    private static final Duration MAX_DURATION = Duration.ofSeconds(
-            Long.MAX_VALUE,
-            999999999L
-    );
+    public Place(final LocationFactory locationFactory) {
+        this.startTime = locationFactory.getStartTime();
+        this.visitorDeepLinks = new DeepLinks(locationFactory.buildVisitor());
+        this.staffDeepLinks = new DeepLinks(locationFactory.buildStaff());
+    }
 
     public DeepLink getDeepLinkAt(final Instant scanTime) {
-        if (this.location.getLocationSpecificPart().getQrCodeRenewalInterval() == 0) {
-            return locationDeepLinks.values().stream()
-                    .flatMap(List::stream)
-                    .filter(deepLink -> deepLink.getValidity() == MAX_DURATION)
-                    .findFirst()
-                    .orElseThrow();
-        } else {
-            return getDeepLink(scanTime, location, locationDeepLinks);
-        }
+        return visitorDeepLinks.get(scanTime);
     }
 
     public DeepLink getStaffDeepLinkAt(final Instant scanTime) {
-        if (this.location.getLocationSpecificPart().getQrCodeRenewalInterval() == 0) {
-            return staffLocationDeepLinks.values().stream()
-                    .flatMap(List::stream)
-                    .filter(deepLink -> deepLink.getValidity() == MAX_DURATION)
+        return staffDeepLinks.get(scanTime);
+    }
+
+    @RequiredArgsConstructor
+    private class DeepLinks {
+
+        private final List<DeepLink> deepLinks = new ArrayList<>();
+
+        private final Location location;
+
+        public DeepLink get(final Instant scanTime) {
+            return deepLinks.stream()
+                    .filter(deeplink -> deeplink.contains(scanTime))
                     .findFirst()
-                    .orElseThrow();
-        } else {
-            return getDeepLink(scanTime, staffLocation, staffLocationDeepLinks);
+                    .orElseGet(() -> {
+                        final var deepLink = createDeepLink(scanTime);
+                        deepLinks.add(deepLink);
+                        return deepLink;
+                    });
         }
-    }
 
-    @SneakyThrows
-    public void createStaticDeepLink(final Instant periodStartTime) {
-        locationDeepLinks.put(
-                new Period(periodStartTime, MAX_DURATION),
-                List.of(
-                        DeepLink.builder()
-                                .url(new URL(location.newDeepLink(periodStartTime)))
-                                .startTime(periodStartTime)
-                                .validity(MAX_DURATION)
-                                .build()
-                )
-        );
-    }
+        @SneakyThrows
+        private DeepLink createDeepLink(final Instant scanTime) {
+            if (isStaticLocation()) {
+                return DeepLink.builder()
+                        .url(new URL(location.newDeepLink(startTime)))
+                        .startTime(startTime)
+                        .duration(MAX_DURATION)
+                        .build();
+            } else {
+                // find out in which period the scan occurs
+                // the period defines the ltid included in the deeplink
+                final var ltidPeriodDuration = Duration.ofHours(location.getLocationSpecificPart().getPeriodDuration());
+                final var ltidPeriodCount = Duration.between(startTime, scanTime).dividedBy(ltidPeriodDuration);
+                final var ltidPeriodStart = startTime.plusSeconds(ltidPeriodCount * ltidPeriodDuration.getSeconds());
 
-    @SneakyThrows
-    public void createStaticStaffDeepLink(final Instant periodStartTime) {
-        staffLocationDeepLinks.put(
-                new Period(periodStartTime, MAX_DURATION),
-                List.of(
-                        DeepLink.builder()
-                                .url(new URL(staffLocation.newDeepLink(periodStartTime)))
-                                .startTime(periodStartTime)
-                                .validity(MAX_DURATION)
-                                .build()
-                )
-        );
-    }
+                // find out in which renewal occurrence the scan occurs in the current period
+                // some random data is used to randomize the deeplink every 'renewal' interval
+                final var renewalDuration = Duration
+                        .ofSeconds(location.getLocationSpecificPart().getQrCodeRenewalInterval());
+                final var renewalCount = Duration.between(ltidPeriodStart, scanTime).dividedBy(renewalDuration);
+                final var renewalStart = ltidPeriodStart.plusSeconds(renewalCount * renewalDuration.getSeconds());
 
-    private DeepLink getDeepLink(final Instant deepLinkScanTime,
-            final Location location,
-            final TreeMap<Period, List<DeepLink>> deepLinks) {
-        final var locationSpecificPart = location.getLocationSpecificPart();
-        final Period concernedPeriod = getDeepLinkPeriod(deepLinkScanTime, deepLinks, locationSpecificPart);
+                return DeepLink.builder()
+                        .url(new URL(location.newDeepLink(ltidPeriodStart, renewalStart)))
+                        .startTime(renewalStart)
+                        .duration(renewalDuration)
+                        .build();
+            }
+        }
 
-        deepLinks.computeIfAbsent(concernedPeriod, (p) -> new ArrayList<>());
-
-        return deepLinks.get(concernedPeriod).stream()
-                .filter(it -> it.containsProvidedScanTime(deepLinkScanTime))
-                .findFirst()
-                .orElseGet(() -> {
-                    final var deepLink = createDeepLinkFrom(
-                            deepLinkScanTime,
-                            concernedPeriod,
-                            locationSpecificPart.getQrCodeRenewalInterval()
-                    );
-                    deepLinks.get(concernedPeriod).add(deepLink);
-                    return deepLink;
-                }
-                );
-    }
-
-    private Period getDeepLinkPeriod(final Instant deepLinkScanTime,
-            final TreeMap<Period, List<DeepLink>> deepLinks,
-            final LocationSpecificPart locationSpecificPart) {
-        final var deepLinkInitialStartTime = locationSpecificPart.getQrCodeValidityStartTime();
-        final var periodDurationInSeconds = locationSpecificPart.getPeriodDuration() * 3600L;
-        final var secondsBetweenScanTimeAndInitialPeriodStartTime = Duration
-                .between(deepLinkScanTime, deepLinkInitialStartTime)
-                .abs().getSeconds();
-        final var timeBetweenPeriodStartTimeAndScanTime = secondsBetweenScanTimeAndInitialPeriodStartTime
-                % periodDurationInSeconds;
-        final var instantPeriodStart = deepLinkScanTime.minus(
-                timeBetweenPeriodStartTimeAndScanTime,
-                ChronoUnit.SECONDS
-        );
-
-        return deepLinks.keySet()
-                .stream()
-                .filter(p -> p.contains(deepLinkScanTime))
-                .findFirst()
-                .orElseGet(() -> createNewPeriod(instantPeriodStart, locationSpecificPart.getPeriodDuration()));
-    }
-
-    private DeepLink createDeepLinkFrom(final Instant scanTime,
-            final Period concernedPeriod,
-            final int deepLinkRenewalInterval) {
-        final var computedValidityStartTime = getValidityStartTime(
-                scanTime, concernedPeriod, deepLinkRenewalInterval
-        );
-        return createDynamicDeepLink(
-                concernedPeriod.getStartTime(),
-                computedValidityStartTime,
-                Duration.of(deepLinkRenewalInterval, SECONDS)
-        );
-    }
-
-    private Instant getValidityStartTime(final Instant deepLinkScanTime,
-            final Period concernedPeriod,
-            final int deepLinkRenewalInterval) {
-        final var secondsBetweenPeriodStartAndScanTime = Duration
-                .between(deepLinkScanTime, concernedPeriod.getStartTime()).abs().getSeconds();
-        final var timeBetweenLastRenewalIntervalAndScanTime = secondsBetweenPeriodStartAndScanTime
-                % deepLinkRenewalInterval;
-        return deepLinkScanTime.minus(
-                timeBetweenLastRenewalIntervalAndScanTime,
-                SECONDS
-        );
-    }
-
-    private Period createNewPeriod(final Instant instantPeriodStart,
-            final int periodDuration) {
-        return new Period(
-                instantPeriodStart, Duration.of(periodDuration, HOURS)
-        );
-    }
-
-    @SneakyThrows
-    private DeepLink createDynamicDeepLink(final Instant deepLinkPeriodStartTime,
-            final Instant deepLinkValidityStartTime,
-            final Duration deepLinkRenewalIntervalDuration) {
-        return DeepLink.builder()
-                .url(new URL(location.newDeepLink(deepLinkPeriodStartTime, deepLinkValidityStartTime)))
-                .startTime(deepLinkPeriodStartTime)
-                .validity(deepLinkRenewalIntervalDuration)
-                .build();
+        private boolean isStaticLocation() {
+            return location.getLocationSpecificPart().getQrCodeRenewalInterval() == 0;
+        }
     }
 }

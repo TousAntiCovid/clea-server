@@ -71,7 +71,7 @@ public class Visitor {
         return Optional.ofNullable(lastReportResponse);
     }
 
-    public void registerDeepLink(final URL deepLink, final Instant scanTime) {
+    public void scans(final URL deepLink, final Instant scanTime) {
         localList.add(
                 Visit.builder()
                         .deepLinkLocationSpecificPart(deepLink.getRef())

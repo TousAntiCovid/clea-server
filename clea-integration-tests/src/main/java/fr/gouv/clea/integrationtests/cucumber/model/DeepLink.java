@@ -15,10 +15,10 @@ public class DeepLink {
 
     Instant startTime;
 
-    Duration validity;
+    Duration duration;
 
-    public boolean containsProvidedScanTime(final Instant scanTime) {
-        final var validityEndTime = startTime.plus(validity);
+    public boolean contains(final Instant scanTime) {
+        final var validityEndTime = startTime.plus(duration);
         return (scanTime.isAfter(startTime) || scanTime.equals(startTime))
                 && (scanTime.isBefore(validityEndTime) || scanTime.equals(validityEndTime));
     }
