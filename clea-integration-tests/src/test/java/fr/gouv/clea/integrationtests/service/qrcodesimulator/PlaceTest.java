@@ -19,7 +19,7 @@ class PlaceTest {
     @BeforeEach
     void setup() {
         final var publicKey = "02c3a58bf668fa3fe2fc206152abd6d8d55102adfee68c8b227676d1fe763f5a06";
-        final var applicationProperties = new ApplicationProperties(publicKey, publicKey, null, null, null);
+        final var applicationProperties = new ApplicationProperties(publicKey, publicKey, null, null, null, null);
         final var startTime = Instant.parse("2019-12-01T12:00:00Z");
         final var staticLocation = LocationSpec.builder(applicationProperties)
                 .startTime(startTime)
