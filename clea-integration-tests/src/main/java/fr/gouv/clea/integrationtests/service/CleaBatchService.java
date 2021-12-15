@@ -33,7 +33,7 @@ public class CleaBatchService {
         final var process = builder.start();
         final var background = Executors.newFixedThreadPool(2);
         background.submit(new StreamGobbler(process.getInputStream(), log::debug));
-        background.submit(new StreamGobbler(process.getErrorStream(), log::error));
+        background.submit(new StreamGobbler(process.getErrorStream(), log::debug));
         boolean hasExited = process.waitFor(BATCH_EXECUTION_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
         background.shutdownNow();
         if (!hasExited) {

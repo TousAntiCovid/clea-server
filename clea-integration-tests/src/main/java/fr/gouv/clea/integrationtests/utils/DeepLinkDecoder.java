@@ -9,7 +9,7 @@ import java.util.Base64;
 import java.util.UUID;
 
 @UtilityClass
-public class QrCodeDecoder {
+public class DeepLinkDecoder {
 
     public static UUID getLocationTemporaryId(final Visit visit) {
         try {

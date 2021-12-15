@@ -1,24 +1,22 @@
 Feature: Record health statistics
 
   Background:
-    Given Laure registered on TAC
-    And Henry registered on TAC
-    And Yaël registered on TAC
-    And "Burger king" created a dynamic QRCode at 04:00, 10 days ago with VType as 1, with VCategory1 as 1, with VCategory2 as 1, with a renewal time of 15 minutes and with a periodDuration of 24 hours
-    And "Le Klub" created a dynamic QRCode at 04:00, 10 days ago with VType as 2, with VCategory1 as 0, with VCategory2 as 2, with a renewal time of 15 minutes and with a periodDuration of 24 hours
-    And "OrangeBleue" created a static QRCode at 11:00, 8 days ago with VType as 4, with VCategory1 as 4, with VCategory2 as 2 and with a periodDuration of 24 hours
+    Given users Laure, Henry, Yaël are registered on TAC
+    And "Burger King" manager configured qrcode generators at 04:00, 10 days ago with venue type 1, venue category 1 1, venue category 2 1, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And "Le Klub" manager configured qrcode generators at 04:00, 10 days ago with venue type 2, venue category 1 0, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
+    And "OrangeBleue" manager configured qrcode generators at 04:00, 20 days ago with venue type 4, venue category 1 4, venue category 2 2, deepLink renewal duration of 15 minutes, and a periodDuration of 24 hours
 
   Scenario: Sanitary statistics
 
-    Given Laure recorded a visit to "Burger king" at 12:45, 6 days ago
-    And Henry recorded a visit to "Burger king" at 12:57, 6 days ago
-    And Laure recorded a visit to "Burger king" at 12:45, 4 days ago
-    And Henry recorded a visit to "Burger king" at 20:57, 2 days ago
+    Given Laure recorded a visit to "Burger King" at 12:45, 6 days ago
+    And Henry recorded a visit to "Burger King" at 12:57, 6 days ago
+    And Laure recorded a visit to "Burger King" at 12:45, 4 days ago
+    And Henry recorded a visit to "Burger King" at 20:57, 2 days ago
 
     Given Henry recorded a visit to "Le Klub" at 11:46, 4 days ago
     And Henry recorded a visit to "Le Klub" at 11:47, 4 days ago
 
-    # Laure scanned two different QRCodes in less than "duplicateScanThresholdInSeconds" (default 1800)
+    # Laure scanned two different deepLinks in less than "duplicateScanThresholdInSeconds" (default 1800)
     Given Laure recorded a visit to "Le Klub" at 12:59, 4 days ago
 
     Given Yaël recorded a visit to "OrangeBleue" at 16:30, 18 days ago

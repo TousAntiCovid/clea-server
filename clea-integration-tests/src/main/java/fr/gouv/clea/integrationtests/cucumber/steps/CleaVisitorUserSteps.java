@@ -1,49 +1,48 @@
 package fr.gouv.clea.integrationtests.cucumber.steps;
 
 import fr.gouv.clea.integrationtests.cucumber.ScenarioContext;
-import fr.inria.clea.lsp.exception.CleaCryptoException;
 import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
+import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 public class CleaVisitorUserSteps {
 
     private final ScenarioContext scenarioContext;
 
-    // TODO Robert registration of the user -> integration tests perimeters to be
-    // specified, do we need to test interactions between all apps?
     @Given("{word} registered on TAC")
     public void registered_on_tac(final String username) {
-        this.scenarioContext.getOrCreateUser(username);
+        scenarioContext.getOrCreateUser(username);
     }
 
-    // Visitor scan a QR code at given instant
+    @Given("users {wordList} are registered on TAC")
+    public void list_registered_on_tac(final List<String> usernames) {
+        usernames.forEach(scenarioContext::getOrCreateUser);
+    }
+
     @Given("{word} recorded a visit to {string} at {naturalTime}")
-    public void visitor_scans_qrcode_at_given_instant(String visitorName, String locationName, Instant qrCodeScanTime)
-            throws CleaCryptoException {
-        final var location = this.scenarioContext.getLocation(locationName);
-        final var qrCode = location.getQrCodeAt(qrCodeScanTime);
-        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qrCode.getDeepLink(), qrCodeScanTime);
+    public void visitor_scans_deepLink_at_given_instant(final String visitorName,
+            final String placeName,
+            final Instant scanTime) {
+        final var deepLink = scenarioContext.getPlace(placeName)
+                .getDeepLinkAt(scanTime)
+                .getUrl();
+        scenarioContext.getVisitor(visitorName)
+                .scans(deepLink, scanTime);
     }
 
-    // Visitor scan a staff QR code at given instant
     @Given("{word} recorded a visit as a STAFF to {string} at {naturalTime}")
-    public void visitor_scans_staff_qrcode_at_given_instant(String visitorName, String locationName,
-            Instant qrCodeScanTime) throws CleaCryptoException {
-        final var location = this.scenarioContext.getStaffLocation(locationName);
-        final var qrCode = location.getQrCodeAt(qrCodeScanTime);
-        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qrCode.getDeepLink(), qrCodeScanTime);
-    }
-
-    // Visitor scan a QR code at a given Instant, but the scanned QR code is valid
-    // for another Instant
-    @Given("{word} recorded a visit to {string} at {naturalTime} with a QR code valid for {string}")
-    public void visitor_scans_qrcode_at_given_instant_but_qr_code_valid_for_another_instant(String visitorName,
-            String locationName, Instant qrCodeScanTime, Instant qrCodeValidTime) throws CleaCryptoException {
-        final var location = this.scenarioContext.getLocation(locationName);
-        final var qrCode = location.getQrCodeAt(qrCodeValidTime);
-        this.scenarioContext.getOrCreateUser(visitorName).registerDeepLink(qrCode.getDeepLink(), qrCodeScanTime);
+    public void visitor_scans_staff_deepLink_at_given_instant(final String visitorName,
+            final String placeName,
+            final Instant scanTime) {
+        final var deepLink = scenarioContext.getPlace(placeName)
+                .getStaffDeepLinkAt(scanTime)
+                .getUrl();
+        scenarioContext.getVisitor(visitorName)
+                .scans(deepLink, scanTime);
     }
 }
