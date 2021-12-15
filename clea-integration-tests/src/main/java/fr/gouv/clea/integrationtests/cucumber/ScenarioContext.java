@@ -9,13 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.UUID.randomUUID;
-import static org.bouncycastle.util.encoders.Hex.toHexString;
 
 @Slf4j
 @Component
@@ -31,8 +26,6 @@ public class ScenarioContext {
 
     private final ClusterExpositionService clusterExpositionService;
 
-    private final LocationFactory locationFactory;
-
     public Visitor getOrCreateUser(final String name) {
         return visitors.computeIfAbsent(name, this::createVisitor);
     }
@@ -45,64 +38,8 @@ public class ScenarioContext {
         return visitors.get(visitorName);
     }
 
-    public Place createStaticPlace(final String placeName,
-            final Instant deepLinkStartTime,
-            final int venueType,
-            final int venueCategory1,
-            final int venueCategory2) {
-        final var permanentLocationSecretKey = toHexString(randomUUID().toString().getBytes());
-        final var place = new Place(
-                locationFactory.createStaticLocation(
-                        deepLinkStartTime,
-                        venueType,
-                        venueCategory1,
-                        venueCategory2,
-                        permanentLocationSecretKey
-                ),
-                locationFactory.createStaticStaffLocation(
-                        deepLinkStartTime,
-                        venueType,
-                        venueCategory1,
-                        venueCategory2,
-                        permanentLocationSecretKey
-                )
-        );
-        places.put(
-                placeName, place
-        );
-        return place;
-    }
-
-    public Place createDynamicPlace(final String placeName,
-            final Instant dynamicDeepLinkStartTime,
-            final int venueType,
-            final int venueCategory1,
-            final int venueCategory2,
-            final Duration deepLinkRenewalInterval,
-            final int periodDuration) {
-        final var permanentLocationSecretKey = toHexString(randomUUID().toString().getBytes());
-        return places.put(
-                placeName, new Place(
-                        locationFactory.createDynamicLocation(
-                                dynamicDeepLinkStartTime,
-                                venueType,
-                                venueCategory1,
-                                venueCategory2,
-                                deepLinkRenewalInterval,
-                                periodDuration,
-                                permanentLocationSecretKey
-                        ),
-                        locationFactory.createDynamicStaffLocation(
-                                dynamicDeepLinkStartTime,
-                                venueType,
-                                venueCategory1,
-                                venueCategory2,
-                                deepLinkRenewalInterval,
-                                periodDuration,
-                                permanentLocationSecretKey
-                        )
-                )
-        );
+    public void createPlace(String placeName, LocationFactory locationFactory) {
+        places.put(placeName, new Place(locationFactory));
     }
 
     public Place getPlace(final String placeName) {
