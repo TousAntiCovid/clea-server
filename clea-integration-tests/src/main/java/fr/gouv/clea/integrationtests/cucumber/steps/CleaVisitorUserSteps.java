@@ -40,7 +40,7 @@ public class CleaVisitorUserSteps {
             final String placeName,
             final Instant scanTime) {
         final var deepLink = scenarioContext.getPlace(placeName)
-                .getDeepLinkAt(scanTime)
+                .getStaffDeepLinkAt(scanTime)
                 .getUrl();
         scenarioContext.getVisitor(visitorName)
                 .scans(deepLink, scanTime);
