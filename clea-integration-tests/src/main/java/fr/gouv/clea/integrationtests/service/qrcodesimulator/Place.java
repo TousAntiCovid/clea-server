@@ -1,6 +1,5 @@
-package fr.gouv.clea.integrationtests.cucumber.model;
+package fr.gouv.clea.integrationtests.service.qrcodesimulator;
 
-import fr.gouv.clea.integrationtests.cucumber.LocationFactory;
 import fr.inria.clea.lsp.Location;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -21,10 +20,10 @@ public class Place {
 
     private final DeepLinks staffDeepLinks;
 
-    public Place(final LocationFactory locationFactory) {
-        this.startTime = locationFactory.getStartTime();
-        this.visitorDeepLinks = new DeepLinks(locationFactory.buildVisitor());
-        this.staffDeepLinks = new DeepLinks(locationFactory.buildStaff());
+    public Place(final LocationSpec locationSpec) {
+        this.startTime = locationSpec.getStartTime();
+        this.visitorDeepLinks = new DeepLinks(locationSpec.buildVisitor());
+        this.staffDeepLinks = new DeepLinks(locationSpec.buildStaff());
     }
 
     public DeepLink getDeepLinkAt(final Instant scanTime) {

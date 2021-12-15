@@ -1,8 +1,9 @@
 package fr.gouv.clea.integrationtests.cucumber;
 
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
-import fr.gouv.clea.integrationtests.cucumber.model.Place;
 import fr.gouv.clea.integrationtests.service.ClusterExpositionService;
+import fr.gouv.clea.integrationtests.service.qrcodesimulator.LocationSpec;
+import fr.gouv.clea.integrationtests.service.qrcodesimulator.Place;
 import fr.gouv.clea.integrationtests.service.visitorsimulator.Visitor;
 import io.cucumber.spring.ScenarioScope;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +39,8 @@ public class ScenarioContext {
         return visitors.get(visitorName);
     }
 
-    public void createPlace(String placeName, LocationFactory locationFactory) {
-        places.put(placeName, new Place(locationFactory));
+    public void createPlace(String placeName, LocationSpec locationSpec) {
+        places.put(placeName, new Place(locationSpec));
     }
 
     public Place getPlace(final String placeName) {

@@ -1,6 +1,6 @@
-package fr.gouv.clea.integrationtests.cucumber.model;
+package fr.gouv.clea.integrationtests.service.qrcodesimulator;
 
-import fr.gouv.clea.integrationtests.cucumber.LocationFactory;
+import fr.gouv.clea.integrationtests.config.ApplicationProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -19,13 +19,14 @@ class PlaceTest {
     @BeforeEach
     void setup() {
         final var publicKey = "02c3a58bf668fa3fe2fc206152abd6d8d55102adfee68c8b227676d1fe763f5a06";
+        final var applicationProperties = new ApplicationProperties(publicKey, publicKey, null, null, null);
         final var startTime = Instant.parse("2019-12-01T12:00:00Z");
-        final var staticLocation = LocationFactory.builder(publicKey)
+        final var staticLocation = LocationSpec.builder(applicationProperties)
                 .startTime(startTime)
                 .venueConfig(1, 1, 1);
         staticPlace = new Place(staticLocation);
 
-        final var dynamicLocation = LocationFactory.builder(publicKey)
+        final var dynamicLocation = LocationSpec.builder(applicationProperties)
                 .startTime(startTime)
                 .periodDurationHours(1)
                 .renewalIntervalSeconds(512)

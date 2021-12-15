@@ -1,4 +1,4 @@
-package fr.gouv.clea.integrationtests.cucumber;
+package fr.gouv.clea.integrationtests.service.qrcodesimulator;
 
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
 import fr.inria.clea.lsp.Location;
@@ -10,8 +10,8 @@ import org.bouncycastle.util.encoders.Hex;
 import java.time.Instant;
 import java.util.UUID;
 
-import static fr.gouv.clea.integrationtests.cucumber.LocationFactory.LocationType.STAFF;
-import static fr.gouv.clea.integrationtests.cucumber.LocationFactory.LocationType.VISITOR;
+import static fr.gouv.clea.integrationtests.service.qrcodesimulator.LocationSpec.LocationType.STAFF;
+import static fr.gouv.clea.integrationtests.service.qrcodesimulator.LocationSpec.LocationType.VISITOR;
 import static lombok.AccessLevel.PRIVATE;
 
 /**
@@ -22,37 +22,37 @@ import static lombok.AccessLevel.PRIVATE;
  * regular visitor location and the staff location.
  * <p>
  * Default values help create static {@link Location}s:
- * 
+ *
  * <pre>
- * 
+ *
  * final var locationBuilder = LocationFactory.builder(applicationProperties)
  *         .startTime(Instant.parse("2021-12-15T01:54:58Z"))
  *         .venueConfig(4, 2, 2);
  * </pre>
- * 
+ *
  * A dynamic deeplink can be created using:
- * 
+ *
  * <pre>
- * 
+ *
  * final var locationBuilder = LocationFactory.builder(applicationProperties)
  *         .startTime(Instant.parse("2021-12-15T01:54:58Z"))
  *         .venueConfig(4, 2, 2)
  *         .periodDurationHours(1)
  *         .renewalIntervalSeconds(512);
  * </pre>
- * 
+ *
  * Finally a regular location for visitors and the staff location can be build
  * using:
- * 
+ *
  * <pre>
- * 
+ *
  * final Location visitorLocation = locationBuilder.buildVisitor();
- * 
+ *
  * final Location staffLocation = locationBuilder.buildStaff();
  * </pre>
  */
 @RequiredArgsConstructor(access = PRIVATE)
-public class LocationFactory {
+public class LocationSpec {
 
     private final static int INFINITE_PERIOD_DURATION = 255;
 
@@ -77,33 +77,29 @@ public class LocationFactory {
 
     private int venueCategory2;
 
-    public static LocationFactory builder(final String serverKey) {
-        return new LocationFactory(serverKey, serverKey);
-    }
-
-    public static LocationFactory builder(final ApplicationProperties applicationProperties) {
-        return new LocationFactory(
+    public static LocationSpec builder(final ApplicationProperties applicationProperties) {
+        return new LocationSpec(
                 applicationProperties.getServerAuthorityPublicKey(),
                 applicationProperties.getManualContactTracingAuthorityPublicKey()
         );
     }
 
-    public LocationFactory startTime(final Instant startTime) {
+    public LocationSpec startTime(final Instant startTime) {
         this.startTime = startTime;
         return this;
     }
 
-    public LocationFactory periodDurationHours(final int periodDurationHours) {
+    public LocationSpec periodDurationHours(final int periodDurationHours) {
         this.periodDurationHours = periodDurationHours;
         return this;
     }
 
-    public LocationFactory renewalIntervalSeconds(final int renewalIntervalSeconds) {
+    public LocationSpec renewalIntervalSeconds(final int renewalIntervalSeconds) {
         this.renewalIntervalSeconds = renewalIntervalSeconds;
         return this;
     }
 
-    public LocationFactory venueConfig(final int venueType, final int venueCategory1, final int venueCategory2) {
+    public LocationSpec venueConfig(final int venueType, final int venueCategory1, final int venueCategory2) {
         this.venueType = venueType;
         this.venueCategory1 = venueCategory1;
         this.venueCategory2 = venueCategory2;

@@ -1,8 +1,8 @@
 package fr.gouv.clea.integrationtests.cucumber.steps;
 
 import fr.gouv.clea.integrationtests.config.ApplicationProperties;
-import fr.gouv.clea.integrationtests.cucumber.LocationFactory;
 import fr.gouv.clea.integrationtests.cucumber.ScenarioContext;
+import fr.gouv.clea.integrationtests.service.qrcodesimulator.LocationSpec;
 import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +27,7 @@ public class CleaPlacesSteps {
             final Duration deepLinkRenewalDuration,
             final Integer periodDuration) {
         scenarioContext.createPlace(
-                locationName, LocationFactory.builder(applicationProperties)
+                locationName, LocationSpec.builder(applicationProperties)
                         .startTime(dynamicDeepLinkStartTime)
                         .venueConfig(venueType, venueCategory1, venueCategory2)
                         .periodDurationHours(periodDuration)
@@ -43,7 +43,7 @@ public class CleaPlacesSteps {
             final Integer venueCategory1,
             final Integer venueCategory2) {
         scenarioContext.createPlace(
-                locationName, LocationFactory.builder(applicationProperties)
+                locationName, LocationSpec.builder(applicationProperties)
                         .startTime(deepLinkStartTime)
                         .venueConfig(venueType, venueCategory1, venueCategory2)
         );

@@ -1,4 +1,4 @@
-package fr.gouv.clea.integrationtests.cucumber.model;
+package fr.gouv.clea.integrationtests.service.qrcodesimulator;
 
 import lombok.Builder;
 import lombok.Value;
