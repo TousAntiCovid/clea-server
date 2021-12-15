@@ -21,8 +21,8 @@ clea:
         - "1,0,*,4,4,48,48"
         - "1,1,*,1,1,48,48"
         - "4,1,*,3,3,48,48"
-      risk:
-        enabled: "false"
+    risk:
+      enabled: "false"
   kafka:
     qrCodesTopic: dev.clea.fct.visit-scans
     reportStatsTopic: dev.clea.fct.report-stats
