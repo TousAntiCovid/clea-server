@@ -8,6 +8,7 @@ import fr.inria.clea.lsp.LocationSpecificPartDecoder;
 import fr.inria.clea.lsp.exception.CleaEncodingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 
+import java.time.Instant;
 import java.util.Base64;
 
 import static java.time.ZoneOffset.UTC;
@@ -41,40 +43,62 @@ public class ManualClusterDeclarationController {
     @PostMapping(value = "/cluster-declaration")
     public String declareCluster(
             @Valid @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest,
-            final BindingResult result, final RedirectAttributes redirectAttributes) throws CleaEncodingException {
+            final BindingResult result, final RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
             return "cluster-declaration";
         }
 
         final var qrCodeScanTime = clusterDeclarationRequest.getDate().toInstant(UTC);
+
+        if (qrCodeScanTime.isAfter(Instant.now())) {
+            result.rejectValue(
+                    "date", "FutureDateError.clusterDeclarationRequest.date"
+            );
+            return "cluster-declaration";
+
+        }
+
         final var deepLinkLocationSpecificPart = clusterDeclarationRequest.getDeeplink().getRef();
 
-        final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(deepLinkLocationSpecificPart);
+        if (StringUtils.isEmpty(deepLinkLocationSpecificPart)) {
+            result.rejectValue(
+                    "deeplink", "InvalidUrlError.clusterDeclarationRequest.deeplink"
+            );
+            return "cluster-declaration";
+        }
 
-        final var decodedVisit = DecodedVisit.builder()
-                .encryptedLocationSpecificPart(decoder.decodeHeader(binaryLocationSpecificPart))
-                .qrCodeScanTime(qrCodeScanTime)
-                .isBackward(false)
-                .build();
+        try {
 
-        decodedVisitService.decryptAndValidate(decodedVisit).ifPresentOrElse(
-                visit -> {
-                    log.info("Consumer: visit after decrypt + validation: {}, ", visit);
-                    visitExpositionAggregatorService.updateExposureCount(visit, true);
-                },
-                () -> result.rejectValue(
-                        "deeplink", "DecryptError.clusterDeclarationRequest.deeplink"
-                )
-        );
+            final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(deepLinkLocationSpecificPart);
+            final var decodedVisit = DecodedVisit.builder()
+                    .encryptedLocationSpecificPart(decoder.decodeHeader(binaryLocationSpecificPart))
+                    .qrCodeScanTime(qrCodeScanTime)
+                    .isBackward(false)
+                    .build();
 
-        if (!result.hasErrors()) {
-            redirectAttributes.addFlashAttribute(
-                    "success_message",
-                    "cluster.declaration.success"
+            decodedVisitService.decryptAndValidate(decodedVisit).ifPresentOrElse(
+                    visit -> {
+                        visitExpositionAggregatorService.updateExposureCount(visit, true);
+                    },
+                    () -> result.rejectValue(
+                            "deeplink", "DecryptError.clusterDeclarationRequest.deeplink"
+                    )
+            );
+        } catch (CleaEncodingException e) {
+            result.rejectValue(
+                    "deeplink", "DecodingError.clusterDeclarationRequest.deeplink"
             );
         }
-        return "redirect:/cluster-declaration";
+
+        if (!result.hasErrors()) {
+            redirectAttributes.addAttribute(
+                    "clusterDeclarationSuccess",
+                    true
+            );
+            return "redirect:/cluster-declaration";
+        }
+        return "cluster-declaration";
 
     }
 

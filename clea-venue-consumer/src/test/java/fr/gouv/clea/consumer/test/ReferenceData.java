@@ -39,7 +39,7 @@ public class ReferenceData {
                 .truncatedTo(HOURS);
         LOCATION_1 = createRandomLocation(instant);
         try {
-            LOCATION_1_URL = new URL(LOCATION_1.newDeepLink());
+            LOCATION_1_URL = new URL(LOCATION_1.newDeepLink(instant));
             LOCATION_1_LOCATION_SPECIFIC_PART_DECODED_BASE64 = Base64.getEncoder().encodeToString(
                     new LocationSpecificPartDecoder()
                             .decodeHeader(Base64.getUrlDecoder().decode(LOCATION_1_URL.getRef()))

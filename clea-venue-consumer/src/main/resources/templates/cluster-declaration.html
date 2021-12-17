@@ -1,61 +1,65 @@
 <!doctype html>
-<html lang="fr" data-fr-scheme="system" xmlns:th="https://www.thymeleaf.org">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="stylesheet" th:href="@{/lib/dsfr/dsfr/dsfr.min.css}">
-        <link rel="stylesheet" th:href="@{/lib/dsfr/core/core.min.css}">
-        <title>Génération d'un cluster TAC-CLEA</title>
-    </head>
-    <header role="banner" class="fr-header">
-        <div class="fr-header__body">
-            <div class="fr-container">
-                <div class="fr-header__body-row">
-                    <div class="fr-header__brand fr-enlarge-link">
-                        <div class="fr-header__brand-top">
-                            <div class="fr-header__logo">
-                                <p class="fr-logo">
-                                    République
-                                    <br>Française
-                                </p>
-                            </div>
+<html data-fr-scheme="system" lang="fr" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <link rel="stylesheet" th:href="@{/lib/dsfr/dsfr/dsfr.min.css}">
+    <link rel="stylesheet" th:href="@{/lib/dsfr/core/core.min.css}">
+    <title>Génération d'un cluster TAC-CLEA</title>
+</head>
+<header class="fr-header" role="banner">
+    <div class="fr-header__body">
+        <div class="fr-container">
+            <div class="fr-header__body-row">
+                <div class="fr-header__brand fr-enlarge-link">
+                    <div class="fr-header__brand-top">
+                        <div class="fr-header__logo">
+                            <p class="fr-logo">
+                                République
+                                <br>Française
+                            </p>
                         </div>
                     </div>
-                    <h3>Service de génération d'un cluster TAC</h3>
                 </div>
+                <h3>Service de génération d'un cluster TAC</h3>
             </div>
         </div>
-    </header>
-    <body>
-        <form action="#" th:action="@{/cluster-declaration}" th:object="${clusterDeclarationRequest}" method="post" class="fr-pt-6w fr-pl-6w fr-pr-6w">
-            <label class="fr-label" for="text-input-text">Deeplink contenu dans le QRCode :</label>
-            <input class="fr-input" type="text" id="text-input-text" name="deepLink" th:field="*{deeplink}" placeholder="https://tac.gouv.fr?v=0#AHG24PXS3W9VsDGr(...)0KwZRzHvmTek">
-            <p th:if="${#fields.hasErrors('deeplink')}" th:errorclass="fr-error-text" th:errors="*{deeplink}">
-                Veuillez renseigner le deeplink
-            </p>
-            <div class="fr-input-group fr-pt-4w">
-                <label class="fr-label" for="text-input-calendar">
-                    Date de début du cluster :
-                </label>
-                <div class="fr-input-wrap">
-                    <input class="fr-input" type="datetime-local" id="text-input-calendar" name="date" th:field="*{date}">
-                </div>
-            </div>
-            <button type="submit" value="Submit" class="fr-btn">
-                Déclarer le cluster
-            </button>
-            <div th:if="${#fields.hasErrors('global')}">
-                <p th:each="err : ${#fields.errors('global')}" th:text="#{err}" class="fr-error-text"></p>
-            </div>
-            <div class="fr-pt-4w" th:if="${success_message}">
-                <h3 th:text="#{cluster.declaration.success}"></h3>
-            </div>
-        </form>
+    </div>
+</header>
+<body>
+<form action="#" class="fr-pt-6w fr-pl-6w fr-pr-6w" method="post" th:action="@{/cluster-declaration}"
+      th:object="${clusterDeclarationRequest}">
+    <div class="fr-input-group fr-pt-4w">
+        <label class="fr-label" for="text-input-text">Deeplink contenu dans le QRCode :</label>
+        <input class="fr-input" id="text-input-text" name="deepLink"
+               placeholder="https://tac.gouv.fr?v=0#AHG24PXS3W9VsDGr(...)0KwZRzHvmTek" th:field="*{deeplink}"
+               type="text">
+        <p th:errorclass="fr-error-text" th:errors="*{deeplink}" th:if="${#fields.hasErrors('deeplink')}"/>
+    </div>
+    <div class="fr-input-group fr-pt-4w">
+        <label class="fr-label" for="text-input-calendar">
+            Date de début du cluster :
+        </label>
+        <div class="fr-input-wrap">
+            <input class="fr-input" id="text-input-calendar" name="date" th:field="*{date}" type="datetime-local">
+        </div>
+        <p th:errorclass="fr-error-text" th:errors="*{date}" th:if="${#fields.hasErrors('date')}"/>
+    </div>
+    <button class="fr-btn" type="submit" value="Submit">
+        Déclarer le cluster
+    </button>
+    <div th:if="${#fields.hasGlobalErrors()}">
+        <p class="fr-error-text" th:each="err : ${#fields.globalErrors()}" th:text="#{err}"></p>
+    </div>
+    <div class="fr-pt-4w" th:if="${param.clusterDeclarationSuccess}">
+        <h3>Cluster enregistré avec succès, le cluster sera actif la prochaine fois que le batch sera déclenché.</h3>
+    </div>
+</form>
 
-        <script type="module" th:src="@{/lib/dsfr/dsfr/dsfr.module.min.js}"></script>
-        <script type="text/javascript" nomodule th:src="@{/lib/dsfr/dsfr/dsfr.nomodule.min.js}"></script>
-        <script type="text/javascript" nomodule th:src="@{/lib/dsfr/legacy/legacy.nomodule.min.js}" ></script>
-        <script type="module" th:src="@{/lib/dsfr/core/core.module.min.js}" ></script>
-        <script type="text/javascript" nomodule th:src="@{/lib/dsfr/core/core.nomodule.min.js}" ></script>
-    </body>
+<script th:src="@{/lib/dsfr/dsfr/dsfr.module.min.js}" type="module"></script>
+<script nomodule th:src="@{/lib/dsfr/dsfr/dsfr.nomodule.min.js}" type="text/javascript"></script>
+<script nomodule th:src="@{/lib/dsfr/legacy/legacy.nomodule.min.js}" type="text/javascript"></script>
+<script th:src="@{/lib/dsfr/core/core.module.min.js}" type="module"></script>
+<script nomodule th:src="@{/lib/dsfr/core/core.nomodule.min.js}" type="text/javascript"></script>
+</body>
 </html>

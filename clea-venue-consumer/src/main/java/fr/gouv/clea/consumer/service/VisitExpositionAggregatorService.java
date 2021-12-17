@@ -32,8 +32,6 @@ public class VisitExpositionAggregatorService {
 
     private final VenueConsumerProperties properties;
 
-    private final StatisticsService statisticsService;
-
     private final int clusterThresholdValue = 100;
 
     @Transactional
