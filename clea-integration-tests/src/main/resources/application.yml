@@ -1,8 +1,12 @@
+spring:
+  application:
+    name: clea-integration-tests
+
 integration-tests:
   server-authority-public-key: 02c3a58bf668fa3fe2fc206152abd6d8d55102adfee68c8b227676d1fe763f5a06
   manual-contact-tracing-authority-public-key: 0280ea16894c9f3b363693666fa88282b25971984f7a4f88e7697fa213e4caff0b
 
   bucket:
-    bucket-name: clea-batch
+    name: clea-batch
 
 logging.level.root: WARN

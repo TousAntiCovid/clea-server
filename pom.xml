@@ -306,8 +306,8 @@
     <repositories>
         <repository>
             <id>gitlab-maven</id>
-            <url
-      >https://gitlab.inria.fr/api/v4/projects/29881/packages/maven</url>
+            <url>https://gitlab.inria.fr/api/v4/projects/29881/packages/maven
+            </url>
         </repository>
         <repository>
             <id>gitlab-maven-clea-crypto</id>

@@ -28,13 +28,13 @@ public class ClusterExpositionService {
         return getJsonFile("v1/clusterIndex.json", ClusterIndex.class);
     }
 
-    public List<Cluster> getClusterFile(int iteration, String prefix) {
+    public List<Cluster> getClusterFile(final int iteration, final String prefix) {
         final var filePath = String.format("v1/%d/%s.json", iteration, prefix);
         final var clusters = getJsonFile(filePath, Cluster[].class);
         return List.of(clusters);
     }
 
-    private <T> T getJsonFile(String key, Class<T> valueType) {
+    private <T> T getJsonFile(final String key, final Class<T> valueType) {
         final var content = getFile(key);
         try {
             return objectMapper.readValue(content, valueType);
@@ -43,14 +43,14 @@ public class ClusterExpositionService {
         }
     }
 
-    private byte[] getFile(String key) {
+    private byte[] getFile(final String key) {
         final var args = GetObjectArgs.builder()
-                .bucket(applicationProperties.getBucket().getBucketName())
+                .bucket(applicationProperties.getBucket().getName())
                 .object(key)
                 .build();
         try (final var minioObjectStream = minioClient.getObject(args)) {
             return IOUtils.toByteArray(minioObjectStream);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }

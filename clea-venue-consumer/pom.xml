@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns="http://maven.apache.org/POM/4.0.0"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
 
     <modelVersion>4.0.0</modelVersion>
@@ -20,7 +20,7 @@
     </description>
 
     <properties>
-        <testcontainers.version>1.15.3</testcontainers.version>
+        <testcontainers.version>1.16.2</testcontainers.version>
     </properties>
 
     <dependencies>
@@ -199,9 +199,11 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <url>https://github.com/GouvernementFR/dsfr/releases/download/v1.2.1/dsfr-v1.2.1.zip</url>
+                    <url
+          >https://github.com/GouvernementFR/dsfr/releases/download/v1.2.1/dsfr-v1.2.1.zip</url>
                     <unpack>true</unpack>
-                    <outputDirectory>${project.build.directory}/dsfr</outputDirectory>
+                    <outputDirectory
+          >${project.build.directory}/dsfr</outputDirectory>
                     <md5>e73e25580caa61873df6184088ced116</md5>
                     <alwaysVerifyChecksum>true</alwaysVerifyChecksum>
                 </configuration>
@@ -217,16 +219,20 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/classes/public/lib/dsfr</outputDirectory>
+                            <outputDirectory
+              >${project.build.directory}/classes/public/lib/dsfr</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.build.directory}/dsfr/dist</directory>
+                                    <directory
+                  >${project.build.directory}/dsfr/dist</directory>
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>
                             <nonFilteredFileExtensions>
-                                <nonFilteredFileExtension>woff</nonFilteredFileExtension>
-                                <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
+                                <nonFilteredFileExtension
+                >woff</nonFilteredFileExtension>
+                                <nonFilteredFileExtension
+                >woff2</nonFilteredFileExtension>
                             </nonFilteredFileExtensions>
                         </configuration>
                     </execution>

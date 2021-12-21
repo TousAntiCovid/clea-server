@@ -20,13 +20,9 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public MinioClient dockerMinioClient() {
+    public MinioClient minioClient() {
         return MinioClient.builder()
                 .endpoint(applicationProperties.getBucket().getUrl())
-                .credentials(
-                        applicationProperties.getBucket().getAccessKey(),
-                        applicationProperties.getBucket().getSecretKey()
-                )
                 .build();
     }
 }

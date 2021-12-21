@@ -49,6 +49,8 @@ public class ApplicationProperties {
 
         @NotNull
         URL baseUrl;
+
+        URL managementUrl;
     }
 
     @Value
@@ -58,10 +60,6 @@ public class ApplicationProperties {
         URL url;
 
         @NotBlank
-        String bucketName;
-
-        String accessKey;
-
-        String secretKey;
+        String name;
     }
 }

@@ -1,5 +1,6 @@
 package fr.gouv.clea.integrationtests;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.runner.JUnitCore;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -10,6 +11,7 @@ import static org.awaitility.Awaitility.await;
 import static org.awaitility.pollinterval.FibonacciPollInterval.fibonacci;
 import static org.hamcrest.Matchers.is;
 
+@Slf4j
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class CleaIntegrationTestsApplication {
@@ -22,7 +24,7 @@ public class CleaIntegrationTestsApplication {
                     .pollInterval(fibonacci(SECONDS))
                     .until(() -> JUnitCore.runClasses(SmokeTests.class).wasSuccessful(), is(true));
 
-            exitCode = JUnitCore.runClasses(CucumberTest.class).wasSuccessful() ? 0 : 1;
+            exitCode = JUnitCore.runClasses(CucumberTests.class).wasSuccessful() ? 0 : 1;
         } finally {
             System.exit(exitCode);
         }

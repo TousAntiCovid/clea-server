@@ -32,6 +32,7 @@ services:
       - elasticsearch
     ports:
       - "7070:8080"
+      - "7071:8081"
 
   clea-batch:
     image: clea-batch:latest
@@ -92,6 +93,16 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+
+  minio-mc:
+    image: minio/mc
+    entrypoint: [""]
+    command: bash -c
+      "/usr/bin/mc alias set minio http://minio:9000 AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY --api S3v4
+      && /usr/bin/mc policy -r set download minio/clea-batch
+      && /usr/bin/mc policy -r set download minio/clea-batch-scaleway"
+    depends_on:
+      - minio
 
   zookeeper:
     image: wurstmeister/zookeeper:latest

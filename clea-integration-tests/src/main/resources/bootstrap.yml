@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: clea-integration-tests
+
+  cloud:
+    consul:
+      enabled: false
+      config:
+        format: YAML
+        acl-token: token
+      host: localhost
+      port: 8500
+      scheme: http
+    vault:
+      enabled: false
+      host: localhost
+      port: 8200
+      scheme: http
+      token: token

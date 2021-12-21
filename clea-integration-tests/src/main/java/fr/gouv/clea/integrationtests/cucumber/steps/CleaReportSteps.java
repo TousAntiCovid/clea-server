@@ -9,9 +9,8 @@ import io.cucumber.core.exception.CucumberException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import lombok.RequiredArgsConstructor;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
@@ -25,26 +24,30 @@ import static java.time.Instant.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+@RequiredArgsConstructor
 public class CleaReportSteps {
 
     private final ScenarioContext scenarioContext;
 
-    private final URL cleaReportUrl;
+    private final ApplicationProperties applicationProperties;
 
-    private final URL cleaHealthUrl;
-
-    public CleaReportSteps(final ScenarioContext ctx, final ApplicationProperties applicationProperties)
-            throws MalformedURLException {
-        scenarioContext = ctx;
-        cleaReportUrl = new URL(applicationProperties.getWsRest().getBaseUrl(), "/api/clea/v1/wreport");
-        cleaHealthUrl = new URL(applicationProperties.getWsRest().getBaseUrl(), "/actuator/health");
+    @Given("application clea ws rest is up")
+    public void applicationCleaWsRestIsReady() {
+        given()
+                .baseUri(applicationProperties.getWsRest().getBaseUrl().toString())
+                .when()
+                .get("/actuator/health")
+                .then()
+                .statusCode(200)
+                .body("status", equalTo("UP"));
     }
 
-    @Given("application clea ws rest is ready")
-    public void applicationCleaIsReady() {
+    @Given("application clea venue consumer is up")
+    public void applicationCleaVenueConsumerIsReady() {
         given()
+                .baseUri(applicationProperties.getVenueConsumer().getManagementUrl().toString())
                 .when()
-                .get(cleaHealthUrl)
+                .get("/actuator/health")
                 .then()
                 .statusCode(200)
                 .body("status", equalTo("UP"));
@@ -59,10 +62,11 @@ public class CleaReportSteps {
                 .build();
 
         final var response = given()
+                .baseUri(applicationProperties.getWsRest().getBaseUrl().toString())
                 .contentType(JSON)
                 .body(request)
                 .when()
-                .post(cleaReportUrl)
+                .post("/api/clea/v1/wreport")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -80,10 +84,11 @@ public class CleaReportSteps {
                 .build();
 
         final var response = given()
+                .baseUri(applicationProperties.getWsRest().getBaseUrl().toString())
                 .contentType(JSON)
                 .body(request)
                 .when()
-                .post(cleaReportUrl)
+                .post("/api/clea/v1/wreport")
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -102,10 +107,11 @@ public class CleaReportSteps {
         );
 
         given()
+                .baseUri(applicationProperties.getWsRest().getBaseUrl().toString())
                 .contentType(JSON)
                 .body(request)
                 .when()
-                .post(cleaReportUrl)
+                .post("/api/clea/v1/wreport")
                 .then()
                 .contentType(JSON)
                 .statusCode(400)
@@ -123,10 +129,11 @@ public class CleaReportSteps {
                         .collect(Collectors.toList())
         );
         given()
+                .baseUri(applicationProperties.getWsRest().getBaseUrl().toString())
                 .contentType(JSON)
                 .body(request)
                 .when()
-                .post(cleaReportUrl)
+                .post("/api/clea/v1/wreport")
                 .then()
                 .contentType(JSON)
                 .statusCode(500)
@@ -144,10 +151,11 @@ public class CleaReportSteps {
                         .collect(Collectors.toList())
         );
         final var response = given()
+                .baseUri(applicationProperties.getWsRest().getBaseUrl().toString())
                 .contentType(JSON)
                 .body(request)
                 .when()
-                .post(cleaReportUrl)
+                .post("/api/clea/v1/wreport")
                 .then()
                 .contentType(JSON)
                 .statusCode(200)
@@ -167,10 +175,11 @@ public class CleaReportSteps {
                         .collect(Collectors.toList())
         );
         given()
+                .baseUri(applicationProperties.getWsRest().getBaseUrl().toString())
                 .contentType(JSON)
                 .body(request)
                 .when()
-                .post(cleaReportUrl)
+                .post("/api/clea/v1/wreport")
                 .then()
                 .contentType(JSON)
                 .statusCode(200)
@@ -210,10 +219,11 @@ public class CleaReportSteps {
         final var localList = scenarioContext.getVisitor(visitorName).getLocalList();
 
         given()
+                .baseUri(applicationProperties.getWsRest().getBaseUrl().toString())
                 .contentType(JSON)
                 .body(Map.of("pivotDate", "malformed", "visits", localList))
                 .when()
-                .post(cleaReportUrl)
+                .post("/api/clea/v1/wreport")
                 .then()
                 .contentType(JSON)
                 .statusCode(400)

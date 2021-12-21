@@ -4,8 +4,6 @@ integration-tests:
   batch.command: "docker-compose up clea-batch"
   bucket:
     url: http://localhost:9000
-    access-key: AKIAIOSFODNN7EXAMPLE
-    secret-key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 
 spring.elasticsearch.rest:
   username: elastic
