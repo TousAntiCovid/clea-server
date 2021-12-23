@@ -18,9 +18,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.validation.Valid;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Base64;
-
-import static java.time.ZoneOffset.UTC;
+import java.util.TimeZone;
 
 @Controller
 @RequiredArgsConstructor
@@ -46,7 +46,9 @@ public class ManualClusterDeclarationController {
             return "cluster-declaration";
         }
 
-        final var qrCodeScanTime = clusterDeclarationRequest.getDate().toInstant(UTC);
+        ZoneId zoneId = TimeZone.getTimeZone((clusterDeclarationRequest.getTimezone())).toZoneId();
+
+        final var qrCodeScanTime = clusterDeclarationRequest.getDate().atZone(zoneId).toInstant();
         final var deepLinkLocationSpecificPart = clusterDeclarationRequest.getDeeplink().getRef();
 
         if (qrCodeScanTime.isAfter(Instant.now())) {

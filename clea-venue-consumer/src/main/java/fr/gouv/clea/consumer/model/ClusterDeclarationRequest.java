@@ -17,4 +17,8 @@ public class ClusterDeclarationRequest {
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime date;
+
+    @NotNull
+    private String timezone;
+
 }

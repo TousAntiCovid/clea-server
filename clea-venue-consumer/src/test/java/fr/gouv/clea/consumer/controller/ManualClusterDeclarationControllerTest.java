@@ -50,8 +50,8 @@ public class ManualClusterDeclarationControllerTest {
                 .contentType(URLENC)
                 .params(
                         "deeplink", LOCATION_1_URL.toString(),
-                        "date", LocalDateTime.now(UTC).minus(1, HOURS).toString()
-
+                        "date", LocalDateTime.now(UTC).minus(1, HOURS).toString(),
+                        "timezone", "Europe/Paris"
                 )
 
                 .expect()
@@ -108,8 +108,8 @@ public class ManualClusterDeclarationControllerTest {
                 .contentType(URLENC)
                 .params(
                         "deeplink", LOCATION_1_URL.toString(),
-                        "date", LocalDateTime.now(UTC).minus(1, HOURS).toString()
-
+                        "date", LocalDateTime.now(UTC).minus(1, HOURS).toString(),
+                        "timezone", "UTC"
                 )
 
                 .expect()
