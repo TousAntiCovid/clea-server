@@ -18,3 +18,7 @@ Feature: Smoke tests
     Given Hugo registered on TAC
     When cluster detection triggered
     Then exposure status should reports Hugo as not being at risk
+
+  @RequiresElasticsearchAccess
+  Scenario: elasticsearch is ready
+    Then elasticsearch is ready

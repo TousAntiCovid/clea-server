@@ -13,6 +13,7 @@ services:
       - kafka
     ports:
       - "8080:8080"
+      - "8081:8081"
 
   clea-venue-consumer:
     image: clea-venue-consumer
@@ -140,7 +141,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - "8081:80"
+      - "18080:80"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2

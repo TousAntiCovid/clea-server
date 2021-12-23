@@ -1,3 +1,4 @@
+@RequiresElasticsearchAccess
 Feature: Record health statistics
 
   Background:

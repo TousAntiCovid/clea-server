@@ -8,6 +8,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 
 import java.io.IOException;
 
+// TODO: rework tests so that they don't work only with empty ES indices
 @RequiredArgsConstructor
 public class CucumberHooks {
 

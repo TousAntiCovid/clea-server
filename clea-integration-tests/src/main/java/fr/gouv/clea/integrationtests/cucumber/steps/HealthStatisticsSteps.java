@@ -7,6 +7,7 @@ import fr.gouv.clea.integrationtests.repository.model.ReportStat;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientProperties;
+import org.springframework.context.annotation.Profile;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import static org.awaitility.pollinterval.FibonacciPollInterval.fibonacci;
 import static org.hamcrest.Matchers.equalTo;
 
 @RequiredArgsConstructor
+@Profile("!int")
 public class HealthStatisticsSteps {
 
     private final ElasticsearchRestClientProperties esProperties;

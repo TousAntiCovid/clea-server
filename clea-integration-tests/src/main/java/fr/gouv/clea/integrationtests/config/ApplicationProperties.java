@@ -22,13 +22,13 @@ public class ApplicationProperties {
     @NotNull
     String manualContactTracingAuthorityPublicKey;
 
-    WsRest wsRest;
+    CleaWebService wsRest;
+
+    CleaWebService venueConsumer;
 
     Batch batch;
 
     Bucket bucket;
-
-    VenueConsumer venueConsumer;
 
     @Value
     public static class Batch {
@@ -38,14 +38,7 @@ public class ApplicationProperties {
     }
 
     @Value
-    public static class WsRest {
-
-        @NotNull
-        URL baseUrl;
-    }
-
-    @Value
-    public static class VenueConsumer {
+    public static class CleaWebService {
 
         @NotNull
         URL baseUrl;

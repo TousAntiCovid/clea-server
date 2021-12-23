@@ -1,6 +1,8 @@
 integration-tests:
   ws-rest.base-url: http://localhost:8080
-  venue-consumer.base-url: http://localhost:7070
+  venue-consumer:
+    base-url: http://localhost:7070
+    management-url: http://localhost:7071
   batch.command: "docker-compose up clea-batch"
   bucket:
     url: http://localhost:9000

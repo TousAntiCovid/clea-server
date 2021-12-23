@@ -19,12 +19,23 @@ public class CleaIntegrationTestsApplication {
     public static void main(String[] args) {
         var exitCode = 1;
         try {
-            await("clea platform is ready")
-                    .atMost(3, MINUTES)
-                    .pollInterval(fibonacci(SECONDS))
-                    .until(() -> JUnitCore.runClasses(SmokeTests.class).wasSuccessful(), is(true));
-
-            exitCode = JUnitCore.runClasses(CucumberTests.class).wasSuccessful() ? 0 : 1;
+            if (System.getProperty("spring.profiles.active").equals("int")) {
+                log.info("Integration platform scenario");
+                await("clea platform is ready")
+                        .atMost(3, MINUTES)
+                        .pollInterval(fibonacci(SECONDS))
+                        .until(() -> JUnitCore.runClasses(DefaultSmokeTests.class).wasSuccessful(), is(true));
+                exitCode = JUnitCore.runClasses(DefaultCucumberTests.class).wasSuccessful() ? 0 : 1;
+            } else {
+                await("clea platform is ready")
+                        .atMost(3, MINUTES)
+                        .pollInterval(fibonacci(SECONDS))
+                        .until(
+                                () -> JUnitCore.runClasses(RequiresElasticsearchAccessSmokeTests.class).wasSuccessful(),
+                                is(true)
+                        );
+                exitCode = JUnitCore.runClasses(RequiresElasticsearchAccessCucumberTests.class).wasSuccessful() ? 0 : 1;
+            }
         } finally {
             System.exit(exitCode);
         }
