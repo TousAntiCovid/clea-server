@@ -2,8 +2,8 @@
 
 Listener intended to anonymously retrieve decoded visits from the kafka queue and calculate exposures.
 
-In addition, this module processes statistics on reports issued by clea-ws and generates its own statistics by location type.
-Statistics are stored on an ELK stack.
+In addition, this module processes statistics on reports issued by clea-ws and generates its own statistics by location
+type. Statistics are stored on an ELK stack.
 
 ### Visit inputs
 
@@ -19,8 +19,10 @@ The structure of a visit received from Kafka is:
 An EncryptedLocationMessage is decrypted as :
 
 - staff: The qrcode was generate for a staff (with longueur exposure time)
-- qrCodeRenewalIntervalExponentCompact: 2^n seconds of validity of this qrCode before the need to create a new one with same UUID, new qrCodeValidityStartTime
-- compressedPeriodStartTime: stored validity date as Hour (periodStartTimeAsNtpTimestamp = compressedPeriodStartTime\*3600)
+- qrCodeRenewalIntervalExponentCompact: 2^n seconds of validity of this qrCode before the need to create a new one with
+  same UUID, new qrCodeValidityStartTime
+- compressedPeriodStartTime: stored validity date as Hour (periodStartTimeAsNtpTimestamp =
+  compressedPeriodStartTime\*3600)
 - locationTemporarySecretKey: used to check the validity of unencrypted locationTemporaryPublicId
 - encryptedLocationContactMessage: currently ignored, can only be decrypted by MSS
 - venueType: used to determine the number of exposure period (slots) to consider, used for statistics
@@ -38,8 +40,9 @@ verifications will be applied:
 - if
   the [drift check]("https://hal.inria.fr/hal-03146022v3/document#processing-of-a-user-location-record-by-the-backend-server")
   fails, it will be rejected.
-- if the public location temporary id is different from the one calculated from the location specific part, it
-  will be rejected (see [hasValidTemporaryLocationPublicId]("src/main/java/fr/gouv/clea/consumer/service/impl/DecodedVisitService.java)).
+- if the public location temporary id is different from the one calculated from the location specific part, it will be
+  rejected (
+  see [hasValidTemporaryLocationPublicId]("src/main/java/fr/gouv/clea/consumer/service/impl/DecodedVisitService.java)).
 
 ### Exposition slots calculation
 
@@ -64,8 +67,8 @@ If the transfert fails (ElasticSearch not available), clea-ws constantly tries t
 
 #### By Location
 
-Each valid decrypted visit is recorded in ElasticSearch (without locationTemporaryPublicId).
-Document sent to ElasticSearch is:
+Each valid decrypted visit is recorded in ElasticSearch (without locationTemporaryPublicId). Document sent to
+ElasticSearch is:
 
 - qrCodeScanTime : scan date truncated per statistic slot duration (property clea.conf.statSlotDurationInSeconds)
   A statistic Slot can be different from a cluster slot.
@@ -75,11 +78,11 @@ Document sent to ElasticSearch is:
 - backward: Number of backward visits received for the same period and location type (type,categ1/categ2)
 - forward: Number of forward visits received for the same period and location type
 
-After 14 days (retention date), we save an aggregate sum of backward and forward visits per period (1/2 hours),
-and the detailed documents are removed from Elasticsearch.
+After 14 days (retention date), we save an aggregate sum of backward and forward visits per period (1/2 hours), and the
+detailed documents are removed from Elasticsearch.
 
-If a visit cannot be pushed to ElasticSearch (ElasticSearch is not available), a failback pushes the document to an error topic.
-A scheduled job may try to process this topic periodically.
+If a visit cannot be pushed to ElasticSearch (ElasticSearch is not available), a failback pushes the document to an
+error topic. A scheduled job may try to process this topic periodically.
 
 ### Run
 
@@ -102,3 +105,12 @@ $ docker-compose up
 #or
 $ docker-compose up clea-venue-consumer
 ```
+
+### Manual cluster declaration
+
+Authorized persons can declare a cluster manually, through an interface (at the url /cluster-declaration). They must
+provide the deeplink of the location and the start date of the cluster.
+
+The interface will call an endpoint in the backend, which will process this information and control the deeplink and
+date format. If correct, each record will go through the usual process (verification and exposition slots calculation),
+with each exposition slot stored in the DB with a number of forward visit high enough to trigger a cluster notification.
