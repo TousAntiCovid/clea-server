@@ -35,14 +35,12 @@ public class ManualClusterDeclarationController {
     private final LocationSpecificPartDecoder decoder;
 
     @GetMapping("/cluster-declaration")
-    public String declareCluster(
-            @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest) {
+    public String declareCluster(@ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest) {
         return "cluster-declaration";
     }
 
     @PostMapping(value = "/cluster-declaration")
-    public String declareCluster(
-            @Valid @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest,
+    public String declareCluster(@Valid @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest,
             final BindingResult result, final RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
@@ -52,9 +50,7 @@ public class ManualClusterDeclarationController {
         final var qrCodeScanTime = clusterDeclarationRequest.getDate().toInstant(UTC);
 
         if (qrCodeScanTime.isAfter(Instant.now())) {
-            result.rejectValue(
-                    "date", "FutureDateError.clusterDeclarationRequest.date"
-            );
+            result.rejectValue("date", "FutureDateError.clusterDeclarationRequest.date");
             return "cluster-declaration";
 
         }
@@ -62,14 +58,11 @@ public class ManualClusterDeclarationController {
         final var deepLinkLocationSpecificPart = clusterDeclarationRequest.getDeeplink().getRef();
 
         if (StringUtils.isEmpty(deepLinkLocationSpecificPart)) {
-            result.rejectValue(
-                    "deeplink", "InvalidUrlError.clusterDeclarationRequest.deeplink"
-            );
+            result.rejectValue("deeplink", "InvalidUrlError.clusterDeclarationRequest.deeplink");
             return "cluster-declaration";
         }
 
         try {
-
             final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(deepLinkLocationSpecificPart);
             final var decodedVisit = DecodedVisit.builder()
                     .encryptedLocationSpecificPart(decoder.decodeHeader(binaryLocationSpecificPart))
@@ -78,28 +71,18 @@ public class ManualClusterDeclarationController {
                     .build();
 
             decodedVisitService.decryptAndValidate(decodedVisit).ifPresentOrElse(
-                    visit -> {
-                        visitExpositionAggregatorService.updateExposureCount(visit, true);
-                    },
-                    () -> result.rejectValue(
-                            "deeplink", "DecryptError.clusterDeclarationRequest.deeplink"
-                    )
+                    visit -> visitExpositionAggregatorService.updateExposureCount(visit, true),
+                    () -> result.rejectValue("deeplink", "DecryptError.clusterDeclarationRequest.deeplink")
             );
         } catch (CleaEncodingException e) {
-            result.rejectValue(
-                    "deeplink", "DecodingError.clusterDeclarationRequest.deeplink"
-            );
+            result.rejectValue("deeplink", "DecodingError.clusterDeclarationRequest.deeplink");
         }
 
         if (!result.hasErrors()) {
-            redirectAttributes.addAttribute(
-                    "clusterDeclarationSuccess",
-                    true
-            );
+            redirectAttributes.addAttribute("clusterDeclarationSuccess", true);
             return "redirect:/cluster-declaration";
         }
         return "cluster-declaration";
-
     }
 
 }
