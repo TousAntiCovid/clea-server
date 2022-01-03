@@ -42,47 +42,36 @@ public class ManualClusterDeclarationController {
     @PostMapping(value = "/cluster-declaration")
     public String declareCluster(@Valid @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest,
             final BindingResult result, final RedirectAttributes redirectAttributes) {
-
-        if (result.hasErrors()) {
-            return "cluster-declaration";
-        }
-
         final var qrCodeScanTime = clusterDeclarationRequest.getDate().toInstant(UTC);
-
-        if (qrCodeScanTime.isAfter(Instant.now())) {
-            result.rejectValue("date", "FutureDateError.clusterDeclarationRequest.date");
-            return "cluster-declaration";
-
-        }
-
         final var deepLinkLocationSpecificPart = clusterDeclarationRequest.getDeeplink().getRef();
 
-        if (StringUtils.isEmpty(deepLinkLocationSpecificPart)) {
+        if (result.hasErrors()) {
+            // do nothing
+        } else if (qrCodeScanTime.isAfter(Instant.now())) {
+            result.rejectValue("date", "FutureDateError.clusterDeclarationRequest.date");
+        } else if (StringUtils.isEmpty(deepLinkLocationSpecificPart)) {
             result.rejectValue("deeplink", "InvalidUrlError.clusterDeclarationRequest.deeplink");
-            return "cluster-declaration";
-        }
+        } else {
+            try {
+                final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(deepLinkLocationSpecificPart);
+                final var decodedVisit = DecodedVisit.builder()
+                        .encryptedLocationSpecificPart(decoder.decodeHeader(binaryLocationSpecificPart))
+                        .qrCodeScanTime(qrCodeScanTime)
+                        .isBackward(false)
+                        .build();
 
-        try {
-            final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(deepLinkLocationSpecificPart);
-            final var decodedVisit = DecodedVisit.builder()
-                    .encryptedLocationSpecificPart(decoder.decodeHeader(binaryLocationSpecificPart))
-                    .qrCodeScanTime(qrCodeScanTime)
-                    .isBackward(false)
-                    .build();
-
-            decodedVisitService.decryptAndValidate(decodedVisit).ifPresentOrElse(
-                    visit -> visitExpositionAggregatorService.updateExposureCount(visit, true),
-                    () -> result.rejectValue("deeplink", "DecryptError.clusterDeclarationRequest.deeplink")
-            );
-        } catch (CleaEncodingException e) {
-            result.rejectValue("deeplink", "DecodingError.clusterDeclarationRequest.deeplink");
-        }
-
-        if (!result.hasErrors()) {
-            redirectAttributes.addAttribute("clusterDeclarationSuccess", true);
-            return "redirect:/cluster-declaration";
+                decodedVisitService.decryptAndValidate(decodedVisit).ifPresentOrElse(
+                        visit -> visitExpositionAggregatorService.updateExposureCount(visit, true),
+                        () -> result.rejectValue("deeplink", "DecryptError.clusterDeclarationRequest.deeplink")
+                );
+            } catch (CleaEncodingException e) {
+                result.rejectValue("deeplink", "DecodingError.clusterDeclarationRequest.deeplink");
+            }
+            if (!result.hasErrors()) {
+                redirectAttributes.addAttribute("clusterDeclarationSuccess", true);
+                return "redirect:/cluster-declaration";
+            }
         }
         return "cluster-declaration";
     }
-
 }
