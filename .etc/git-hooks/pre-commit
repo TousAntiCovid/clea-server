@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 # check prettier is installed
-if ! command -v prettier &> /dev/null ; then
+if npm list -g --depth=0 | grep -q prettier ; then
+  echo 'prettier is installed'
+else
   echo '🙏 Please, install prettier so we can check yaml/xml/md/json files'
   echo '📝  `npm install -g prettier @prettier/plugin-xml`'
   echo ''
