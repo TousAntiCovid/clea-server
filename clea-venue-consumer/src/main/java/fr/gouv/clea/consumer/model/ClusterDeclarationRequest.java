@@ -1,5 +1,6 @@
 package fr.gouv.clea.consumer.model;
 
+import fr.gouv.clea.consumer.model.validators.ValidTimezoneFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -7,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Data
 public class ClusterDeclarationRequest {
@@ -19,6 +21,7 @@ public class ClusterDeclarationRequest {
     private LocalDateTime date;
 
     @NotNull
-    private String timezone;
+    @ValidTimezoneFormat
+    private ZoneId zoneId;
 
 }

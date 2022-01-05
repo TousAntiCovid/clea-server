@@ -29,7 +29,8 @@ public class CleaManualClusterSteps {
                 .params(
                         Map.of(
                                 "deeplink", deeplink,
-                                "date", clusterScanTime.toString()
+                                "date", clusterScanTime.toString(),
+                                "zoneId", "Europe/Paris"
                         )
                 )
                 .when()

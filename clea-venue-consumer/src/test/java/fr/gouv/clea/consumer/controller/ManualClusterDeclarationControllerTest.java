@@ -22,6 +22,7 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.HttpStatus.FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -49,7 +50,7 @@ public class ManualClusterDeclarationControllerTest {
                 .urlEncodingEnabled(false)
                 .contentType(URLENC)
                 .params(
-                        "deeplink", LOCATION_1_URL.toString(),
+                        "deeplink", LOCATION_1_URL,
                         "date", LocalDateTime.now(UTC).minus(1, HOURS).toString(),
                         "timezone", "Europe/Paris"
                 )
@@ -60,7 +61,7 @@ public class ManualClusterDeclarationControllerTest {
                 .when()
                 .post("/cluster-declaration");
 
-        final var headerLocationValue = redirectResponse.then().extract().header("Location");
+        final var headerLocationValue = redirectResponse.then().extract().header(LOCATION);
 
         given()
                 .urlEncodingEnabled(false)
@@ -107,7 +108,7 @@ public class ManualClusterDeclarationControllerTest {
                 .urlEncodingEnabled(false)
                 .contentType(URLENC)
                 .params(
-                        "deeplink", LOCATION_1_URL.toString(),
+                        "deeplink", LOCATION_1_URL,
                         "date", LocalDateTime.now(UTC).minus(1, HOURS).toString(),
                         "timezone", "UTC"
                 )
@@ -168,8 +169,8 @@ public class ManualClusterDeclarationControllerTest {
                 .contentType(URLENC)
                 .params(
                         "deeplink", deeplink,
-                        "date", LocalDateTime.now(UTC).minus(1, HOURS).toString()
-
+                        "date", LocalDateTime.now(UTC).minus(1, HOURS).toString(),
+                        "zoneId", "Europe/Paris"
                 )
                 .post("/cluster-declaration")
 
@@ -197,9 +198,9 @@ public class ManualClusterDeclarationControllerTest {
                 .when()
                 .contentType(URLENC)
                 .params(
-                        "deeplink", LOCATION_1_URL.toString(),
-                        "date", date
-
+                        "deeplink", LOCATION_1_URL,
+                        "date", date,
+                        "zoneId", "Europe/Paris"
                 )
                 .post("/cluster-declaration")
 
@@ -221,7 +222,7 @@ public class ManualClusterDeclarationControllerTest {
                 .when()
                 .contentType(URLENC)
                 .params(
-                        "deeplink", LOCATION_1_URL.toString(),
+                        "deeplink", LOCATION_1_URL,
                         "date", LocalDateTime.now(UTC).plus(1, HOURS).toString()
 
                 )
