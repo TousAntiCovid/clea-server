@@ -50,11 +50,9 @@ public class ManualClusterDeclarationController {
 
         if (qrCodeScanTime.isAfter(Instant.now())) {
             result.rejectValue("date", "FutureDateError.clusterDeclarationRequest.date");
-
         } else if (deepLinkLocationSpecificPart == null || deepLinkLocationSpecificPart.isEmpty()) {
             result.rejectValue("deeplink", "InvalidUrlError.clusterDeclarationRequest.deeplink");
         } else {
-
             try {
                 final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(deepLinkLocationSpecificPart);
                 final var decodedVisit = DecodedVisit.builder()

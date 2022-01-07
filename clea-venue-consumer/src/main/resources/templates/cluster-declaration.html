@@ -8,7 +8,7 @@
     />
     <link rel="stylesheet" th:href="@{/lib/dsfr/dsfr/dsfr.min.css}" />
     <link rel="stylesheet" th:href="@{/lib/dsfr/core/core.min.css}" />
-    <title>Génération d'un cluster TAC-CLEA</title>
+    <title>Déclaration d'un cluster TAC-CLEA</title>
   </head>
   <header class="fr-header" role="banner">
     <div class="fr-header__body">
@@ -75,6 +75,12 @@
         />
       </div>
       <input th:field="*{zoneId}" type="hidden" id="zoneId" name="zoneId" />
+      <div class="fr-input-group fr-pt-4w" th:if="${#fields.hasErrors('zoneId')}">
+        <p
+                th:errorclass="fr-error-text"
+                th:errors="*{zoneId}"
+        />
+      </div>
       <button class="fr-btn" type="submit" value="Submit">
         Déclarer le cluster
       </button>
@@ -86,10 +92,7 @@
         ></p>
       </div>
       <div class="fr-pt-4w" th:if="${param.clusterDeclarationSuccess}">
-        <h3>
-          Cluster enregistré avec succès, le cluster sera actif la prochaine
-          fois que le batch sera déclenché.
-        </h3>
+        <h3 th:text="#{cluster.declaration.success}" />
       </div>
     </form>
     <script>

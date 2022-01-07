@@ -27,6 +27,7 @@ clea:
 
 logging:
   level:
+    root: WARN
     fr.gouv.clea.consumer: INFO
 
 management:
