@@ -39,7 +39,7 @@ public class ReferenceData {
                 .truncatedTo(HOURS);
         LOCATION_1 = createRandomLocation(instant);
         try {
-            LOCATION_1_URL = new URL(LOCATION_1.newDeepLink());
+            LOCATION_1_URL = new URL(LOCATION_1.newDeepLink(instant));
             LOCATION_1_LOCATION_SPECIFIC_PART_DECODED_BASE64 = Base64.getEncoder().encodeToString(
                     new LocationSpecificPartDecoder()
                             .decodeHeader(Base64.getUrlDecoder().decode(LOCATION_1_URL.getRef()))
@@ -52,11 +52,11 @@ public class ReferenceData {
         }
     }
 
-    public static DecodedVisit givenBackwardDecodedVisitAt(Instant qrCodeScanTime) {
+    public static DecodedVisit givenBackwardDecodedVisitAt(final Instant qrCodeScanTime) {
         return givenDecodedVisitAt(qrCodeScanTime, true);
     }
 
-    private static DecodedVisit givenDecodedVisitAt(Instant qrCodeScanTime, boolean isBackward) {
+    private static DecodedVisit givenDecodedVisitAt(final Instant qrCodeScanTime, final boolean isBackward) {
 
         try {
 
@@ -81,7 +81,7 @@ public class ReferenceData {
         }
     }
 
-    private static Location createRandomLocation(Instant instant) {
+    private static Location createRandomLocation(final Instant instant) {
         return Location.builder()
                 .manualContactTracingAuthorityPublicKey(PK_MCTA)
                 .serverAuthorityPublicKey(PK_SA)

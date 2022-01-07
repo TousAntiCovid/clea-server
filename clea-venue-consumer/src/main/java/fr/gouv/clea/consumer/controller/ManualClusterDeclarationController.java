@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 
+import java.time.Instant;
 import java.util.Base64;
 
 import static java.time.ZoneOffset.UTC;
@@ -33,15 +34,13 @@ public class ManualClusterDeclarationController {
     private final LocationSpecificPartDecoder decoder;
 
     @GetMapping("/cluster-declaration")
-    public String declareCluster(
-            @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest) {
+    public String declareCluster(@ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest) {
         return "cluster-declaration";
     }
 
     @PostMapping(value = "/cluster-declaration")
-    public String declareCluster(
-            @Valid @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest,
-            final BindingResult result, final RedirectAttributes redirectAttributes) throws CleaEncodingException {
+    public String declareCluster(@Valid @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest,
+            final BindingResult result, final RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
             return "cluster-declaration";
@@ -50,32 +49,35 @@ public class ManualClusterDeclarationController {
         final var qrCodeScanTime = clusterDeclarationRequest.getDate().toInstant(UTC);
         final var deepLinkLocationSpecificPart = clusterDeclarationRequest.getDeeplink().getRef();
 
-        final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(deepLinkLocationSpecificPart);
+        if (qrCodeScanTime.isAfter(Instant.now())) {
+            result.rejectValue("date", "FutureDateError.clusterDeclarationRequest.date");
 
-        final var decodedVisit = DecodedVisit.builder()
-                .encryptedLocationSpecificPart(decoder.decodeHeader(binaryLocationSpecificPart))
-                .qrCodeScanTime(qrCodeScanTime)
-                .isBackward(false)
-                .build();
+        } else if (deepLinkLocationSpecificPart == null || deepLinkLocationSpecificPart.isEmpty()) {
+            result.rejectValue("deeplink", "InvalidUrlError.clusterDeclarationRequest.deeplink");
+        } else {
 
-        decodedVisitService.decryptAndValidate(decodedVisit).ifPresentOrElse(
-                visit -> {
-                    log.info("Consumer: visit after decrypt + validation: {}, ", visit);
-                    visitExpositionAggregatorService.updateExposureCount(visit, true);
-                },
-                () -> result.rejectValue(
-                        "deeplink", "DecryptError.clusterDeclarationRequest.deeplink"
-                )
-        );
+            try {
+                final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(deepLinkLocationSpecificPart);
+                final var decodedVisit = DecodedVisit.builder()
+                        .encryptedLocationSpecificPart(decoder.decodeHeader(binaryLocationSpecificPart))
+                        .qrCodeScanTime(qrCodeScanTime)
+                        .isBackward(false)
+                        .build();
+
+                decodedVisitService.decryptAndValidate(decodedVisit).ifPresentOrElse(
+                        visit -> visitExpositionAggregatorService.updateExposureCount(visit, true),
+                        () -> result.rejectValue("deeplink", "DecryptError.clusterDeclarationRequest.deeplink")
+                );
+            } catch (CleaEncodingException e) {
+                result.rejectValue("deeplink", "DecodingError.clusterDeclarationRequest.deeplink");
+            }
+        }
 
         if (!result.hasErrors()) {
-            redirectAttributes.addFlashAttribute(
-                    "success_message",
-                    "cluster.declaration.success"
-            );
+            redirectAttributes.addAttribute("clusterDeclarationSuccess", true);
+            return "redirect:/cluster-declaration";
         }
-        return "redirect:/cluster-declaration";
-
+        return "cluster-declaration";
     }
 
 }
