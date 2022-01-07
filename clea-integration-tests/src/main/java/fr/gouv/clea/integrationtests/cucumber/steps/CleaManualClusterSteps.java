@@ -6,10 +6,12 @@ import io.cucumber.java.en.When;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;
-import java.util.Map;
+import java.time.ZoneId;
 
+import static io.cucumber.messages.internal.com.google.common.net.HttpHeaders.LOCATION;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.URLENC;
+import static org.hamcrest.Matchers.endsWith;
 
 @RequiredArgsConstructor
 public class CleaManualClusterSteps {
@@ -27,16 +29,15 @@ public class CleaManualClusterSteps {
                 .baseUri(applicationProperties.getVenueConsumer().getBaseUrl().toString())
                 .contentType(URLENC)
                 .params(
-                        Map.of(
-                                "deeplink", deeplink,
-                                "date", clusterScanTime.toString(),
-                                "zoneId", "Europe/Paris"
-                        )
+                        "deeplink", deeplink,
+                        "dateTime", clusterScanTime.atZone(ZoneId.systemDefault()).toLocalDateTime().toString(),
+                        "zoneId", ZoneId.systemDefault().toString()
                 )
                 .when()
                 .post("/cluster-declaration")
                 .then()
-                .statusCode(302);
+                .statusCode(302)
+                .header(LOCATION, endsWith("/cluster-declaration?success=true"));
 
     }
 

@@ -63,15 +63,15 @@
           <input
             class="fr-input"
             id="text-input-calendar"
-            name="date"
-            th:field="*{date}"
+            name="dateTime"
+            th:field="*{dateTime}"
             type="datetime-local"
           />
         </div>
         <p
           th:errorclass="fr-error-text"
-          th:errors="*{date}"
-          th:if="${#fields.hasErrors('date')}"
+          th:errors="*{dateTime}"
+          th:if="${#fields.hasErrors('dateTime')}"
         />
       </div>
       <input th:field="*{zoneId}" type="hidden" id="zoneId" name="zoneId" />
@@ -91,7 +91,7 @@
           th:text="#{err}"
         ></p>
       </div>
-      <div class="fr-pt-4w" th:if="${param.clusterDeclarationSuccess}">
+      <div class="fr-pt-4w" th:if="${param.success}">
         <h3 th:text="#{cluster.declaration.success}" />
       </div>
     </form>

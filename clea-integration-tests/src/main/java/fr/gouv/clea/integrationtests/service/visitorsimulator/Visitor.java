@@ -6,9 +6,7 @@ import fr.gouv.clea.integrationtests.service.model.Cluster;
 import fr.gouv.clea.integrationtests.service.model.ClusterExposition;
 import fr.gouv.clea.integrationtests.utils.DeepLinkDecoder;
 import fr.inria.clea.lsp.utils.TimeUtils;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +30,6 @@ public class Visitor {
 
     private List<Visit> localList = new ArrayList<>();
 
-    @Getter(AccessLevel.NONE)
     private WreportResponse lastReportResponse = null;
 
     public float getStatus() {
