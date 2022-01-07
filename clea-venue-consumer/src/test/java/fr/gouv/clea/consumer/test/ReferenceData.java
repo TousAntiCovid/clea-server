@@ -52,11 +52,11 @@ public class ReferenceData {
         }
     }
 
-    public static DecodedVisit givenBackwardDecodedVisitAt(Instant qrCodeScanTime) {
+    public static DecodedVisit givenBackwardDecodedVisitAt(final Instant qrCodeScanTime) {
         return givenDecodedVisitAt(qrCodeScanTime, true);
     }
 
-    private static DecodedVisit givenDecodedVisitAt(Instant qrCodeScanTime, boolean isBackward) {
+    private static DecodedVisit givenDecodedVisitAt(final Instant qrCodeScanTime, final boolean isBackward) {
 
         try {
 
@@ -81,7 +81,7 @@ public class ReferenceData {
         }
     }
 
-    private static Location createRandomLocation(Instant instant) {
+    private static Location createRandomLocation(final Instant instant) {
         return Location.builder()
                 .manualContactTracingAuthorityPublicKey(PK_MCTA)
                 .serverAuthorityPublicKey(PK_SA)

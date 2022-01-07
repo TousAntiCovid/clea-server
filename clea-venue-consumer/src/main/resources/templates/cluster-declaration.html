@@ -85,14 +85,9 @@
         ></p>
     </div>
     <div class="fr-pt-4w" th:if="${param.clusterDeclarationSuccess}">
-        <h3>
-            Cluster enregistré avec succès, le cluster sera actif la prochaine
-            fois que le batch sera déclenché.
-        </h3>
+        <h3>Cluster enregistré avec succès, le cluster sera actif la prochaine fois que le batch sera déclenché.</h3>
     </div>
 </form>
-
-
 <script
         th:src="@{/lib/dsfr/dsfr/dsfr.module.min.js}"
         type="module"
