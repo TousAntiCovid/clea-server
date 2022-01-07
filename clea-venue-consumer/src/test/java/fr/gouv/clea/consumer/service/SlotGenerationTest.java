@@ -68,7 +68,7 @@ class SlotGenerationTest {
         properties.setDurationUnitInSeconds(Duration.ofMinutes(30).toSeconds());
         service = new VisitExpositionAggregatorService(
                 repository,
-                exposureTimeConfig, properties, statisticsService
+                exposureTimeConfig, properties
         );
     }
 
