@@ -4,6 +4,7 @@ import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
 import fr.gouv.clea.consumer.service.VisitExpositionAggregatorService;
 import fr.gouv.clea.consumer.test.IntegrationTest;
 import fr.gouv.clea.consumer.test.ReferenceData;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,7 @@ import static io.restassured.http.ContentType.URLENC;
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.HttpStatus.FOUND;
@@ -31,7 +33,7 @@ import static org.springframework.http.HttpStatus.OK;
 public class ManualClusterDeclarationControllerTest {
 
     @Autowired
-    private ExposedVisitRepository repository;
+    private ExposedVisitRepository exposedVisitRepository;
 
     @Autowired
     private VisitExpositionAggregatorService service;
@@ -80,17 +82,20 @@ public class ManualClusterDeclarationControllerTest {
                         )
                 );
 
-        final var exposedVisitList = repository.findAll();
-
-        assertThat(exposedVisitList).isNotEmpty();
-        assertThat(exposedVisitList)
-                .allMatch(
-                        exposedVisit -> exposedVisit.getLocationTemporaryPublicId()
-                                .equals(LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID),
-                        "has uuid" + LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID
+        // according to the test configuration and our test deeplink,
+        // we expect 7 time slots to be stored in database for the deeplink LTID
+        assertThat(exposedVisitRepository.findAll())
+                .extracting(
+                        exposedVisit -> tuple(
+                                exposedVisit.getLocationTemporaryPublicId(), exposedVisit.getPeriodStart(),
+                                exposedVisit.getForwardVisits()
+                        )
                 )
-                .allMatch(exposedVisit -> exposedVisit.getPeriodStart() == periodStart)
-                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 100, "has 100 forward visits");
+                .areExactly(
+                        7, new HamcrestCondition<>(
+                                equalTo(tuple(LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID, periodStart, 100L))
+                        )
+                );
     }
 
     @Test
@@ -138,17 +143,20 @@ public class ManualClusterDeclarationControllerTest {
                         )
                 );
 
-        final var exposedVisitList = repository.findAll();
-
-        assertThat(exposedVisitList).isNotEmpty();
-        assertThat(exposedVisitList)
-                .allMatch(
-                        exposedVisit -> exposedVisit.getLocationTemporaryPublicId()
-                                .equals(LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID),
-                        "has uuid" + LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID
+        // according to the test configuration and our test deeplink,
+        // we expect 7 time slots to be stored in database for the deeplink LTID
+        assertThat(exposedVisitRepository.findAll())
+                .extracting(
+                        exposedVisit -> tuple(
+                                exposedVisit.getLocationTemporaryPublicId(), exposedVisit.getPeriodStart(),
+                                exposedVisit.getForwardVisits()
+                        )
                 )
-                .allMatch(exposedVisit -> exposedVisit.getPeriodStart() == periodStart)
-                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 101, "has 101 forward visits");
+                .areExactly(
+                        7, new HamcrestCondition<>(
+                                equalTo(tuple(LOCATION_1_LOCATION_TEMPORARY_SPECIFIC_ID, periodStart, 101L))
+                        )
+                );
     }
 
     @ParameterizedTest
@@ -166,7 +174,8 @@ public class ManualClusterDeclarationControllerTest {
                 .params(
                         "deeplink", LOCATION_1_URL.toString(),
                         "date", LocalDateTime.now(UTC).minus(1, HOURS).toString(),
-                        "zoneId", "Europe/Paris")
+                        "zoneId", "Europe/Paris"
+                )
                 // override attribute and set null value
                 .param(attributeName, (String) null)
                 .post("/cluster-declaration")
@@ -176,7 +185,7 @@ public class ManualClusterDeclarationControllerTest {
                 .body("html.body.form.div.p", equalTo(errorMessage))
                 .statusCode(OK.value());
 
-        assertThat(repository.findAll()).isEmpty();
+        assertThat(exposedVisitRepository.findAll()).isEmpty();
 
     }
 
@@ -208,7 +217,7 @@ public class ManualClusterDeclarationControllerTest {
                 .body("html.body.form.div.p", equalTo(errorMessage))
                 .statusCode(OK.value());
 
-        assertThat(repository.findAll()).isEmpty();
+        assertThat(exposedVisitRepository.findAll()).isEmpty();
 
     }
 
@@ -238,7 +247,7 @@ public class ManualClusterDeclarationControllerTest {
                 .body("html.body.form.div.p", equalTo(message))
                 .statusCode(OK.value());
 
-        assertThat(repository.findAll()).isEmpty();
+        assertThat(exposedVisitRepository.findAll()).isEmpty();
 
     }
 
@@ -262,7 +271,7 @@ public class ManualClusterDeclarationControllerTest {
                 .body("html.body.form.div.p", equalTo("La date ne peut pas être située dans le futur"))
                 .statusCode(OK.value());
 
-        assertThat(repository.findAll()).isEmpty();
+        assertThat(exposedVisitRepository.findAll()).isEmpty();
     }
 
     @ParameterizedTest
@@ -291,7 +300,7 @@ public class ManualClusterDeclarationControllerTest {
                 .body("html.body.form.div.p", equalTo(message))
                 .statusCode(OK.value());
 
-        assertThat(repository.findAll()).isEmpty();
+        assertThat(exposedVisitRepository.findAll()).isEmpty();
     }
 
 }
