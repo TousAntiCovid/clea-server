@@ -13,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
@@ -20,11 +21,10 @@ import javax.validation.Valid;
 import java.time.Instant;
 import java.util.Base64;
 
-import static java.time.ZoneOffset.UTC;
-
 @Controller
 @RequiredArgsConstructor
 @Slf4j
+@RequestMapping("/cluster-declaration")
 public class ManualClusterDeclarationController {
 
     private final DecodedVisitService decodedVisitService;
@@ -33,12 +33,12 @@ public class ManualClusterDeclarationController {
 
     private final LocationSpecificPartDecoder decoder;
 
-    @GetMapping("/cluster-declaration")
+    @GetMapping
     public String declareCluster(@ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest) {
         return "cluster-declaration";
     }
 
-    @PostMapping(value = "/cluster-declaration")
+    @PostMapping
     public String declareCluster(@Valid @ModelAttribute final ClusterDeclarationRequest clusterDeclarationRequest,
             final BindingResult result, final RedirectAttributes redirectAttributes) {
 
@@ -46,16 +46,16 @@ public class ManualClusterDeclarationController {
             return "cluster-declaration";
         }
 
-        final var qrCodeScanTime = clusterDeclarationRequest.getDate().toInstant(UTC);
+        final var qrCodeScanTime = clusterDeclarationRequest.getDateTime()
+                .atZone(clusterDeclarationRequest.getZoneId())
+                .toInstant();
         final var deepLinkLocationSpecificPart = clusterDeclarationRequest.getDeeplink().getRef();
 
         if (qrCodeScanTime.isAfter(Instant.now())) {
-            result.rejectValue("date", "FutureDateError.clusterDeclarationRequest.date");
-
+            result.rejectValue("dateTime", "FutureDateError.clusterDeclarationRequest.dateTime");
         } else if (deepLinkLocationSpecificPart == null || deepLinkLocationSpecificPart.isEmpty()) {
             result.rejectValue("deeplink", "InvalidUrlError.clusterDeclarationRequest.deeplink");
         } else {
-
             try {
                 final var binaryLocationSpecificPart = Base64.getUrlDecoder().decode(deepLinkLocationSpecificPart);
                 final var decodedVisit = DecodedVisit.builder()
@@ -74,7 +74,7 @@ public class ManualClusterDeclarationController {
         }
 
         if (!result.hasErrors()) {
-            redirectAttributes.addAttribute("clusterDeclarationSuccess", true);
+            redirectAttributes.addAttribute("success", true);
             return "redirect:/cluster-declaration";
         }
         return "cluster-declaration";

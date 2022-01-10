@@ -37,7 +37,7 @@ public class CleaReportSteps {
             throws MalformedURLException {
         scenarioContext = ctx;
         cleaReportUrl = new URL(applicationProperties.getWsRest().getBaseUrl(), "/api/clea/v1/wreport");
-        this.cleaHealthUrl = new URL(applicationProperties.getWsRest().getBaseUrl(), "/actuator/health");
+        cleaHealthUrl = new URL(applicationProperties.getWsRest().getBaseUrl(), "/actuator/health");
     }
 
     @Given("application clea ws rest is ready")
