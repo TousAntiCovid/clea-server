@@ -146,8 +146,9 @@
                             </inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>fr.gouv.clea.ws.api</apiPackage>
-                            <modelPackage
-              >fr.gouv.clea.ws.api.model</modelPackage>
+                            <modelPackage>
+                                fr.gouv.clea.ws.api.model
+                            </modelPackage>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
                                 <useBeanValidation>false</useBeanValidation>
