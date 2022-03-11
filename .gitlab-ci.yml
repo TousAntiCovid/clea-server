@@ -1,3 +1,11 @@
+default:
+  cache:
+    paths:
+      - .m2/repository/
+  tags:
+    - ci.inria.fr
+    - medium
+
 include:
   - project: stopcovid19/accueil
     ref: master
