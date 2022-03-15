@@ -42,8 +42,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: password
       BUCKET_OUTSCALE: clea-batch
       ENDPOINT_OUTSCALE: http://minio:9000
-      BUCKET_SCALEWAY: clea-batch-scaleway
-      ENDPOINT_SCALEWAY: http://minio:9000
       CLEA_BATCH_LOG_FILE_PATH: /logs
       CLEA_BATCH_LOG_FILE_NAME: clea-batch
     depends_on:
@@ -83,7 +81,7 @@ services:
       MINIO_ROOT_USER: AKIAIOSFODNN7EXAMPLE
       MINIO_ROOT_PASSWORD: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     entrypoint: sh
-    command: -c 'mkdir -p /data/clea-batch /data/clea-batch-scaleway && /opt/bin/minio server /data --console-address ":9001"'
+    command: -c 'mkdir -p /data/clea-batch && /opt/bin/minio server /data --console-address ":9001"'
     ports:
       - "9000:9000"
       - "9001:9001"
