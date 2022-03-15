@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class CleaBatchApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CleaBatchApplication.class, args);
+        final var context = SpringApplication.run(CleaBatchApplication.class, args);
+        System.exit(SpringApplication.exit(context));
     }
 }

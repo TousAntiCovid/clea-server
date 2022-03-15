@@ -32,10 +32,10 @@ public class VisitExpositionAggregatorService {
 
     private final VenueConsumerProperties properties;
 
-    private final StatisticsService statisticsService;
+    private final int clusterThresholdValue = 100;
 
     @Transactional
-    public void updateExposureCount(Visit visit) {
+    public void updateExposureCount(Visit visit, boolean isManualDeclaredCluster) {
         Instant periodStartAsInstant = this
                 .periodStartFromCompressedPeriodStartAsInstant(visit.getCompressedPeriodStartTime());
         long scanTimeSlot = Duration.between(periodStartAsInstant, visit.getQrCodeScanTime()).toSeconds()
@@ -51,6 +51,7 @@ public class VisitExpositionAggregatorService {
                 visit.getVenueType(), visit.getVenueCategory1(), visit.getVenueCategory2(), visit.isStaff(),
                 visit.isBackward()
         );
+
         int firstExposedSlot = Math.max(0, (int) scanTimeSlot - exposureTime);
         int lastExposedSlot = Math
                 .min(this.getPeriodMaxSlot(visit.getPeriodDuration()), (int) scanTimeSlot + exposureTime);
@@ -74,8 +75,11 @@ public class VisitExpositionAggregatorService {
                                 .filter(exposedVisit -> exposedVisit.getTimeSlot() == slotIndex)
                                 .findFirst()
                                 .ifPresentOrElse(
-                                        exposedVisit -> toUpdate.add(this.updateExposedVisit(visit, exposedVisit)),
-                                        () -> toPersist.add(this.newExposedVisit(visit, slotIndex))
+                                        exposedVisit -> toUpdate.add(
+                                                this.updateExposedVisit(visit, exposedVisit, isManualDeclaredCluster)
+                                        ),
+                                        () -> toPersist
+                                                .add(this.newExposedVisit(visit, slotIndex, isManualDeclaredCluster))
                                 )
                 );
 
@@ -121,16 +125,22 @@ public class VisitExpositionAggregatorService {
         return ((long) visit.getCompressedPeriodStartTime()) * TimeUtils.NB_SECONDS_PER_HOUR;
     }
 
-    protected ExposedVisitEntity updateExposedVisit(Visit visit, ExposedVisitEntity exposedVisit) {
-        if (visit.isBackward()) {
-            exposedVisit.setBackwardVisits(exposedVisit.getBackwardVisits() + 1);
+    protected ExposedVisitEntity updateExposedVisit(Visit visit, ExposedVisitEntity exposedVisit,
+            boolean isManualDeclaredCluster) {
+        if (isManualDeclaredCluster) {
+            exposedVisit.setForwardVisits(exposedVisit.getForwardVisits() + clusterThresholdValue);
         } else {
-            exposedVisit.setForwardVisits(exposedVisit.getForwardVisits() + 1);
+            if (visit.isBackward()) {
+                exposedVisit.setBackwardVisits(exposedVisit.getBackwardVisits() + 1);
+            } else {
+                exposedVisit.setForwardVisits(exposedVisit.getForwardVisits() + 1);
+            }
         }
+
         return exposedVisit;
     }
 
-    protected ExposedVisitEntity newExposedVisit(Visit visit, int slotIndex) {
+    protected ExposedVisitEntity newExposedVisit(Visit visit, int slotIndex, boolean isManualDeclaredCluster) {
         // TODO: visit.getPeriodStart returning an Instant
         long periodStart = periodStartFromCompressedPeriodStart(visit.getCompressedPeriodStartTime());
         return ExposedVisitEntity.builder()
@@ -141,7 +151,9 @@ public class VisitExpositionAggregatorService {
                 .periodStart(periodStart)
                 .timeSlot(slotIndex)
                 .backwardVisits(visit.isBackward() ? 1 : 0)
-                .forwardVisits(visit.isBackward() ? 0 : 1)
+                .forwardVisits(
+                        isManualDeclaredCluster ? clusterThresholdValue : visit.isBackward() ? 0 : 1
+                )
                 .build();
     }
 

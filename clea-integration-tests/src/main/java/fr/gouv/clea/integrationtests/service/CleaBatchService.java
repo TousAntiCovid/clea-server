@@ -30,10 +30,12 @@ public class CleaBatchService {
         final var batchTriggerCommand = applicationProperties.getBatch().getCommand().split(" ");
         final var builder = new ProcessBuilder(batchTriggerCommand);
         builder.directory(Path.of(".").toFile());
-        var process = builder.start();
-        var streamGobbler = new StreamGobbler(process.getInputStream(), log::debug);
-        Executors.newSingleThreadExecutor().submit(streamGobbler);
+        final var process = builder.start();
+        final var background = Executors.newFixedThreadPool(2);
+        background.submit(new StreamGobbler(process.getInputStream(), log::debug));
+        background.submit(new StreamGobbler(process.getErrorStream(), log::debug));
         boolean hasExited = process.waitFor(BATCH_EXECUTION_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+        background.shutdownNow();
         if (!hasExited) {
             throw new RuntimeException("Cluster detection trigger timeout");
         }
@@ -55,7 +57,8 @@ public class CleaBatchService {
 
         @Override
         public void run() {
-            new BufferedReader(new InputStreamReader(inputStream)).lines()
+            new BufferedReader(new InputStreamReader(inputStream))
+                    .lines()
                     .forEach(consumer);
         }
     }

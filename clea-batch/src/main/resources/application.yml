@@ -1,0 +1,27 @@
+spring:
+  datasource:
+  jpa:
+    hibernate.ddl-auto: none
+
+  jackson:
+    serialization:
+      indent-output: true
+
+clea:
+  conf:
+    exposure:
+      enabled: "false"
+    risk:
+      enabled: "true"
+      rules: # FIXME: change with real values
+        # venueType, venueCat1, venueCat2, clusterThresholdBackward, clusterThresholdForward, riskLevelBackward, riskLevelForward
+        - "*,*,*,3,1,3.0,2.0"
+  batch:
+    cluster:
+      duration-unit-in-seconds: 1800
+      static-prefix-length: 2
+      files-output-path: /tmp/v1
+      grid-size: 6
+      identification-step-chunk-size: 1000
+      indexation-step-chunk-size: 1000
+      prefixes-computing-step-chunk-size: 1000

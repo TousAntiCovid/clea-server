@@ -1,5 +1,6 @@
-# contains only static configurations that are not added to consul
+management:
+  server.port: 8081
+  endpoints.web.exposure.include: health,info,metrics,prometheus
 
-logging:
-  level:
-    fr.gouv.clea.consumer: INFO
+logging.level:
+  fr.gouv.clea.consumer: INFO

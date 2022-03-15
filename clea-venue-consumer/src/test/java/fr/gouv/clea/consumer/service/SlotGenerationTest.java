@@ -66,7 +66,10 @@ class SlotGenerationTest {
                 )
         );
         properties.setDurationUnitInSeconds(Duration.ofMinutes(30).toSeconds());
-        service = new VisitExpositionAggregatorService(repository, exposureTimeConfig, properties, statisticsService);
+        service = new VisitExpositionAggregatorService(
+                repository,
+                exposureTimeConfig, properties
+        );
     }
 
     @Test
@@ -78,7 +81,7 @@ class SlotGenerationTest {
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         // => scanTimeSlot = 8*2 = 16
         // => slots to generate = 3 before + scanTimeSlot + 3 after = 7
@@ -99,7 +102,7 @@ class SlotGenerationTest {
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         // => scanTimeSlot = 0
         // => slots to generate = scanTimeSlot + 1 after = 2
@@ -120,7 +123,7 @@ class SlotGenerationTest {
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         // => scanTimeSlot = 0
         // => slots to generate = scanTimeSlot + 3 after = 4
@@ -141,7 +144,7 @@ class SlotGenerationTest {
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         verify(repository, never()).saveAll(exposedVisitEntitiesCaptor.capture());
     }
@@ -158,7 +161,7 @@ class SlotGenerationTest {
                 .qrCodeScanTime(TODAY_AT_8AM)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         // => scanTimeSlot = 8
         // => slots to generate = scanTimeSlot + 3 after + 3 before

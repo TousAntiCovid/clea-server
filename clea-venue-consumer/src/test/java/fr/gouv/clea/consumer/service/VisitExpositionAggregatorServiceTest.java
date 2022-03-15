@@ -2,28 +2,20 @@ package fr.gouv.clea.consumer.service;
 
 import fr.gouv.clea.consumer.model.Visit;
 import fr.gouv.clea.consumer.repository.visits.ExposedVisitRepository;
-import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeConfiguration;
-import fr.gouv.clea.scoring.configuration.exposure.ExposureTimeRule;
+import fr.gouv.clea.consumer.test.IntegrationTest;
 import fr.inria.clea.lsp.utils.TimeUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@DirtiesContext
+@IntegrationTest
 class VisitExpositionAggregatorServiceTest {
 
     @Autowired
@@ -32,46 +24,15 @@ class VisitExpositionAggregatorServiceTest {
     @Autowired
     private VisitExpositionAggregatorService service;
 
-    @MockBean
-    private ExposureTimeConfiguration exposureTimeConfiguration;
+    private Instant todayAtMidnight = Instant.now().truncatedTo(ChronoUnit.DAYS);
 
-    @MockBean
-    private StatisticsService statisticsService;
+    private Instant todayAt8am = todayAtMidnight.plus(8, ChronoUnit.HOURS);
 
-    private Instant todayAtMidnight;
+    private UUID uuid = UUID.randomUUID();
 
-    private Instant todayAt8am;
+    private byte[] locationTemporarySecretKey = RandomUtils.nextBytes(20);
 
-    private UUID uuid;
-
-    private byte[] locationTemporarySecretKey;
-
-    private byte[] encryptedLocationContactMessage;
-
-    @BeforeEach
-    void init() {
-        todayAtMidnight = Instant.now().truncatedTo(ChronoUnit.DAYS);
-        todayAt8am = todayAtMidnight.plus(8, ChronoUnit.HOURS);
-        uuid = UUID.randomUUID();
-        locationTemporarySecretKey = RandomUtils.nextBytes(20);
-        encryptedLocationContactMessage = RandomUtils.nextBytes(20);
-        when(exposureTimeConfiguration.getConfigurationFor(anyInt(), anyInt(), anyInt()))
-                .thenReturn(
-                        ExposureTimeRule.builder()
-                                .exposureTimeBackward(3)
-                                .exposureTimeStaffBackward(3)
-                                .exposureTimeForward(3)
-                                .exposureTimeStaffForward(3)
-                                .build()
-                );
-
-        doNothing().when(statisticsService).logStats(any(Visit.class));
-    }
-
-    @AfterEach
-    void clean() {
-        repository.deleteAll();
-    }
+    private byte[] encryptedLocationContactMessage = RandomUtils.nextBytes(20);
 
     @Test
     @DisplayName("visits with no existing context should be saved in DB")
@@ -81,7 +42,7 @@ class VisitExpositionAggregatorServiceTest {
                 .isBackward(true)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         assertThat(repository.findAll())
                 .allMatch(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid), "has uuid" + uuid)
@@ -95,10 +56,10 @@ class VisitExpositionAggregatorServiceTest {
                 .locationTemporaryPublicId(uuid)
                 .isBackward(true)
                 .build();
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
         long before = repository.count();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         long after = repository.count();
         assertThat(before).isEqualTo(after);
@@ -115,7 +76,7 @@ class VisitExpositionAggregatorServiceTest {
                 .locationTemporaryPublicId(uuid)
                 .isBackward(true)
                 .build();
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
         visit.setBackward(false);
         UUID newUUID = UUID.randomUUID();
         Visit visit2 = visit.toBuilder()
@@ -123,8 +84,8 @@ class VisitExpositionAggregatorServiceTest {
                 .isBackward(true)
                 .build();
 
-        service.updateExposureCount(visit);
-        service.updateExposureCount(visit2);
+        service.updateExposureCount(visit, false);
+        service.updateExposureCount(visit2, false);
 
         assertThat(repository.findAll())
                 .filteredOn(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid))
@@ -135,6 +96,67 @@ class VisitExpositionAggregatorServiceTest {
                 .filteredOn(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(newUUID))
                 .allMatch(exposedVisit -> exposedVisit.getBackwardVisits() == 1, "has 1 backward visit")
                 .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 0, "has 0 forward visit");
+    }
+
+    @Test
+    @DisplayName("manually declared cluster with no context should be save in DB ")
+    void saveManuallyDeclaredClusterWithNoContext() {
+        Visit visit = defaultVisit().toBuilder()
+                .locationTemporaryPublicId(uuid)
+                .isBackward(false)
+                .build();
+        service.updateExposureCount(visit, true);
+
+        assertThat(repository.findAll())
+                .allMatch(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid), "has uuid" + uuid)
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 100, "has 100 forward visits");
+    }
+
+    @Test
+    @DisplayName("manually declared cluster with no existing context should be update in DB")
+    void updateManuallyDeclaredClusterWithExistingContext() {
+        Visit visit = defaultVisit().toBuilder()
+                .locationTemporaryPublicId(uuid)
+                .isBackward(false)
+                .build();
+        service.updateExposureCount(visit, false);
+        long before = repository.count();
+
+        service.updateExposureCount(visit, true);
+
+        long after = repository.count();
+        assertThat(before).isEqualTo(after);
+
+        assertThat(repository.findAll())
+                .allMatch(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid), "has uuid" + uuid)
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 101, "has 101 forward visits");
+    }
+
+    @Test
+    @DisplayName("new manually declared clusters should be saved while existing be updated in DB")
+    void manuallyDeclaredClusterWithMixedContext() {
+        Visit visit = defaultVisit().toBuilder()
+                .locationTemporaryPublicId(uuid)
+                .isBackward(false)
+                .build();
+        service.updateExposureCount(visit, false);
+        visit.setBackward(false);
+        UUID newUUID = UUID.randomUUID();
+        Visit visit2 = visit.toBuilder()
+                .locationTemporaryPublicId(newUUID)
+                .isBackward(false)
+                .build();
+
+        service.updateExposureCount(visit, true);
+        service.updateExposureCount(visit2, true);
+
+        assertThat(repository.findAll())
+                .filteredOn(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(uuid))
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 101, "has 101 forward visit");
+
+        assertThat(repository.findAll())
+                .filteredOn(exposedVisit -> exposedVisit.getLocationTemporaryPublicId().equals(newUUID))
+                .allMatch(exposedVisit -> exposedVisit.getForwardVisits() == 100, "has 100 forward visit");
     }
 
     @Test
@@ -149,7 +171,7 @@ class VisitExpositionAggregatorServiceTest {
                 .qrCodeScanTime(todayAtMidnight)
                 .build();
 
-        service.updateExposureCount(visit);
+        service.updateExposureCount(visit, false);
 
         assertThat(repository.count()).isZero();
     }

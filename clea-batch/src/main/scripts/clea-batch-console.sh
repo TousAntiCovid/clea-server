@@ -8,13 +8,10 @@ info() { echo "`date "+%Y-%m-%d %T.999"`  INFO 0 --- [     clea-batch] clea-batc
 WORKDIR=${CLEA_BATCH_CLUSTER_OUTPUT_PATH:-/tmp/v1}
 
 [ -n "${BUCKET_OUTSCALE}" ] || die "Environment variable BUCKET_OUTSCALE required"
-[ -n "${BUCKET_SCALEWAY}" ] || die "Environment variable BUCKET_SCALEWAY required"
 
 PROFILE_OUTSCALE=${PROFILE_OUTSCALE:-s3outscale}
-PROFILE_SCALEWAY=${PROFILE_SCALEWAY:-s3scaleway}
 
 [ -n "${ENDPOINT_OUTSCALE}" ] || die "Environment variable ENDPOINT_OUTSCALE required"
-[ -n "${ENDPOINT_SCALEWAY}" ] || die "Environment variable ENDPOINT_OUTSCALE required"
 
 BUCKET_FILES_RETENTION_IN_DAYS=${BUCKET_FILES_RETENTION_IN_DAYS:-15}
 
@@ -78,10 +75,8 @@ if [ $NB_INDEX -gt 1 ] ; then
 fi
 
 copy_files_to_bucket $PROFILE_OUTSCALE $BUCKET_OUTSCALE  $ENDPOINT_OUTSCALE
-copy_files_to_bucket $PROFILE_SCALEWAY $BUCKET_SCALEWAY  $ENDPOINT_SCALEWAY
 
 purge_old_bucket_iterations $PROFILE_OUTSCALE $BUCKET_OUTSCALE $ENDPOINT_OUTSCALE
-purge_old_bucket_iterations $PROFILE_SCALEWAY $BUCKET_SCALEWAY $ENDPOINT_SCALEWAY
 
 # purge batch temporary files
 info "Purging working files"

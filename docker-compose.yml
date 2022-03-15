@@ -4,59 +4,60 @@ services:
     image: clea-ws-rest
     build: clea-ws-rest
     environment:
-      SPRING_PROFILES_ACTIVE: dev,docker
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      CLEA_CONF_AUTHORIZATION_CHECK_ACTIVE: "false"
       CLEA_WS_REST_LOG_FILE_PATH: /logs
       CLEA_WS_REST_LOG_FILE_NAME: clea-ws-rest
     depends_on:
       - kafka
     ports:
       - "8080:8080"
-    restart: always
 
   clea-venue-consumer:
     image: clea-venue-consumer
     build: clea-venue-consumer
     environment:
-      SPRING_PROFILES_ACTIVE: dev,docker
-      SPRING_JPA_HIBERNATE_DDL_AUTO: none
-      CLEA_VENUE_CONSUMER_LOG_FILE_PATH: /logs
-      CLEA_VENUE_CONSUMER_LOG_FILE_NAME: clea-venue-consumer
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cleadb
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_ELASTICSEARCH_REST_PASSWORD: password
+      SPRING_ELASTICSEARCH_REST_USERNAME: elastic
+      SPRING_ELASTICSEARCH_REST_URIS: http://elasticsearch:9200
     depends_on:
       - postgres
       - kafka
       - elasticsearch
     ports:
       - "7070:8080"
-    restart: always
 
   clea-batch:
     image: clea-batch:latest
     build: clea-batch
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cleadb
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
       BUCKET_OUTSCALE: clea-batch
       ENDPOINT_OUTSCALE: http://minio:9000
-      BUCKET_SCALEWAY: clea-batch-scaleway
-      ENDPOINT_SCALEWAY: http://minio:9000
       CLEA_BATCH_LOG_FILE_PATH: /logs
       CLEA_BATCH_LOG_FILE_NAME: clea-batch
     depends_on:
       - postgres
-    restart: "no"
 
   clea-dbmigration:
     image: flyway/flyway:7.8
-    command: migrate
+    command: migrate -connectRetries=60
     environment:
       FLYWAY_URL: jdbc:postgresql://postgres/cleadb
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: password
     volumes:
-      - ./clea-dbmigration/conf:/flyway/conf
-      - ./clea-dbmigration/sql:/flyway/sql
+      - ./clea-dbmigration/src/main/resources/db/migration:/flyway/sql
     depends_on:
       - postgres
-    restart: always
 
   kafka:
     image: "wurstmeister/kafka:latest"
@@ -73,17 +74,17 @@ services:
       - "9092:9092"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    restart: always
 
   minio:
-    image: minio/minio:edge
+    image: minio/minio
     environment:
-      MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
-      MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      MINIO_ROOT_USER: AKIAIOSFODNN7EXAMPLE
+      MINIO_ROOT_PASSWORD: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     entrypoint: sh
-    command: -c 'mkdir -p /data/clea-batch /data/clea-batch-scaleway && /usr/bin/minio server /data'
+    command: -c 'mkdir -p /data/clea-batch && /opt/bin/minio server /data --console-address ":9001"'
     ports:
       - "9000:9000"
+      - "9001:9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -94,7 +95,6 @@ services:
     image: wurstmeister/zookeeper:latest
     ports:
       - "2181:2181"
-    restart: always
 
   kafdrop:
     image: "obsidiandynamics/kafdrop:latest"
@@ -106,7 +106,6 @@ services:
       - kafka
     ports:
       - "9100:9000"
-    restart: always
 
   postgres:
     image: "postgres:latest"
@@ -118,9 +117,6 @@ services:
       - "5432:5432"
     volumes:
       - "./docker-compose/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
-    restart: always
-    logging:
-      driver: none
 
   pgadmin:
     image: "dpage/pgadmin4:latest"
@@ -132,9 +128,6 @@ services:
       - postgres
     ports:
       - "8081:80"
-    restart: always
-    logging:
-      driver: none
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
