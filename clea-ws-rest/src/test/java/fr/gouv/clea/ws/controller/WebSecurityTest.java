@@ -11,9 +11,10 @@ import static fr.gouv.clea.ws.test.RestAssuredManager.givenJwt;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.time.temporal.ChronoUnit.MINUTES;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.WWW_AUTHENTICATE;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @IntegrationTest
@@ -63,6 +64,16 @@ class WebSecurityTest {
                                 "Bearer error=\"invalid_token\", error_description=\"An error occurred while attempting to decode the Jwt: Signed JWT rejected: Invalid signature\","
                         )
                 );
+    }
+
+    @Test
+    void status_file_is_publicly_accessible() {
+        given()
+                .get("/status.txt")
+
+                .then()
+                .statusCode(OK.value())
+                .body(equalTo("up\n"));
     }
 
     @Test

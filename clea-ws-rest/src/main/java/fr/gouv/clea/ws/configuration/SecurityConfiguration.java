@@ -40,6 +40,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .jwt();
             http.authorizeRequests()
                     .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
+                    .antMatchers("/status.txt").permitAll()
                     .anyRequest().authenticated();
         } else {
             log.warn("Authentication is disabled");
