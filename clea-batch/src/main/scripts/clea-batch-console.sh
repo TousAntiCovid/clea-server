@@ -53,7 +53,7 @@ purge_old_bucket_iterations() {
 
 }
 
-if ! java -jar clea-batch.jar $@ ; then
+if ! java ${JAVA_OPTS:-} -jar clea-batch.jar $@ ; then
     die "Java batch fails"
 fi
 
