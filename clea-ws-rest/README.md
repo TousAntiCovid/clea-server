@@ -1,14 +1,14 @@
 ## Clea Ws Rest
 
-Exposed [REST APIs]("https://gitlab.inria.fr/stopcovid19/clea-server/-/blob/develop/clea-ws-rest/src/main/resources/openapi-clea-server-v1.yml") for reporting 1..\* visits.
+Exposed [REST APIs](https://gitlab.inria.fr/stopcovid19/clea-server/-/blob/develop/clea-ws-rest/src/main/resources/openapi-clea-server-v1.yml) for reporting 1..\* visits.
 
 ### Validity verifications:
 
 When a report is sent, the following verifications are applied to the request:
 
-- if any field does not respect its type, all the [request]("src/main/java/fr/gouv/clea/ws/vo/ReportRequest.java") is
+- if any field does not respect its type, all the request is
   rejected
-- Individual [visits]("src/main/java/fr/gouv/clea/ws/vo/Visit.java") that are not valid, will be pruned from the
+- Individual visits that are not valid, will be pruned from the
   request, while other valid visits will be kept.
 
 ### Reporting verifications:
